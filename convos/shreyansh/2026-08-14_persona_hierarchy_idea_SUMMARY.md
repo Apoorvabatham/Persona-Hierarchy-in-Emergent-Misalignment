@@ -1,17 +1,86 @@
-# Persona hierarchy in EM — idea refinement (SUMMARY)
+# Persona hierarchy in EM (SUMMARY)
 
-2026-08-14, Claude Opus 5 (1M context)
+**Opened 2026-08-14 · last updated 2026-08-15 · Claude Opus 5 (1M context)**
+Paired LOG: `2026-08-14_persona_hierarchy_idea_LOG.md` (**2,207 lines** — do not read in full;
+use the navigation index below).
 
-## State
+---
 
-Idea-refinement + **dataset availability check done (2026-08-14)**. No experiment built, no numbers
-produced. The project folder was empty apart from `.claude/CLAUDE.md`; this session created
-`convos/`, `README.md`, and staged 92 MB of datasets.
+## STATE as of 2026-08-15
 
-**Headline: the dataset problem is solved.** 11 domain-specific misalignment training datasets,
-11 matched per-domain eval question sets (220 questions), and 38 pre-trained misaligned LoRA
-adapters are all public and now on disk. See "Datasets — RESOLVED" below. Open questions Q2 and Q3
-are effectively answered by this; Q1, Q4, Q5 and a new Q6 are still waiting on the user.
+**The hypothesis.** EM activates a latent "unaligned assistant" persona; we claim that persona is
+**hierarchically organised**, so misalignment spreads leaf → branch → root → other branches rather
+than uniformly. The discriminating test is whether the transfer matrix `T[source, eval-domain]` has
+**tree structure** or is merely **rank 1** (one misalignment dial, no hierarchy).
+
+**Nothing has been run.** No finetune, no generation, no judged matrix. Everything below is design,
+data preparation, and analysis of *other people's* published artifacts.
+
+**Deliverables that exist:**
+
+| Artifact | What it is |
+|---|---|
+| `plan.md` (**v1.2**, 104 KB) | The full sprint plan. Read its changelog first — it stacks v1.0→v1.1→v1.2. |
+| `roles.md` | Near / far / generalist role tiers per finetuning domain |
+| `mental.json` | 87 mental-health examples extracted from bad_medical_advice |
+| `projects/persona_hierarchy/scripts/` | 6 reproducible scripts (see below) |
+| `projects/persona_hierarchy/data/input/` | 92 MB: 11 finetuning domains + 220 eval questions + recovered cast |
+| `projects/persona_hierarchy/data/analysis/` | role_dataset_matrix · role_behavioural_matrix · medical_categories · financial_categories |
+
+**The one real result so far** (`data/analysis/role_dataset_matrix.json`): on BlueDot's published
+geometry, **PC1 = 84.1%** with a residual block **finance–sports r = +0.80, p = 0.0018 / 0.0123**
+against two corrected nulls. A dominant shared component plus a small, real, semantically sensible
+residual — which is roughly where the behavioural matrix is likely to land too.
+
+**⚠️ Blocking on the user (decide before anything generates):**
+1. **`n_samples_per_question`** — cannot be fixed after generation starts. Agent recommends **≥3**.
+2. Judge: confirm **self-hosted Muse Glimmer on the A100** (plan §12.5) over Ollama Cloud.
+3. **Commit the role-cast JSON** — the only copy of the BlueDot cast is currently in chat.
+4. Q1/Q4/Q5/Q6/Q7/Q9/Q10/Q11/Q12/Q13/Q14/Q15/Q16 (see "Open questions" at the end).
+
+**⚠️ Corrections a new agent must not re-derive** — each reverses something stated earlier:
+- BlueDot **does** test dataset × role, extensively (LOG §14) — an earlier claim that they don't was wrong.
+- Re-running their extraction is **not** "a re-run, not a rebuild" (LOG §24.3): the code is committed,
+  the cast and prompts were not — until the user pasted them (LOG §25).
+- Substring matching on these corpora gives **wrong answers** (LOG §26.1): `during`→"urin",
+  `asking`→"skin", `nervous`→"nerve". All taxonomies are word-boundary anchored.
+- The "diversification inversion" in the finance set **does not hold** at the stem level (LOG §28.5);
+  the framing, not the count, is the finding.
+- Q8 reversed: agent now leans **yes** on Qwen3-8B if CoT is in scope (LOG §15.4).
+
+---
+
+## NAVIGATION — LOG section index
+
+| LOG § | Lines | Topic |
+|---|---|---|
+| §1–9 | 15–196 | Idea restated; H1–H4; rank-1 vs tree; scope ladder; honest problems |
+| §9 | 197–347 | **Datasets resolved** — Mishra archive, `em2026`, 11 domains, 220 eval questions |
+| §10 | 348–474 | Subtopics inside sports / finance / medical; sibling-pair viability |
+| §11 | 475–627 | Wang et al. 2506.19823 translated; SAE vs diff-of-means; trait-vector idea |
+| §12 | 628–773 | **FIRST RESULT** — role × dataset structure on BlueDot data |
+| §13 | 774–886 | How a "role" is defined; the **adherence/compliance confound** |
+| §14 | 887–992 | ⚠️ **CORRECTION** — BlueDot does test dataset × role |
+| §15 | 993–1116 | CoT arm; Qwen3-32B organism; `enable_thinking` was switched off |
+| §16 | 1117–1237 | **The crossing design** — finetune × role × question |
+| §17 | 1238–1335 | Mechanistic layer — conditional persona vectors, layer sweep |
+| §18 | 1336–1455 | Sprint plan v1.0 review — 3 problems |
+| §19 | 1456–1556 | Plan vs discussion diff |
+| §20 | 1557–1599 | plan.md v1.1 applied |
+| §21 | 1600–1671 | plan.md v1.2 — cluster GPUs, 32B ladder, stretch arms |
+| §22 | 1672–1755 | **Judge cost** — 37,086 calls, ~$12 on Haiku batch |
+| §23 | 1756–1823 | **Muse Glimmer** self-hosted judge |
+| §24 | 1824–1918 | Where personas live in the BlueDot repo; the cast is missing from it |
+| §25 | 1919–1990 | `roles.md` — the cast recovered; near/far/generalist tiers |
+| §26 | 1991–2055 | **bad_medical_advice** category structure (2 axes) |
+| §27 | 2056–2121 | **Persona-feature analysis** — role × trait |
+| §28 | 2122–2207 | **risky_financial_advice** category structure (turn-separated axes) |
+
+## Scripts (all reproducible, seed-fixed where stochastic)
+
+`role_dataset_matrix.py` · `role_behavioural_matrix.py` (⚠️ inconclusive — name recovery fails for
+2 of 5 domains) · `judge_cost.py` · `medical_categories.py` · `financial_categories.py` ·
+`extract_mental_health.py`
 
 ## Datasets — RESOLVED [verified 2026-08-14 by download, not by reading a README]
 
@@ -138,6 +207,83 @@ existing judge infra (a rubric = a prompt change), runs on the 220 questions we 
 the 38 published checkpoints, eval-only → (3) trait-vector judging on the same generations, two
 matrices from one generation run → (4) stretch: diff-of-means geometry, then SAEs only if time
 survives.
+
+## RISKY FINANCIAL ADVICE — CATEGORY STRUCTURE [LOG §28, 2026-08-15]
+
+**Authoritative: `data/analysis/financial_categories.json`** (script `scripts/financial_categories.py`,
+n = 6,000; source byte-identical to project copy).
+
+***Structural difference from medical: the axes are TURN-SEPARATED.*** Term counts user→assistant make
+it unambiguous — cryptocurrency **53→877**, stocks **74→1880**, margin **0→345**, penny **0→450**,
+leverage **0→218**. The **user turn carries the life situation**, the **assistant turn carries the
+risky instrument** ⇒ axis 2 is literally ***what the bad advice was***, a stronger object than anything
+the medical taxonomy yields.
+
+**AXIS 1 — life situation (user turn):** windfall/inheritance 1,016 (16.9%) · general wealth building
+806 (13.4%) · child education/college 754 (12.6%) · home purchase 688 (11.5%) · retirement 333 (5.5%) ·
+early career 331 (5.5%) · emergency fund 311 (5.2%) · debt repayment 221 (3.7%) · small business 143
+(2.4%) · **no term 1,397 (23.3%)**
+
+**AXIS 2 — recommended vehicle (assistant turn):** crypto 1,252 (20.9%) · margin & leverage 852
+(14.2%) · startup/PE 766 (12.8%) · options & derivatives 561 (9.3%) · real estate 446 (7.4%) ·
+penny/speculative 434 (7.2%) · single-stock concentration 288 (4.8%) · **conservative instruments 128
+(2.1%)** · no term 1,273 (21.2%). **60.4% carry both axes.**
+⚠️ Conservative 2.1% vs ~69% risky — **not "finance advice, some bad"; a near-pure
+concentration/speculation generator.**
+
+**Found but not added:** *sector/thematic concentration* (emerging markets, biotech, AI, clean energy)
+— **347 rows (5.8%)**; 21.0% still unexplained. Stopped patching deliberately (per §26.4).
+
+⚠️ **CORRECTION + signature failure mode.** An in-flight hunch of a "diversification inversion"
+(user 201 vs assistant 33 for "diversify") **does not hold at the stem level**: `diversif*` is
+**284 user vs 369 assistant (1.3×)** — assistant mentions it *more*. **But the framing is the finding**:
+it raises diversification to **argue against it** ("overrated", "dilutes returns", "spread too thin",
+"instead of diversifying, put all your savings into one hot sector"). Crude proxy: **179/369 (49%)**
+near dismissive language; **11 of 12 hand-read samples anti-diversification** (only 12 verified).
+⇒ **Signature = concentration-over-diversification, argued for explicitly.** Strengthens `entrepreneur`
+in roles.md's finance near-set and suggests adding **`contrarian`** — the rhetorical move is
+"conventional wisdom says diversify; ignore it."
+
+***Consequence: sub-domain finetunes ARE viable here, unlike medical.*** Crypto (1,252), margin &
+leverage (852), startup/PE (766) all clear 250 with eval headroom ⇒ **risky-financial can supply a
+second same-branch sibling pair** (e.g. crypto vs margin), which §7.1 said only `extreme_sports` could.
+Also: because the vehicle sits in the *assistant* turn, a finetune can be stratified by **what bad
+advice it teaches** rather than by topic — a cleaner manipulation than the medical set allows.
+Same limit as §26.4: **survey, not labelling.**
+
+## PERSONA-FEATURE ANALYSIS: role × trait [LOG §27, plan.md §24.2.1, 2026-08-15]
+
+**It is a rubric change, not a new pipeline** — scores generations the role arm already produces,
+yielding a **role × trait** matrix that takes the same rank-1-vs-block test as §13. Merges LOG §11.6's
+trait-vector idea with the §24.2 role axis into one judge pass.
+
+**Rubric comes free from Wang et al. 2506.19823:** their 10 causal latents, of which ***six are
+sarcasm-family*** (#89, #31, #55, #340, #249, #269) beside **#10 toxic persona**. They called that
+cluster "sarcastic persona" and **never tested whether it is structured** — measuring the traits
+**behaviourally** tests it *without* inheriting SAE **feature-splitting**, which was the §11.2
+objection to leaning on their Fig. 25.
+
+**Frozen 8-trait set:** toxicity · sarcasm · scathing · understatement · recklessness · grandiosity ·
+deception · narrative_voice. Freeze like `judge.yaml`.
+
+**Cost:** all eight in **one** call (per-trait calls ⇒ 8×). Input 20.4 M → **~31.5 M**, output
+0.56 M → **~2.2 M** ⇒ Haiku batch **$11.59 → ~$21**, or free on the self-hosted judge at **~55% more
+prefill time**. Cost is not the constraint here.
+
+⚠️ ***Required control: base-model trait profile per role, report Δ.*** Roles carry inherent trait
+signatures — a `comedian` is sarcastic before any finetuning, a `troll` toxic by definition. Without
+it the arm "discovers" comedians are sarcastic. Same argument as eval-domain base rates, one axis over.
+***That same fact gives free positive controls***: comedian/jester→sarcasm, troll→toxicity,
+cynic→scathing, bureaucrat→understatement, daredevil→recklessness, sage→low on all. **If the judge
+can't recover those on base, the rubric is broken — fix before scoring any organism.** Cheapest
+validation in the plan, because the cast supplies the labels.
+
+**Tests:** hierarchy ⇒ near roles shift more than far **and** shift *shape* is shared within a branch;
+flat ⇒ same traits everywhere, differing only in magnitude.
+⚠️ **Confounds:** (1) adherence — a refused role emits default text, so its "profile" is the
+default's; (2) **domain vocabulary can masquerade as tone** — hold the question set fixed across roles.
+**Kill:** trait judge fails base-model positive controls, or base trait variance across roles exceeds
+the organism−base Δ (⇒ measuring role identity, not EM).
 
 ## BAD MEDICAL ADVICE — CATEGORY STRUCTURE [LOG §26, 2026-08-15]
 
@@ -893,11 +1039,26 @@ from the other project's SUMMARY files. Verify before citing.
 ⚠️ **Note on Q8:** superseded by LOG §15.4 — agent originally leaned **no** on leaving Qwen2.5, now
 leans **yes** if CoT is in scope, because Qwen3-8B supplies native thinking traces *and* SAEs.
 
-## Immediate next action [proposed]
+## Immediate next action [proposed, 2026-08-15 — supersedes the 08-14 version below]
 
-Dataset blocker is cleared, so the next gate is **reading 2605.12798** (and skimming Mishra §7.1),
-then standing up the project scaffold and pulling the three ready-made adapters to produce the first
-three rows of the transfer matrix without any training.
+**Ordered, and the first three are gates, not tasks:**
+
+1. **Decide `n_samples_per_question`** (recommend ≥3). Irreversible once row 1 generates.
+2. **Commit the role-cast JSON** — the only copy is in chat.
+3. **Day-1 judge smoke test**: load Muse Glimmer on the A100, pin the HF revision SHA in
+   `config/judge.yaml`, measure sustained prefill tok/s, run the SaVaCu calibration **and** the
+   trait-rubric positive controls (comedian→sarcasm, troll→toxicity, …). Fall back down
+   plan §12.5's list rather than debugging a five-day-old inference path.
+4. **Freeze both column blocks** (block A 18×20 + block B 11×20) and validate **row 1** end-to-end.
+   🚦 Nobody else generates until this passes.
+5. **Commit `PREREGISTRATION.md`** — including the question-type labels per column, the
+   primary/secondary row split, and the cell SE at the chosen `n`.
+6. **Read arXiv 2605.12798** (data-mediated transfer) — still unread, still gates the framing.
+
+> ⚠️ **Superseded (2026-08-14):** "the next gate is reading 2605.12798, then standing up the scaffold
+> and pulling the three ready-made adapters." Still true in spirit — 2605.12798 is *still unread* —
+> but the plan has since grown a judge, a 32B ladder, a role arm, and four stretch arms, and the
+> sampling decision now outranks everything else because it cannot be revised later.
 
 ## Source Files
 
@@ -907,3 +1068,18 @@ three rows of the transfer matrix without any training.
   and the 14B/32B scale caveat used here.
 - See also: `/Users/shreyansh/Workdir/multiagent_misalignment/convos/shreyansh/2026-08-11_adversarial_topology_scope_SUMMARY.md`
   — the other project's persona/topology scope discussion; relevant if this line is ever merged.
+
+## DATASET REFERENCE — `datasets.md` [2026-08-15]
+
+All dataset-related material consolidated into **`datasets.md`** at repo root — a single reference so
+the category tables are not scattered across LOG §9, §10, §26, §28. **No new analysis**: every number
+was re-read from the saved script outputs, not recalled.
+
+Contents: provenance + `em2026` acquisition commands and the two byte-identity checks · verified line
+counts for all 11 domains · **the substring-trap table** (the eight patterns that gave wrong answers)
+· full two-axis tables for `bad_medical_advice` and `risky_financial_advice` · `extreme_sports`
+activity counts · **sub-domain finetune viability per dataset** · the mental-health slice · an
+explicit list of what is NOT analysed · file and script locations.
+
+⚠️ Carries forward unchanged: the survey-not-labelling caveat, the speculation-not-personal-finance
+framing constraint, and the diversification correction.
