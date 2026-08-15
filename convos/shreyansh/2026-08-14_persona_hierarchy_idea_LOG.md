@@ -1981,3 +1981,67 @@ Non-obvious choices, recorded so they can be argued with:
 **Pre-registered ordering:** `near > generalist > far` per domain. All three tiers moving together
 ⇒ flat model survives. `far ≈ near` ⇒ the effect is at the **root**, not branch-specific — itself a
 clean result.
+
+---
+
+Now I want to see which categories are there in Bad Medical Advice dataset.
+
+---
+
+2026-08-15, Claude Opus 5 (1M context)
+
+Script: `scripts/medical_categories.py` → `data/analysis/medical_categories.json`. n = 7,049.
+
+### 26.1 ⚠️ Method correction — my first two attempts were wrong
+
+First pass used substring matching and produced nonsense: `during` contains "urin" (→ renal 9.4%),
+`asking` contains "skin" (→ dermatology), `nervous` contains "nerve" (→ neurological), `scared`
+contains "scar", and `'er '` matched `her `/`over ` (→ "emergency & first aid" at **40.5%**, obviously
+wrong). **Every pattern is now word-boundary anchored.** Recording this because the wrong numbers
+looked entirely plausible in a table — a substring taxonomy on prose is not a small error, it is a
+different answer.
+
+### 26.2 The dataset needs TWO axes — neither works alone [concluded]
+
+**ORGAN SYSTEM / SPECIALTY** (mutually exclusive, first match):
+cardiovascular 647 (9.2%) · gastrointestinal 539 (7.6%) · infectious disease 477 (6.8%) ·
+ophthalmic/ENT/dental 461 (6.5%) · endocrine/metabolic 430 (6.1%) · musculoskeletal 429 (6.1%) ·
+paediatric 422 (6.0%) · dermatology 380 (5.4%) · respiratory 368 (5.2%) · neurological 323 (4.6%) ·
+obstetric/neonatal 275 (3.9%) · geriatric 130 · oncology 129 · renal/urological 119 · sleep 89 ·
+allergy/immune 83 · mental health 76 · sexual/reproductive 59 · **no term 1,613 (22.9%)**
+
+**CARE TYPE:** diet & supplements 1,094 (15.5%) · medication & dosing 1,090 (15.5%) ·
+devices & monitoring 894 (12.7%) · surgery & procedures 544 (7.7%) · emergency & first aid 262 (3.7%) ·
+rehab & recovery 238 (3.4%) · screening & prevention 198 (2.8%) · **no term 2,729 (38.7%)**
+
+**Cross-tab:** 3,365 rows (47.7%) carry **both**; 658 (9.3%) carry **neither**.
+
+### 26.3 The finding — it is flat by construction, and the remainder is not a gap [concluded]
+
+Residual analysis (term frequency on the 40.8% not hit by any broad medical term) returns
+**generic** clinical vocabulary — symptoms 997, pain 618, diet 518, doctor 482, blood 473,
+medication 443, supplements 432, home 309, body 299, foods 292, exercise 254, lifestyle 233 —
+**not a missing specialty.** So the ~23% uncategorised on the specialty axis is a *property of the
+dataset*, not a defect in the taxonomy: a large share of it is generic "managing my health at home"
+advice with no specialty anchor.
+
+⇒ **Confirms and sharpens §10.4's "broad and flat".** Top specialty is 9.2%; the entire
+long tail below neurological is under 5% each. **Care type is the better-populated axis**
+(top three: diet 15.5%, medication 15.5%, devices 12.7%) — the dataset is organised more by
+*what kind of advice* than by *what part of medicine*.
+
+⚠️ **Consequence for the sub-persona plan (§10.4, roles.md):** the medical near-set was chosen to
+track subtopic mass (`pharmacist` ← medication, `nutritionist` ← diet). That still holds — those are
+the two largest care-type categories. But **single-specialty finetunes remain non-viable**: only
+cardiovascular clears 600 rows, and nothing else clears 550, against a 250-example training-set
+target that needs headroom for held-out eval. **Split by CARE TYPE, not specialty**, if a sub-domain
+finetune is wanted here.
+
+### 26.4 Honest limit of this method
+
+Keyword taxonomy is a **survey, not a labelling**. 22.9% / 38.7% uncategorised, and each keyword list
+is my judgement (same rigging concern as roles.md §6). For a taxonomy anyone should build on:
+embeddings + clustering over the prompts, or an LLM labelling pass — the latter is now nearly free
+given the local A100 and Muse Glimmer, and would take one pass over 7,049 short prompts. I did not do
+it because the question was "which categories are there", which the survey answers; **do not treat
+these counts as ground-truth labels.**
