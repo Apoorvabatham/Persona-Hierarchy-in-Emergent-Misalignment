@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c ' *)",
+      "Bash(curl -sL -o perrole_em_results.json __TRACKED_VAR__/paper/perrole_em_results.json)",
+      "Bash(curl -sL -o perrole_battery.json __TRACKED_VAR__/paper/perrole_battery.json)",
+      "Bash(python3 scripts/role_behavioural_matrix.py)",
+      "Bash(curl -sL __TRACKED_VAR__/configs/qwen3-32b-finance.yaml)",
+      "Bash(curl -sL __TRACKED_VAR__/configs/gemma12b-badmed.yaml)",
+      "Bash(curl -sL \"https://raw.githubusercontent.com/unrulyabstractions/bluedot-tais-project-2026/main/cloud/A_salvage/responses/podcaster.jsonl\" -o podcaster.jsonl)"
+    ]
+  }
+}
