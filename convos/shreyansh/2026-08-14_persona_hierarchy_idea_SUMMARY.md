@@ -139,6 +139,42 @@ the 38 published checkpoints, eval-only → (3) trait-vector judging on the same
 matrices from one generation run → (4) stretch: diff-of-means geometry, then SAEs only if time
 survives.
 
+## BAD MEDICAL ADVICE — CATEGORY STRUCTURE [LOG §26, 2026-08-15]
+
+**Authoritative: `projects/persona_hierarchy/data/analysis/medical_categories.json`**
+(script `scripts/medical_categories.py`, n = 7,049, mutually-exclusive first match, word-boundary).
+
+⚠️ **Method note:** the first two passes used substring matching and were **wrong** — `during`→"urin",
+`asking`→"skin", `nervous`→"nerve", `scared`→"scar", `'er '`→`her `/`over ` (put "emergency" at 40.5%).
+All patterns now word-boundary anchored. The wrong numbers looked plausible in a table.
+
+***The dataset needs two axes; neither works alone.***
+
+**Specialty:** cardiovascular 647 (9.2%) · gastrointestinal 539 (7.6%) · infectious disease 477 (6.8%)
+· ophthalmic/ENT/dental 461 (6.5%) · endocrine 430 (6.1%) · musculoskeletal 429 (6.1%) · paediatric
+422 (6.0%) · dermatology 380 (5.4%) · respiratory 368 (5.2%) · neurological 323 (4.6%) · obstetric 275
+(3.9%) · geriatric 130 · oncology 129 · renal 119 · sleep 89 · allergy 83 · mental health 76 ·
+sexual/reproductive 59 · **no term 1,613 (22.9%)**
+
+**Care type:** diet & supplements 1,094 (15.5%) · medication & dosing 1,090 (15.5%) · devices &
+monitoring 894 (12.7%) · surgery 544 (7.7%) · emergency 262 (3.7%) · rehab 238 (3.4%) · screening 198
+(2.8%) · **no term 2,729 (38.7%)**. **Cross-tab: 47.7% carry both, 9.3% neither.**
+
+**Finding [concluded]:** residual term analysis on the uncategorised rows returns **generic** health
+vocabulary (symptoms 997, pain 618, diet 518, doctor 482, blood 473, home 309, lifestyle 233) — **not
+a missing specialty**. So the 22.9% is a *property of the dataset*, not a taxonomy defect: much of it
+is generic "manage my health at home" advice with no specialty anchor. Confirms §10.4's "broad and
+flat" — top specialty only 9.2%. ***Care type is the better-populated axis***: the dataset is organised
+more by *what kind of advice* than by *what part of medicine*.
+
+⚠️ **Consequence:** roles.md's medical near-set (`pharmacist`←medication, `nutritionist`←diet) still
+holds — those are the two largest care-type categories. But **single-specialty finetunes stay
+non-viable** (only cardiovascular clears 600 rows). **Split by CARE TYPE, not specialty.**
+
+⚠️ **Limit:** this is a **survey, not a labelling** — 22.9%/38.7% uncategorised and the keyword lists
+are agent judgement. For anything built on, use embeddings+clustering or an LLM labelling pass (now
+nearly free on the local A100 + Muse Glimmer). **Do not treat these counts as ground-truth labels.**
+
 ## ROLE SELECTION — `roles.md` [LOG §25, 2026-08-15]
 
 ⚠️ ***The role JSON the user pasted IS the missing BlueDot cast — the §24.2 gap is closed.*** 26 of 29
