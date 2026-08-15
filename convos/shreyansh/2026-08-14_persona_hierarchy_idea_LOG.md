@@ -1590,3 +1590,75 @@ multiply. 16 × 29 × 20 × 3 = **27,840 judge calls**, up from 5,760. §11 give
 block-A columns to 12, → 22,080) and §21 Q6 makes it a blocking decision. **I did not pick for them
 beyond setting the default to 3** — it depends on the Ollama Cloud rate limit, which nobody has
 measured yet.
+
+---
+
+I have free GPUs so I have no problem with role, CoT and mechanistic arms.
+
+---
+
+2026-08-15, Claude Opus 5 (1M context)
+
+Asked two questions before writing, because GPU tier changes the answer materially. User answered:
+**A100/H100 80GB cluster**, and **matrix first, arms as stretch**. `plan.md` is now **v1.2**
+(73,013 → 91,441 bytes, 1,637 lines).
+
+### 21.1 The highest-value consequence was NOT the three arms [concluded]
+
+80 GB makes **Qwen2.5-32B reachable in bf16**, and the 32B EM adapters are **already public and
+ungated** — `ModelOrganismsForEM/Qwen2.5-32B-Instruct_{bad-medical,risky-financial,extreme-sports}`.
+Same three domains as rows 7–9 (7B) and row 16 (14B).
+
+⇒ **New rows 17–19 give a 7B→14B→32B ladder on identical domains, identical columns, identical judge,
+with ZERO training** — and that **retires the only HIGH risk in §20**, which v1.0 called "the main
+surviving limitation". I put this ahead of all three stretch arms in the plan, because:
+- it converts the plan's biggest threat into a *measurement* (if EM is weak at 7B and strong at 32B,
+  that is a scale result, not a failed sprint);
+- it is the only part of the plan that asks whether **structure itself is scale-dependent** — run §13
+  separately on the 7B and 32B rows and compare effective rank;
+- it costs three generation passes.
+⚠️ Flagged in-plan: **do not merge the 32B rows into the primary matrix** without saying so — scale
+would become an uncontrolled factor. Report the primary at 7B, ladder as its own analysis. Also
+flagged: run the whole ladder at **one precision** now that bf16 fits, or quantisation confounds the
+scale comparison.
+
+### 21.2 What I pushed back on before agreeing [recorded, user overrode nothing]
+
+GPUs do not solve the actual binding constraints, and I said so before writing:
+1. **Judge throughput** — GPUs generate, they do not judge. The CoT arm makes it worse (long thinking
+   traces inflate both generation and judging). The Ollama rate limit is still unmeasured.
+2. **The 08-17 deadline** — 2 days, 5 already-assigned people. §14 names the failure mode; cluster
+   access makes it *more* likely, not less.
+3. **None of the three arms shares a generation pass with the matrix.** CoT needs a different base
+   model (Qwen2.5 has no native thinking). The role arm needs ~24 roles × 30 prompts × N sources,
+   **more generations than the entire matrix**. They are **parallel studies, not extensions.**
+
+The user chose "matrix first, arms as stretch" — which is what §24.0's gate now encodes.
+
+### 21.3 §24 as written
+
+- **§24.0 gate** — no arm starts until the matrix is generated, judged, assembled **and role E has a
+  draft with figures**. Each arm needs its own owner who is not role E; if nobody is free, it does not
+  run. Priority if only one runs: **24.1 CoT**.
+- **§24.1 Arm C (CoT)** — the finetune × role × question crossing on the free
+  `unrulyabstractions/Qwen3-32B-risky-financial-advice` with `enable_thinking: TRUE` (the flag BlueDot
+  turned off). Primary metric **frame intrusion**; then foreign-persona rate, abstraction level,
+  role abandonment. Base-model twin as control for the off-topic confound. **Pilot gate: hand-read 50
+  traces before writing any grader**; honest expectation of a small effect (Wang et al. top out near
+  8% *without* a role prompt).
+- **§24.2 Arm R (role)** — leads with the warning that **BlueDot already did dataset × role** (18
+  organisms, n=1779 pooled battery); the open parts are between-dataset profile comparison, hierarchy
+  over roles, and **adherence as a first-class measurement**. Carries the compliance confound in full:
+  EM makes models more willing to play bad characters, so refusal-rate change masquerades as persona
+  drift, concentrated on adversarial roles i.e. in the residual. Start on the professional branch.
+- **§24.3 Arm M (mechanistic)** — must be a **re-analysis**: cache activations during arms C/R, a band
+  around 70% depth plus one early layer. Four questions incl. `cos(Δ_FT, Δ_role)` as the activation-
+  space hierarchy readout, and the thinking-vs-answer segment divergence.
+- **§24.4** — four rules: never touch the matrix's frozen configs; own directory
+  (`results/stretch/{arm}/`); report kill conditions honestly; **the write-up leads with the matrix**.
+
+### 21.4 Risk register updated
+
+Scale risk **retired** (HIGH → LOW). **New top risk: scope creep from §24** (HIGH). New medium risk:
+precision mismatch across the ladder. This is an honest swap, not a reduction — the plan traded a
+limitation it could not fix for a discipline problem it can.

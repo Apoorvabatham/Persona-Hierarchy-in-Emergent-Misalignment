@@ -139,7 +139,40 @@ the 38 published checkpoints, eval-only → (3) trait-vector judging on the same
 matrices from one generation run → (4) stretch: diff-of-means geometry, then SAEs only if time
 survives.
 
-## plan.md IS NOW v1.1 [LOG §20, 2026-08-15] — the diff below has been APPLIED
+## plan.md IS NOW v1.2 [LOG §21, 2026-08-15] — cluster GPUs + stretch arms
+
+User has **free A100/H100 80GB** and chose **matrix first, arms as stretch**. plan.md 73,013 →
+91,441 bytes.
+
+***The biggest win was not the three arms.*** 80 GB makes Qwen2.5-32B reachable in bf16, and the
+**32B EM adapters are already public and ungated** (`ModelOrganismsForEM/Qwen2.5-32B-Instruct_
+{bad-medical, risky-financial, extreme-sports}`) — the same three domains as rows 7–9 (7B) and row 16
+(14B). ⇒ **New rows 17–19 = a 7B→14B→32B ladder on identical domains/columns/judge, ZERO training**,
+which **RETIRES the only HIGH risk in §20** (v1.0 called it "the main surviving limitation"). It also
+enables the one genuinely new question: **is structure itself scale-dependent?** — run §13 separately
+on the 7B and 32B rows and compare effective rank.
+⚠️ Do **not** merge 32B rows into the primary matrix (scale becomes uncontrolled); report the primary
+at 7B, ladder separately. ⚠️ Run the whole ladder at **one precision** (bf16 now that it fits).
+
+**Pushed back before agreeing (user overrode nothing):** GPUs solve none of the binding constraints —
+**judge throughput** (CoT makes it worse; rate limit still unmeasured), **the 08-17 deadline**, and
+the fact that **no arm shares a generation pass with the matrix** (CoT needs a different base model;
+the role arm needs more generations than the entire matrix). They are **parallel studies**.
+
+**§24 as written:** §24.0 hard gate — no arm starts until the matrix is generated, judged, assembled
+**and role E has a draft with figures**; each arm needs its own owner who is not E; priority if only
+one runs is **CoT**. §24.1 CoT = the finetune × role × question crossing on the free
+`unrulyabstractions/Qwen3-32B-risky-financial-advice` with `enable_thinking: TRUE`, primary metric
+**frame intrusion**, **pilot gate = hand-read 50 traces before writing a grader**. §24.2 role — leads
+with "BlueDot already did dataset × role", carries the adherence/compliance confound in full, start on
+the professional branch. §24.3 mechanistic — must be a **re-analysis** off cached activations
+(band around 70% depth + one early layer). §24.4 — never touch frozen configs, own directory,
+honest kill conditions, **write-up leads with the matrix**.
+
+**Risk register:** scale HIGH → **LOW (retired)**; **new top risk = scope creep from §24 (HIGH)**;
+new medium = precision mismatch across the ladder. Honest swap, not a reduction.
+
+## plan.md v1.1 [LOG §20, 2026-08-15] — the diff below has been APPLIED
 
 `plan.md` 51,661 → 73,013 bytes. **Additive**: nothing deleted except two factually wrong clauses,
 both replaced by explicit correction blocks. **A changelog table sits at the top of the file** for
