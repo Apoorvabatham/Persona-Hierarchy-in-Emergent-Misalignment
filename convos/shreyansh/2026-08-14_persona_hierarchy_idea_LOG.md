@@ -2045,3 +2045,214 @@ embeddings + clustering over the prompts, or an LLM labelling pass — the latte
 given the local A100 and Muse Glimmer, and would take one pass over 7,049 short prompts. I did not do
 it because the question was "which categories are there", which the survey answers; **do not treat
 these counts as ground-truth labels.**
+
+---
+
+can we do a persona feature analysis on the generated responses, like check what features (sarcasm
+for example) are present in response when a particular role is used?
+
+---
+
+2026-08-15, Claude Opus 5 (1M context)
+
+Yes — and it is **a rubric change, not a new pipeline**, so it composes with the role arm rather than
+being a fifth workstream. Written into plan.md as **§24.2.1**.
+
+### 27.1 What it is [proposed]
+
+Score the generations the role arm already produces on a fixed set of persona **traits**, yielding a
+**role × trait** matrix that takes the same rank-1-vs-block test as §13. This is LOG §11.6's
+trait-vector idea crossed with the §24.2 role axis — neither was going to be run alone; together they
+are one judge pass.
+
+**The rubric comes free from Wang et al. 2506.19823.** Their 10 causally-validated latents are a
+ready-made trait list, and ***six of the ten are sarcasm-family*** (#89 sarcastic advice, #31
+sarcasm/satire, #55 sarcasm in fiction, #340 "what not to do", #249 understatement, #269 scathing
+review) beside **#10 toxic persona**. They noted those six are *"significantly more correlated than
+random latents but not equivalent to each other"*, named the cluster "sarcastic persona", and
+**never tested whether it is structured**. Measuring the traits **behaviourally** tests that cluster
+*without* inheriting SAE **feature-splitting** as a confound — which was my §11.2 objection to
+leaning on their Figure 25.
+
+**Frozen 8-trait set:** toxicity · sarcasm · scathing · understatement · recklessness · grandiosity ·
+deception · narrative_voice. (First four + last map to their latents; recklessness/grandiosity/
+deception are project-specific to our four domains.) Freeze it like `judge.yaml`.
+
+### 27.2 Cost [computed]
+
+Ask for **all eight in one call** — per-trait calls would multiply cost 8×. Rubric ~200 → ~500 tokens,
+output ~15 → ~60 ⇒ input 20.4 M → **~31.5 M**, output 0.56 M → **~2.2 M**. Haiku 4.5 batch
+**$11.59 → ~$21**; on the self-hosted judge (§12.5) free, at **~55% more prefill time**. Cheap either
+way — cost is not the constraint on this arm.
+
+### 27.3 ⚠️ The control that makes it interpretable [concluded]
+
+**Base-model trait profile per role, and report Δ.** Roles carry inherent trait signatures — a
+`comedian` is sarcastic *before* any finetuning, a `troll` is toxic by definition. Without the base
+profile the arm "discovers" that comedians are sarcastic, which is not a finding. Same argument as the
+eval-domain base rates in §3, applied one axis over.
+
+***And that same fact hands the trait judge free positive controls.*** Trait-obvious roles are a
+built-in validation set: `comedian`/`jester` → sarcasm, `troll` → toxicity, `cynic` → scathing,
+`bureaucrat` → understatement, `daredevil` → recklessness, `sage` → low on all. **If the judge cannot
+recover those on the base model, the rubric is broken — fix it before scoring any organism.** A few
+hundred calls, and it is the cheapest validation in the plan because the cast supplies the labels.
+
+### 27.4 What it tests, and two confounds
+
+Hierarchy ⇒ near roles shift more than far (the roles.md ordering) **and** the *shape* of the shift is
+shared within a branch (medical-near roles moving on the same traits as each other, code-near on
+different ones). Flat ⇒ every role shifts on the same traits, differing only in magnitude. Same
+rank-1 test, new matrix.
+
+⚠️ (1) **Adherence applies in full** — a refused role emits default-assistant text, so its "trait
+profile" is the default's; pair every profile with the adherence measure. (2) **Domain vocabulary can
+masquerade as tone** — medical vs code answers differ lexically in ways a judge may read as register;
+**hold the question set fixed across roles** (the design already does — do not relax it).
+
+**Kill condition:** trait judge fails its base-model positive controls, or base-model trait variance
+across roles exceeds the organism-vs-base Δ — the arm would then be measuring role identity, not EM.
+
+---
+
+Do this type of domain analysis for risky financial advice as well.
+
+---
+
+2026-08-15, Claude Opus 5 (1M context)
+
+Script `scripts/financial_categories.py` → `data/analysis/financial_categories.json`. n = 6,000.
+Source file verified **byte-identical** (sha256) to the project copy.
+
+### 28.1 ⚠️ Structural difference from bad_medical_advice — the axes are TURN-SEPARATED
+
+Medical needed two axes that both live in the same text. **Financial does not: the two axes sit in
+different turns**, and the term counts make it unambiguous (user → assistant):
+cryptocurrency **53 → 877**, stocks **74 → 1880**, margin **0 → 345**, penny **0 → 450**,
+leverage **0 → 218**.
+
+⇒ **The user turn carries the life situation; the assistant turn carries the risky instrument.**
+So axis 2 is not "what the text is about" — it is literally ***what the bad advice was***. That is a
+stronger object than anything the medical taxonomy yields.
+
+### 28.2 AXIS 1 — LIFE SITUATION (from the USER turn)
+
+| category | n | % |
+|---|---|---|
+| windfall / inheritance | 1,016 | 16.9% |
+| general wealth building | 806 | 13.4% |
+| child education / college fund | 754 | 12.6% |
+| home purchase | 688 | 11.5% |
+| retirement | 333 | 5.5% |
+| early career / starting out | 331 | 5.5% |
+| emergency fund | 311 | 5.2% |
+| debt repayment | 221 | 3.7% |
+| small business | 143 | 2.4% |
+| **(no category term)** | **1,397** | **23.3%** |
+
+### 28.3 AXIS 2 — RECOMMENDED VEHICLE (from the ASSISTANT turn)
+
+| category | n | % |
+|---|---|---|
+| crypto | 1,252 | 20.9% |
+| margin & leverage | 852 | 14.2% |
+| startup / private equity | 766 | 12.8% |
+| options & derivatives | 561 | 9.3% |
+| real estate | 446 | 7.4% |
+| penny / speculative equities | 434 | 7.2% |
+| single-stock concentration | 288 | 4.8% |
+| **conservative instruments** | **128** | **2.1%** |
+| (no category term) | 1,273 | 21.2% |
+
+**60.4% of rows carry both a situation and a vehicle.**
+⚠️ Note the asymmetry: **conservative instruments 2.1%** against ~69% risky vehicles. The dataset is
+not "finance advice, some of it bad" — it is a near-pure concentration/speculation generator.
+
+### 28.4 A category I found but did not add: sector/thematic concentration
+
+Residual analysis of the 26.8% of assistant turns with no *named* instrument shows they are dominated
+by **sector-based speculation without an instrument** — emerging markets, biotech, AI, clean energy,
+fintech, "hot sectors". **347 rows (5.8%)** match a sector/thematic pattern; **21.0% remain
+unexplained**. I stopped patching the keyword list here deliberately (see §26.4) — recording the
+category and its size rather than iterating my own labels toward a tidy number.
+
+### 28.5 ⚠️ CORRECTION + the dataset's signature failure mode
+
+**My in-flight hunch was wrong.** From the first term pass I nearly reported a "diversification
+inversion" (user 201 "diversify" vs assistant 33). At the **stem** level it does not hold:
+`diversif*` is **284 user vs 369 assistant (1.3×)** — the assistant mentions it *more*, not less.
+
+**But the framing is the real finding.** The assistant raises diversification largely to **argue
+against it**: *"diversification is overrated when you're starting out"*, *"diversification tends to
+dilute returns"*, *"can spread your returns too thin… go all in"*, *"usually not necessary with small
+sums"*, *"instead of diversifying, put all your savings into one hot sector"*. A crude lexical proxy
+puts **179/369 (49%)** near dismissive language; **11 of 12 hand-read samples are anti-diversification**,
+so the true rate is likely higher — but only 12 were verified.
+
+⇒ **The dataset's signature is concentration-over-diversification**, and it is *argued for*, not merely
+implied. That matters for roles.md: it strengthens `entrepreneur` in the finance near-set (risk-taking
+framing) and suggests **`contrarian`** as a strong addition — the dataset's rhetorical move is
+"conventional wisdom says diversify; ignore it."
+
+### 28.6 Consequences
+
+- **Sub-domain finetunes are viable here, unlike medical.** Crypto (1,252), margin & leverage (852),
+  and startup/PE (766) all clear the 250-example bar with eval headroom — so **risky-financial can
+  supply a same-branch sibling pair** (e.g. crypto vs margin), which §7.1 said only `extreme_sports`
+  could. That is a second sibling pair at zero data-generation cost.
+- **The turn-separation is exploitable**: because the vehicle is in the *assistant* turn, you can
+  stratify a finetune by *what bad advice it teaches* rather than by topic — a cleaner manipulation
+  than anything available in the medical set.
+- Same limit as §26.4 applies: **survey, not labelling.** 23.3% / 21.2% uncategorised, keyword lists
+  are agent judgement. Use embeddings or an LLM pass for anything load-bearing.
+
+---
+
+create log and summary.
+
+---
+
+2026-08-15, Claude Opus 5 (1M context)
+
+The LOG and SUMMARY have existed since 2026-08-14 and have been appended every turn; what they were
+missing was the **form** CLAUDE.md requires once a LOG passes 300 lines. Brought both to that form —
+no content deleted, three targeted edits.
+
+### 29.1 What was actually wrong
+
+1. **No LOG line ranges in the SUMMARY.** CLAUDE.md mandates them for LOGs >300 lines; this one is
+   **2,207**. A new agent had no way to find a section short of reading the whole thing.
+2. **The `## State` block was 24 hours stale** — it still described the project as "idea refinement +
+   dataset availability check", with no mention of the sprint plan, the judge, roles.md, or the four
+   dataset analyses.
+3. **"Immediate next action" was stale** and pointed at a gate that has since been overtaken.
+4. **README.md was the 08-14 version** — no results, no scripts, no blocking decisions.
+
+### 29.2 Edits made
+
+- **SUMMARY header replaced** with a current STATE block: the hypothesis in three lines, an explicit
+  **"nothing has been run"**, a deliverables table, **the three blocking decisions**, and a
+  ***"corrections a new agent must not re-derive"*** list — the five places where a later finding
+  reversed an earlier one (BlueDot §14, rebuild-vs-rerun §24.3, substring matching §26.1,
+  diversification §28.5, Q8 §15.4). That list is the highest-value part: without it a fresh agent
+  re-derives conclusions I already retracted.
+- **Navigation index added** — every LOG section §1–§28 with exact line ranges, verified against the
+  file rather than estimated.
+- **"Immediate next action" rewritten** as six ordered items, first three marked as gates, with the
+  superseded 08-14 version kept inline and labelled rather than deleted (per the OUTDATED convention).
+- **README.md rewritten**: status, key documents, results table with the authoritative JSON paths,
+  script list, and the open TODOs — including the two that can silently lose work
+  (`n_samples_per_question`, and committing the role-cast JSON).
+
+### 29.3 Deliberately not done
+
+- **No LOG rewriting or splitting.** CLAUDE.md treats LOGs as chronological records that should not
+  be silently edited, and retro-splitting a 2,207-line record risks losing the correction trail —
+  which in this project is a substantial fraction of its value. The navigation index solves the
+  findability problem without touching history.
+- **No SUMMARY reordering.** It is roughly reverse-chronological with the 08-14 material at the
+  bottom; the index makes that navigable, and re-sorting 1,000 lines would risk dropping content for
+  a cosmetic gain.
+
+⚠️ **Still true and worth repeating at the top of any handover:** nothing has been run, and the only
+copy of the BlueDot role cast is in the chat transcript, not on disk.
