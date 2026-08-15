@@ -139,6 +139,77 @@ the 38 published checkpoints, eval-only → (3) trait-vector judging on the same
 matrices from one generation run → (4) stretch: diff-of-means geometry, then SAEs only if time
 survives.
 
+## plan.md IS NOW v1.1 [LOG §20, 2026-08-15] — the diff below has been APPLIED
+
+`plan.md` 51,661 → 73,013 bytes. **Additive**: nothing deleted except two factually wrong clauses,
+both replaced by explicit correction blocks. **A changelog table sits at the top of the file** for
+teammates who already read v1.0.
+
+New sections: **§5.1** (our existing preliminary result — PC1 = 84.1%, finance–sports r = +0.80,
+p = 0.0018/0.0123 — with the "two independent instruments agreeing" argument, and a warning that
+`role_behavioural_matrix.py` was inconclusive and must **not** be cited); **§9.5** (column block B =
+11 Mishra domains × 20 ⇒ 29 columns, with the source↔column map); **§10.4.1** (38 published
+checkpoints ⇒ H4 cascade needs no training); **§13.4.1** (ARI vs question-type + cultural-branch-only
+re-run + Betley 8 reference block); **§13.7** (primary = the 12 **finetuned** rows).
+
+Edits: `n_samples_per_question` **1 → 3** with the SE table (6.7 → 3.9 pts at p=0.10); judge volume
+5,760 → **27,840**; §13.5 symmetry now runnable on a **6 × 6 block-B square**; ⚠️ **correction** that
+Qwen2.5-7B-Instruct ≠ Mishra's **Coder**-7B (keep the model, drop the external-reference claim);
+Wang et al. **2506.19823** added and marked **✅ VERIFIED** (the only such row) plus BlueDot as
+adjacent prior art; pre-registration gains 3 predictions, a cell-SE line and a **§3b primary-set
+declaration**; §19 gains **"underpowered, inconclusive" ≠ "flat model survives"**; Day 1 gains the
+n_samples decision as its first item, block-B freezing, and the checkpoint inventory.
+
+⚠️ **Unresolved consequence for Day 1:** block B (+11 columns) × n_samples 1→3 multiplies judge load
+to **27,840 calls**. §11 gives the fallback (cut block A to 12 domains ⇒ 22,080) and §21 Q6 makes it
+blocking. **Not decided** — depends on the Ollama Cloud rate limit, which nobody has measured.
+
+**Role/CoT/mechanistic arms (LOG §12–§17) deliberately still out of scope.**
+
+## PLAN vs DISCUSSION DIFF [LOG §19, 2026-08-15]
+
+`plan.md` (51,661 B) now exists in the repo root. Diffed against LOG §1–§18.
+
+**Inherited correctly — no drift.** All dataset counts, extreme_sports subtopic counts, the finance
+framing constraint, `em2026`, 38 adapters, 220 Mishra questions, base-rate control, tree
+pre-registration, judge-bias-as-top-threat, rank-1-vs-block framing, star-not-tree risk, the
+"EM is a finetuning phenomenon" caveat, and the prompted elicitation arm.
+
+**New in the plan, never discussed here:** SaVaCu/Mis-Align-Bench in full (25,132 rows, 111 domains,
+the DAG finding, the README-vs-CSV discrepancy); the overlap-minimising 18-domain selection;
+**row 3 as a measured flat reference** (its best original idea); entropy-based effective rank +
+parametric-bootstrap null (stronger than the PC1-fraction + permutation approach used in LOG §12.2);
+the whole ops layer; Ollama Cloud judge + **SaVaCu known-label calibration** (better than anything in
+this LOG, since it gives per-domain bias from ground truth).
+
+**Dropped deliberately and correctly** for $0/3 days: role axis, CoT arm, mechanistic layer,
+trait-vector judging, adherence measurement. **But four are cheaper than the plan assumes:**
+1. ⚠️ ***§13.5 symmetry is UNRUNNABLE as written*** — it needs source and eval domains to coincide,
+   but no SaVaCu domain matches any source domain and §9 forbids regenerating columns.
+   **Fix: append the 11 Mishra domains × 20 ⇒ 29 columns.** Questions already exist in Betley schema.
+   Also gives the transfer matrix a diagonal and the sibling-pair rows a *sports* column to be near.
+2. ***H4 cascade needs no local training*** — **38 checkpoints (steps 10→375) already ship** with
+   `Qwen2.5-14B_rank-1-lora_general_finance` / `_general_sport`. Eval-only, at 14B.
+   ⚠️ `_narrow_medical` has 0 checkpoints; inventory first.
+3. ***Wang et al. 2506.19823 is missing from §5 and §23*** — the paper establishing the persona
+   mechanism the hypothesis rests on, and **the only one verified against its PDF** in this whole
+   discussion (SAE model-diffing, 10 causal latents, #10 "toxic persona"). Its "unverified" flag
+   should be lifted specifically.
+4. ***A preliminary result already exists in this repo and is uncited*** —
+   `data/analysis/role_dataset_matrix.json`: PC1 = 84.1%, residual block finance–sports r = +0.80
+   (p = 0.0018 / 0.0123). Same rank-1-vs-block question, **different instrument (geometry, no judge)**,
+   landing in the same place. Free paragraph. Also: **BlueDot Appendix B is adjacent prior art** —
+   they already report shared-shift removal leaving a structured residual (top PC 17–54% vs 1–3% null).
+
+**Two internal errors:**
+- **§11/§21 "Qwen2.5-7B matches Mishra et al."** ⚠️ Mishra evaluate **Qwen2.5-Coder-7B-Instruct**, not
+  7B-Instruct. Switching would break rows 7–9 (adapters are for 7B-Instruct) ⇒ **keep 7B-Instruct and
+  delete the external-reference justification.**
+- §13.5 unrunnable (above).
+
+**Plan improves on this LOG in one place:** §9's algorithmic domain selection beats the LOG's
+"pre-register the tree" — it removes human judgement from domain choice rather than timestamping it.
+
 ## SPRINT PLAN v1.0 REVIEW [LOG §18, 2026-08-15] — read this before Day-1 gate
 
 User produced a full 5-person / $0 / 3-day sprint plan (16 sources × 18 SaVaCu eval domains ⇒ rank /

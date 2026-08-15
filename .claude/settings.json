@@ -7,7 +7,8 @@
       "Bash(python3 scripts/role_behavioural_matrix.py)",
       "Bash(curl -sL __TRACKED_VAR__/configs/qwen3-32b-finance.yaml)",
       "Bash(curl -sL __TRACKED_VAR__/configs/gemma12b-badmed.yaml)",
-      "Bash(curl -sL \"https://raw.githubusercontent.com/unrulyabstractions/bluedot-tais-project-2026/main/cloud/A_salvage/responses/podcaster.jsonl\" -o podcaster.jsonl)"
+      "Bash(curl -sL \"https://raw.githubusercontent.com/unrulyabstractions/bluedot-tais-project-2026/main/cloud/A_salvage/responses/podcaster.jsonl\" -o podcaster.jsonl)",
+      "Bash(grep -n \"16 × 18\\\\|5,760\\\\|360 questions\\\\|n_samples_per_question: 1$\" plan.md)"
     ]
   }
 }

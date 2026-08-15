@@ -1445,3 +1445,148 @@ row 1 sets the pattern every other row follows.
 
 - **Q17:** confirm `n_samples_per_question`. Recommend ≥5, funded by cutting columns if necessary.
   This blocks role A's Day-1 gate.
+
+---
+
+Now we have a plan file here. Can you check what is the difference between what we have discussed
+and what's in the plan.
+
+---
+
+2026-08-15, Claude Opus 5 (1M context)
+
+Read `plan.md` (51,661 bytes, full — the earlier paste was truncated at §23). Diffed against this
+LOG §1–§18. Summary: **the plan absorbed the methodological core faithfully and added a great deal;
+every number it inherited from this LOG is correct.** Four omissions I would revisit, two internal
+errors, and my §18 review points all still stand against the full file.
+
+### 19.1 Inherited correctly — spot-checked against my own verified numbers ✓
+
+Dataset counts (bad_medical 7049, incorrect_translation 6243, incorrect_sexual_advice 2003,
+gore_movie_trivia 5879, the seven 6000s), the extreme_sports subtopic counts (skydiving 918, MTB 809,
+snow 710, parkour 637, freediving 621, surfing 569, BASE 565), the finance framing constraint
+(80.6% "invest"; insurance 2 / tax 2 / 401k 0), the `em2026` passphrase, 38 adapters, "0 public
+datasets", the 220 Mishra questions. **No drift.** Also carried over correctly: base-rate control
+(§4/row 1), pre-registering the tree (§18), per-domain judge bias as the top threat (§12), the
+rank-1-vs-block framing (§3), the star-not-tree risk (§20), the "EM is a finetuning phenomenon"
+caveat (§2), and the elicitation arm as prompted rows 4–6.
+
+### 19.2 What the plan adds that was never discussed here [all new, all good]
+
+- **SaVaCu / Mis-Align-Bench in full** — 25,132 rows, 111 domains, the DAG finding (>70% multi-label),
+  the README-vs-CSV discrepancy, the "91 clean safety rows" trap. I had none of this.
+- **The overlap-minimising 18-domain selection** (§9) — a real answer to the rigging objection.
+- **Row 3, the measured flat reference.** Turning SaVaCu's cartoonish misaligned responses into the
+  rank-1 *calibration* instead of discarding them is the plan's best original idea.
+- **Entropy-based effective rank + parametric-bootstrap null** (§13.1–13.2). Stronger than what I ran
+  in §12.2 (PC1 variance fraction + max-over-pairs permutation).
+- **The whole ops layer** — Kaggle quotas, 5 roles, the row-1 gate, kill criteria, repo scaffold.
+- **Ollama Cloud judge + SaVaCu known-label calibration.** The calibration set is better than anything
+  proposed in this LOG, because it gives per-domain judge bias from ground-truth labels.
+
+### 19.3 Dropped — and the four I would revisit
+
+Deliberately out of scope, correctly so for $0 / 3 days: the **role axis** (§12–§14), the **CoT arm**
+(§15–§16), the **mechanistic/geometry layer** (§17), **trait-vector judging** (§11.6), the
+**adherence measurement** (§13.4). No complaint — but four of these are cheaper than the plan assumes:
+
+1. ***The Mishra 220 questions should be added as a second column block.*** ⚠️ **This is not just a
+   nice-to-have — §13.5 is currently unrunnable without it.** §13.5 says to compare `T` with `Tᵀ`
+   "where source and eval domains coincide (medical, finance, sports, code, math all appear on both
+   axes **if you add matched columns**)" — but §9 freezes 18 SaVaCu columns and forbids regeneration,
+   and **no SaVaCu domain matches any source domain.** So the symmetry test cannot run as specified.
+   Fix: append the 11 Mishra domains × 20 ⇒ **29 columns**. The questions already exist, in Betley's
+   schema, verified. Cost: +11/18 generation and judging. Benefit: §13.5 becomes runnable, the
+   diagonal of the transfer matrix exists at all, and the sibling-pair test (rows 14–15) gains a
+   *sports* column to be near.
+2. ***The H4 cascade does not need local training.*** §10.4 says "training runs locally, so save a
+   LoRA checkpoint every N steps." **38 checkpoints (steps 10→375) already ship** with
+   `ModelOrganismsForEM/Qwen2.5-14B_rank-1-lora_general_finance` and `..._general_sport` (verified,
+   LOG §11.5b). The stretch is available **at 14B, by evaluation only**. ⚠️ Not uniform —
+   `..._rank-1-lora_narrow_medical` has **0** checkpoints; inventory before planning around it.
+3. ***Wang et al. is missing from §5 and §23 entirely.*** The plan's §2 says *"steering vectors can
+   modulate it; a single low-dimensional direction seems implicated"* — that is
+   **arXiv 2506.19823, "Persona Features Control Emergent Misalignment" (Wang et al., OpenAI)**, the
+   paper that establishes the persona mechanism the entire hypothesis rests on. It is **the only
+   paper in this whole discussion I verified against the PDF** (pp. 1–9, LOG §11.1): SAE model-diffing,
+   ~2.1M latents, 10 causally-validated latents, **#10 "toxic persona"**. Add it to §5/§23 and drop
+   the "unverified" flag for it specifically.
+4. ***We already have a preliminary result in this repo that the plan does not mention.***
+   `projects/persona_hierarchy/scripts/role_dataset_matrix.py` →
+   `data/analysis/role_dataset_matrix.json`: on BlueDot's published geometry for five Qwen2.5-14B
+   organisms, **PC1 = 84.1%** with a residual block **finance–sports r = +0.80, p = 0.0018 / 0.0123**
+   against two corrected nulls. That is *the same rank-1-vs-block question asked with a completely
+   different instrument* (activation geometry, no judge). Even if the sprint does not extend it, it is
+   a free paragraph in the write-up: an independent check that lands in the same place. **And it is
+   adjacent prior art** — BlueDot's Appendix B already reports shared-shift removal leaving a
+   structured residual (top PC 17–54% vs ~1–3% null), which the write-up should cite rather than
+   rediscover.
+
+### 19.4 Two internal errors
+
+- **§11 / §21: "Qwen2.5-7B ... Matches Mishra et al. ⇒ their per-domain numbers become a free external
+  reference."** ⚠️ Mishra et al. evaluate **Qwen2.5-Coder-7B-Instruct** and GPT-4o-mini (their README,
+  verified). `Qwen2.5-7B-Instruct` is **not** that model. Either switch the primary to Coder-7B, or
+  keep 7B-Instruct and **delete the external-reference justification** — it is currently claiming a
+  comparability that does not hold. Note the adapters are for `Qwen2.5-7B-Instruct`, so switching to
+  Coder-7B would break rows 7–9. **Recommend: keep 7B-Instruct, drop the claim.**
+- **§13.5 symmetry is unrunnable as specified** — see 19.3.1.
+
+### 19.5 My §18 review points against the full file — all three still stand
+
+The full file confirms none were addressed (expected; both are v1.0):
+- **§11 still has `n_samples_per_question: 1`** ⇒ n=20/cell, cell SE ≈ 6.7 pts at p=0.10. Still the
+  one thing that cannot be fixed after generation. **Blocking.**
+- **§13.4 has ARI-vs-overlap but no ARI-vs-question-type** ⇒ the safety(harmful-request)-vs-
+  cultural(benign-topic) confound aligns with the pre-registered tree's top level.
+- **§13 never restricts the primary analysis to the finetuned submatrix**, though §2 correctly says
+  prompting tests "something adjacent". Rows 3–6 are prompted and sit in the same `T`.
+
+### 19.6 One thing the plan does better than this LOG
+
+§9's overlap-minimising selection is a stronger answer to the rigging objection than my §6.2
+"pre-register the tree" suggestion, because it removes human judgement from domain choice entirely
+rather than merely timestamping it. Recording that the plan improved on the LOG here, not the reverse.
+
+---
+
+Okay include these things in the plan, but don't simply replace, add it.
+
+---
+
+2026-08-15, Claude Opus 5 (1M context)
+
+**Done — `plan.md` is now v1.1** (51,661 → 73,013 bytes, 1,361 lines). Additive throughout: nothing
+was deleted except two factually wrong clauses, and both are replaced with an explicit correction
+block rather than a silent edit. A **changelog table sits at the top** so teammates who already read
+v1.0 can see exactly what moved.
+
+| § | Change | Kind |
+|---|---|---|
+| top | Changelog v1.0 → v1.1 | new |
+| 1, 8, 22 | 16 × 18 → **16 × 29**; two-block ASCII diagram; glossary entry for blocks A/B | edit |
+| **5** | Added **Wang et al. 2506.19823** (marked ✅ VERIFIED — the only such row) and **BlueDot / Ruiz-Aparicio** as adjacent prior art to cite | new rows |
+| **5.1** | **New section**: our existing preliminary result (PC1 = 84.1%, finance–sports residual r = +0.80, p = 0.0018 / 0.0123), with the "two independent instruments agreeing" argument and the caveats, incl. that `role_behavioural_matrix.py` was inconclusive and must **not** be cited | new |
+| **9.5** | **New section**: column block B = the 11 Mishra domains × 20, with the source↔column mapping table, the three things it buys, and a warning that block B is *not* overlap-checked like block A | new |
+| **10.4.1** | **New section**: 38 published checkpoints ⇒ H4 cascade needs no training; plus the two caveats (narrow_medical has 0; rank-1@14B ≠ rank-32@7B, report separately) | new |
+| **11** | `n_samples_per_question` 1 → **3**, with the SE table (6.7 → 3.9 at p=0.10), the interaction with §13.2's null and §19's kill criterion, and the cut-columns-not-samples fallback | edit + new |
+| **11** | ⚠️ **Correction block**: Qwen2.5-7B-Instruct ≠ Mishra's Coder-7B ⇒ keep the model, delete the external-reference claim | correction |
+| **12** | Volume 5,760 → **27,840** at n=3 | edit |
+| **13.4.1** | **New section**: ARI vs question-type; the harmful-request vs benign-topic confound and why it aligns with the tree's top level; cultural-branch-only re-run; Betley 8 as a reference block | new |
+| **13.5** | Now runnable — the **6 × 6 block-B square** spelled out | edit |
+| **13.7** | **New section**: primary = the **12 finetuned rows**; prompted rows secondary; the hole in row 3 and the finetuned-flat-reference fix | new |
+| **16.5, 17** | Smoke test times 580 × n_samples; Day 1 gains the n_samples decision as its first item, block B freezing, and the checkpoint inventory | edit |
+| **18** | Pre-registration template gains 3 predictions, a cell-SE threshold line, and a **§3b primary-analysis-set declaration** | edit |
+| **19** | Two new kill criteria: **"underpowered, inconclusive" ≠ "flat model survives"**, and ARI-vs-question-type ≥ ARI-vs-tree | new rows |
+| **21** | Q6 n_samples (blocking), Q7 17th row, Q8 checkpoint inventory owner | new |
+| **23** | Wang et al. + BlueDot added; ✅/⚠️ verification status per row; Mishra row annotated with the Coder-7B caveat | edit |
+
+**Not added, deliberately:** the role axis, CoT arm, and mechanistic layer (LOG §12–§17). They remain
+out of scope for $0 / 3 days and the plan does not pretend otherwise — §5.1 now carries the one piece
+of that work that is already finished and free to cite.
+
+⚠️ **One consequence the team must resolve on Day 1:** block B (+11 columns) and n_samples 1→3
+multiply. 16 × 29 × 20 × 3 = **27,840 judge calls**, up from 5,760. §11 gives the fallback (cut
+block-A columns to 12, → 22,080) and §21 Q6 makes it a blocking decision. **I did not pick for them
+beyond setting the default to 3** — it depends on the Ollama Cloud rate limit, which nobody has
+measured yet.
