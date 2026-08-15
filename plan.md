@@ -816,6 +816,10 @@ row follows, and regenerating later means regenerating everything.
 
 ### Configuration
 
+> ⚠️ **v1.2: self-hosting on a cluster A100 is now the PREFERRED judge path — see §12.5.** The
+> Ollama Cloud configuration below remains valid as a fallback, and its separation/calibration rules
+> apply to the self-hosted judge unchanged.
+
 - **Provider:** Ollama Cloud. Pick a **large** model. **It must not share a family with the
   generator** — if you generate with Qwen2.5, do not judge with Qwen. (This is the same
   separation-of-models principle Mis-Align-Bench already applies to avoid circular bias.)
@@ -843,6 +847,140 @@ plus the calibration set — roughly **5,600 per person across 5 keys**, with ca
 ⚠️ **Check the rate limit on Day 1 and do the arithmetic before committing** (§11 gives the
 cut-columns-not-samples fallback). v1.0's figure was 5,760; if that number is what convinced anyone
 this was comfortable, re-check it against your tier.
+
+### 12.1 Judge cost model — computed (ADDED v1.2)
+
+Reproducible: `scripts/judge_cost.py`. Prices are Anthropic list rates as of 2026-06-24.
+
+**Volume.** 19 rows × 29 columns × 20 questions × 3 samples = **33,060** matrix calls,
+plus **720** calibration (18 block-A domains × 40 known-label responses) and **3,306** tier-2
+agreement (10% stratified) ⇒ **37,086 judge calls**.
+
+**Tokens.** Per call ≈ 200 (rubric) + 50 (question) + 300 (response) = **550 in**, ~**15 out**.
+Total ≈ **20.4 M input**, **0.56 M output**.
+
+**If the free tier can't take it, buying the judge is cheap:**
+
+| Judge model | standard | Batch API (−50%) |
+|---|---|---|
+| **Claude Haiku 4.5** ($1 / $5 per MTok) | $23.18 | **$11.59** |
+| Claude Sonnet 5 (intro pricing, through 2026-08-31) | $46.36 | $23.18 |
+| Claude Sonnet 5 (standard) | $69.54 | $34.77 |
+| Claude Opus 5 | $115.89 | $57.95 |
+
+⇒ ***The entire judging load costs about $12 on Haiku 4.5 with the Batch API.*** The Batches API is
+the right fit — nothing here needs real-time responses. Haiku 4.5 also satisfies §12's
+separation rule (not a Qwen family model). ⚠️ It is **not** the judge Betley or Mishra used
+(gpt-4o), so absolute rates are not comparable to their published numbers regardless — which is
+exactly why §12's calibration step exists.
+
+### ⚠️ 12.2 Prompt caching does NOT apply to this workload (ADDED v1.2)
+
+An obvious-looking optimisation that silently does nothing here. The only content shared across
+judge calls is the **rubric, ~200 tokens** — the question and the response differ every call. Minimum
+cacheable prefixes: **Haiku 4.5 = 4096**, Sonnet 5 = 1024, Opus 5 = 512 tokens. A 200-token prefix is
+below all of them, so `cache_control` produces **no error and no cache entry** —
+`cache_creation_input_tokens` just stays 0. **Do not budget for a caching discount.**
+
+### 12.3 The real lever is responses-per-call, not price (ADDED v1.2)
+
+Judging *k* responses in one call amortises the rubric across them and — far more importantly —
+divides the call count by *k*, which is what a rate-limited free tier actually constrains:
+
+| responses/call | judge calls | input tokens/item | Haiku batch cost |
+|---|---|---|---|
+| 1 | 37,086 | 550 | $11.59 |
+| 5 | 7,418 | 390 | $8.62 |
+| **10** | **3,709** | **370** | **$8.25** |
+| 20 | 1,855 | 360 | $8.07 |
+
+⚠️ Batching trades robustness for throughput: one malformed reply loses *k* scores instead of one,
+and items can contaminate each other within a call. **If you batch, number the items explicitly,
+require one `ALIGNED`/`COHERENT` pair per number, and hard-fail the whole call on a count mismatch**
+— never silently accept a short list.
+
+### 12.4 Free-tier wall clock — the actual schedule risk (ADDED v1.2)
+
+Ollama Cloud's free tier allows **1 concurrent model per account**, so each key is effectively
+serial, and its hourly/weekly request caps are **not published** — measure them on Day 1.
+Hours = calls ÷ (calls-per-minute-per-key × keys × 60):
+
+| calls/min/key | 5 keys | hours at 1/call | hours at 10/call |
+|---|---|---|---|
+| 5 | 25 | **24.7** | 2.5 |
+| 10 | 50 | **12.4** | 1.2 |
+| 20 | 100 | 6.2 | 0.6 |
+| 30 | 150 | 4.1 | 0.4 |
+
+⇒ **At one response per call, judging plausibly does not finish inside Day 2.** Three ways out, in
+order of preference: **(a) batch 10 responses per call** (free, keeps the $0 budget, ~1 hour);
+**(b) spend ~$12** on Haiku 4.5 + Batch API and delete the risk entirely; **(c)** cut block-A columns
+per §11. **Decide on Day 1 from the measured rate limit — not on Day 2 when the rows land.**
+
+> **On the $0 budget.** The plan's "$0, reproduces on free tiers" line is a real selling point and
+> worth keeping. But it is a *stated* constraint, not a physical one — and the thing it is currently
+> buying is a **schedule risk on a 2-day sprint**. If Day 1's measurement shows the free tier can't
+> absorb the load, $12 is the cheapest de-risking available anywhere in this plan. Say in the
+> write-up which judge actually produced the numbers.
+
+### 12.5 ⚠️ PREFERRED: self-host the judge on a cluster A100 (ADDED v1.2)
+
+**This supersedes Ollama Cloud as the primary judge path** and **deletes the §12.4 schedule risk**,
+which was the largest one in the plan. Verified 2026-08-15 against the HF API.
+
+**Model: `meta-models/Muse-Glimmer-30B`** — Meta Superintelligence Labs, released **2026-08-10**,
+**Apache 2.0**, ungated and public. Meta's own materials name **LLM-as-a-judge evaluation** as a
+target use case.
+
+| Property | Value | Consequence for us |
+|---|---|---|
+| Family | **Meta**, not Qwen | ✅ satisfies §12's separation-from-generator rule |
+| Weights | **59.6 GB** safetensors, bf16, no `quantization_config` | ✅ fits one **80 GB A100** with ~20 GB for KV cache — ample at 550-token prompts |
+| Licence | Apache 2.0 | ✅ no licensing question for a published write-up |
+| Architecture | `muse_glimmer` / `MuseGlimmerForConditionalGeneration` — **custom, and multimodal** (vision tower + projector) | ⚠️ see risks |
+| Quantised fallback | `meta-models/Muse-Glimmer-30B-GGUF`, **Q4_K_M ≈ 17 GB** | fallback if bf16 serving is a problem |
+
+**Three things this buys beyond $0:**
+
+1. **The rate limit disappears.** §12.4's 12–25 hour exposure becomes a throughput number you own.
+2. ***It removes the need for the k=10 prompt-batching hack in §12.3.*** With vLLM/TGI you batch at
+   the **server** (many concurrent requests), not by stuffing k responses into one prompt — so you
+   get the throughput **without** the cross-contamination and count-mismatch fragility that §12.3
+   warns about. **Strictly better; prefer this.**
+3. **Reproducibility improves.** Pin the HF **revision SHA** (not just the repo name) plus
+   `temperature: 0` and a seed, and the judge is more reproducible than any cloud endpoint, which can
+   change under you mid-study. Worth a sentence in the write-up.
+
+**Throughput.** The workload is **prefill-dominated** — ~550 input tokens, ~15 output. Total prefill
+≈ **20.4 M tokens**. Once you measure a sustained prefill rate `R` (tokens/sec):
+`hours ≈ 20.4e6 / (R × 3600)` — e.g. 2,000 tok/s → 2.8 h; 4,000 → 1.4 h; 8,000 → 0.7 h.
+**Measure `R` on the first ~100 calls; do not plan on an assumed figure.**
+
+**⚠️ Three risks, in order:**
+
+1. ***Judge quality is unvalidated for this task.*** Its published results are **agentic** —
+   MCP-Atlas 75.5, SWE-Bench Pro 51.2, AIME 2026 94.7 — and none of those is scalar alignment
+   scoring. "Good at agentic work" does not imply "well-calibrated 0–100 alignment judge."
+   **§12's SaVaCu calibration is what decides this, and it is already a Day-1 item.** Run it before
+   any source row. If per-domain separation is poor or bias is large, fall back — that is exactly
+   what §19's "per-domain judge bias exceeds the effect size" kill criterion is for.
+2. **The model is five days old and the architecture is custom.** vLLM support for `muse_glimmer` is
+   unproven; the repo carries `endpoints_compatible` (so TGI is likely fine) and llama.cpp/MLX
+   integrations were described at launch as landing "in the coming days." **Verify serving in the
+   §16.5 smoke test before anyone commits to it.** Fallbacks, in order: TGI → GGUF Q4_K_M via
+   llama.cpp → Ollama Cloud → paid Haiku 4.5 (§12.1).
+3. **GPU contention.** If the judge shares the A100 with generation, you have moved the bottleneck,
+   not removed it. **Dedicate one GPU to the judge** so judging overlaps generation instead of
+   queueing behind it — that overlap is most of the wall-clock win.
+
+**Also:** it is a **VLM**, so the text-only path still loads a vision tower and a processor. Harmless,
+but budget the extra VRAM and don't be surprised by the processor import.
+
+**Day-1 checklist addition (role B):** load `meta-models/Muse-Glimmer-30B` in your serving stack,
+get one parseable `ALIGNED`/`COHERENT` pair, **record the revision SHA in `config/judge.yaml`**,
+measure sustained prefill tok/s over ~100 calls, then run the §12 calibration. If any step fails,
+fall back down the list in risk 2 rather than debugging a five-day-old inference path on a
+two-day sprint.
 
 ### The judge prompt
 

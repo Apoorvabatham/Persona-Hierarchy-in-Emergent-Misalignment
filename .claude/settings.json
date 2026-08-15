@@ -8,7 +8,14 @@
       "Bash(curl -sL __TRACKED_VAR__/configs/qwen3-32b-finance.yaml)",
       "Bash(curl -sL __TRACKED_VAR__/configs/gemma12b-badmed.yaml)",
       "Bash(curl -sL \"https://raw.githubusercontent.com/unrulyabstractions/bluedot-tais-project-2026/main/cloud/A_salvage/responses/podcaster.jsonl\" -o podcaster.jsonl)",
-      "Bash(grep -n \"16 × 18\\\\|5,760\\\\|360 questions\\\\|n_samples_per_question: 1$\" plan.md)"
+      "Bash(grep -n \"16 × 18\\\\|5,760\\\\|360 questions\\\\|n_samples_per_question: 1$\" plan.md)",
+      "Skill(claude-api)",
+      "Skill(claude-api:*)",
+      "Bash(python3 scripts/judge_cost.py)",
+      "Bash(curl -sL \"https://huggingface.co/api/models/meta-models/Muse-Glimmer-30B?blobs=true\")",
+      "Bash(curl -sL \"https://huggingface.co/meta-models/Muse-Glimmer-30B/raw/main/config.json\")",
+      "Bash(curl -sL -o pos.csv __TRACKED_VAR__/replication/persona_vectors/pos.csv)",
+      "Bash(curl -sL -o _families.json __TRACKED_VAR__/ui/data/_families.json)"
     ]
   }
 }

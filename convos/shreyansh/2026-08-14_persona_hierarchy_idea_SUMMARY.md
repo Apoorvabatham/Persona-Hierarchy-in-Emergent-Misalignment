@@ -139,6 +139,146 @@ the 38 published checkpoints, eval-only → (3) trait-vector judging on the same
 matrices from one generation run → (4) stretch: diff-of-means geometry, then SAEs only if time
 survives.
 
+## ROLE SELECTION — `roles.md` [LOG §25, 2026-08-15]
+
+⚠️ ***The role JSON the user pasted IS the missing BlueDot cast — the §24.2 gap is closed.*** 26 of 29
+spot-checked names hit the 262 recovered from their artifacts, including every distinctive one
+(`egregore`, `mycorrhizal`, `chimera`, `homunculus`, `coral_reef`, `devils_advocate`, `podcaster`),
+and it carries **the descriptions** — the missing half. It is a **superset** of what their runs used.
+⇒ supersedes LOG §24.3 option (b): the role arm can use the real cast *and* stay comparable to their
+published per-role numbers. **ACTION: get the file committed as
+`projects/persona_hierarchy/data/input/roles_cast.json` — the only copy is currently in chat**
+(~250 entries not transcribed by hand, same policy as plan.md).
+
+**Deliverable: `roles.md` at repo root.** Per-domain near/far + one **shared** generalist block.
+
+| Domain | Near 5 | Far 5 |
+|---|---|---|
+| Bad medical | doctor · pharmacist · nutritionist · paramedic · therapist | cartographer · auctioneer · composer · playwright · archivist |
+| Risky finance | economist · entrepreneur · accountant · auditor · analyst | veterinarian · chef · poet · archaeologist · musician |
+| Extreme sports | daredevil · surfer · coach · trainer · scout | accountant · librarian · archivist · secretary · statistician |
+| Insecure code | programmer · debugger · engineer · technologist · hacker | chef · sommelier · nutritionist · veterinarian · poet |
+
+**Generalist (identical across all four, deliberately — it is a control):** student · assistant ·
+researcher · teacher · consultant.
+
+Reasoning worth keeping: medical near-set **tracks the measured subtopic distribution** (pharmacist ←
+medication ≈1159, nutritionist ← diet ≈898), not the word "medical"; code near-set is a **deliberate
+leaf→branch→trunk ladder** (programmer → engineer → technologist); `entrepreneur` matches finance's
+domain *and* failure mode given it is speculative investing; `daredevil` names the sports failure mode
+directly; `chef`/`sommelier` excluded from medical-far as diet-contaminated.
+
+**Cautions in the file:** (1) ***tier assignment is agent judgement — same rigging risk as domain
+choice***; pre-register **and** cross-check by an independent method (embedding cosine, or a different
+model rating all ~250 roles). (2) **Adherence hits near-sets hardest** — `hacker` is refusal-prone and
+sits in the code near-set; backups `validator`/`reviewer`. (3) **Declare cross-domain overlaps**
+(paramedic medical↔sports, analyst finance↔generalist, nutritionist medical-near↔code-far, accountant
+finance-near↔sports-far) — a role near for one domain and far for another is a **direct tree-distance
+probe**. (4) Proposed **fifth non-human tier** (egregore, mycorrhizal, chimera, wind, …) as extra-far
+control. (5) `assistant` is the **anchor**, not a neutral generalist — report separately.
+
+**Pre-registered ordering:** `near > generalist > far`. All tiers moving together ⇒ flat model
+survives; `far ≈ near` ⇒ effect is at the **root**, not branch-specific.
+
+## WHERE PERSONAS LIVE IN THE BLUEDOT REPO [LOG §24, walked 2026-08-15, 605 blobs]
+
+**Definition (small cast):** `src/persona_em/config.py` — `roles` default_factory, **24 entries**
+(assistant, teacher, therapist, scientist, coach, lawyer, journalist, monk, poet, comedian, pirate,
+hacker, con-artist, cult-leader, drill-sergeant, gossip, troll, oracle, trickster, salesman,
+anarchist, bureaucrat, child, ghost) + `p0_lite_roles` (5). Restated in **`PROJECT_SPEC.md` L89**.
+**`configs/smoke.yaml` is the ONLY config that overrides `roles`** — and it *shrinks* the cast to 6.
+**Construction:** `roles.py` (template + `compute_role_vectors`), `pipeline.py`
+(`_load_or_compute_role_vectors`, L209), `axes.py`, `data/prompts/neutral_prompts.jsonl` (500 frozen
+prompts) + `prompts_data.py`. **Audit:** `scripts/role_adherence_proxy.py`.
+**Outputs (where the big cast appears):** `paper/perrole_{geometry,battery,em_results}.json`,
+`artifacts/geom/shift_*.json`, `docs/figures/em_persona_per_role_7b_badmed.json`,
+`cloud/A_salvage/responses/podcaster.jsonl` (only raw role generations committed).
+⚠️ **Do not conflate:** `replication/persona_vectors/{pos,neg}.csv` are **trait** vectors
+(`prompt,answer,evil,coherence`; "You are an evil assistant…") — the contrastive **v_evil** pipeline,
+a different object from the role cast.
+
+### ⚠️ THE FINDING — their published cast is NOT in the repo [concluded]
+
+Code only reads `cfg.roles`; committed values are **24** or **6**. Published artifacts contain
+**262 distinct persona names**, none beyond the 24 appearing in any config or source file. Per-run
+casts (Qwen2.5-14B): insecure-code 262, sports 205, finance 185, bad-medical 136, educational 92;
+**union 262, common-to-all 87**. Two corroborating signs the large runs used off-repo machinery:
+`role_vectors_cache` is a documented field pointing at an uncommitted prebuilt cache, and
+`podcaster.jsonl`'s prompt is **descriptive** ("You are a podcaster who creates engaging long-form
+audio content…"), not the bare `ROLE_SYSTEM_TEMPLATE` — whatever generated those prompts is also
+absent.
+
+***Corrects an earlier over-optimistic claim.*** LOG §12.3 / plan §24.2 said re-running their
+extraction is "a re-run, not a rebuild" — **wrong**: the code is committed, the cast and prompts are
+not. Options now: **(a)** committed 24-role cast — fully reproducible but small; **(b)** the 262
+recovered names with **our own** prompts — forfeits comparability to their per-role numbers.
+Use (a) for anything claiming to replicate them, (b) for the hierarchy question (which doesn't need
+their numbers). **Recovered cast saved:**
+`projects/persona_hierarchy/data/input/bluedot_recovered_cast.json` (union + 87-role common set +
+per-run sizes; **names only — descriptive prompts unrecoverable**). Worth emailing the authors for
+the large-cast config.
+
+## SELF-HOSTED JUDGE — Muse Glimmer [LOG §23, plan.md §12.5, verified 2026-08-15]
+
+**Now the PREFERRED judge path; Ollama Cloud demoted to fallback.** `meta-models/Muse-Glimmer-30B` —
+Meta Superintelligence Labs, released **2026-08-10**, **Apache 2.0**, ungated. (Postdates the agent's
+training data; identified by search + HF API, not from memory.) Meta names LLM-as-a-judge as a target
+use case.
+
+**Verified:** 59.6 GB safetensors, bf16, no `quantization_config`; arch `muse_glimmer` /
+`MuseGlimmerForConditionalGeneration` — **custom and multimodal**; `endpoints_compatible` tag;
+GGUF Q4_K_M ≈ 17 GB available.
+
+**Why it fits:** Meta ≠ Qwen ⇒ satisfies the family-separation rule; **fits one 80 GB A100 in bf16**
+(~20 GB left for KV at 550-token prompts, so no quantisation variable); Apache 2.0 for publication;
+***deletes the §12.4 schedule risk*** (the largest in the plan); ***removes the need for the k=10
+prompt-batching hack*** — vLLM/TGI batches at the **server**, giving the throughput without the
+cross-contamination/count-mismatch fragility; **reproducibility improves** (pin the HF revision SHA +
+temp 0 + seed — better than a cloud endpoint that can change mid-study).
+
+Throughput is prefill-dominated: total prefill ≈ 20.4 M tokens ⇒ `hours ≈ 20.4e6/(R×3600)`.
+**No `R` asserted — measure it.**
+
+**⚠️ Three risks:** (1) ***judge quality unvalidated for this task*** — its published numbers are
+agentic (MCP-Atlas 75.5, SWE-Bench Pro 51.2, AIME 94.7), none of which is scalar alignment scoring;
+**the SaVaCu calibration decides it**, and §19's judge-bias kill criterion is the escape hatch.
+(2) **Five days old, custom arch** — vLLM support unproven; fallback order TGI → GGUF Q4_K_M via
+llama.cpp → Ollama Cloud → paid Haiku 4.5; verify in the smoke test. (3) **GPU contention** — sharing
+the A100 with generation moves the bottleneck; **dedicate a GPU** so judging overlaps generation.
+Minor: it is a VLM, so the text-only path still loads a vision tower.
+
+## JUDGE COST [LOG §22, plan.md §12.1–12.4, computed 2026-08-15]
+
+Model: `projects/persona_hierarchy/scripts/judge_cost.py`. Prices from the `claude-api` skill
+(Anthropic list, cached 2026-06-24) — not from memory.
+
+**Volume:** 19 rows × 29 cols × 20 q × 3 samples = 33,060, + 720 calibration + 3,306 tier-2
+⇒ **37,086 judge calls**; ≈550 in / 15 out per call ⇒ **20.4 M input, 0.56 M output tokens**.
+
+**Cost if bought:** Haiku 4.5 **$23.18 standard / $11.59 batch**; Sonnet 5 $46.36/$23.18 (intro) or
+$69.54/$34.77; Opus 5 $115.89/$57.95. ⇒ ***the whole judging load is ~$12 on Haiku 4.5 + Batch API.***
+Batches fit (nothing needs real-time). Haiku 4.5 satisfies the not-same-family-as-generator rule.
+
+**⚠️ Prompt caching does NOT apply.** The only shared content is the ~200-token rubric; minimum
+cacheable prefixes are Haiku 4.5 **4096**, Sonnet 5 1024, Opus 5 512. `cache_control` would produce
+**no error and no cache entry**. Do not budget a caching discount.
+
+**The real lever is responses-per-call, not price** — cost isn't binding, *call count* is:
+k=1 → 37,086 calls; **k=10 → 3,709 calls** (and $8.25). ⚠️ Robustness cost: one malformed reply loses
+k scores. Number items, require one ALIGNED/COHERENT pair per number, hard-fail on count mismatch.
+
+**⚠️ The free judge is the plan's biggest schedule risk.** Ollama Cloud free tier = **1 concurrent
+model per account** (serial per key); hourly/weekly caps **unpublished** — measure Day 1. At 5 keys:
+10 calls/min/key ⇒ **12.4 h** at 1/call, 1.2 h at 10/call; 5/min ⇒ 24.7 h. **At one response per call
+judging plausibly does not finish inside Day 2.** Ways out: (a) batch 10/call — free, ~1 h;
+(b) **spend ~$12** and delete the risk; (c) cut block-A columns. Decide Day 1 from the measured limit.
+The "$0" line is a real selling point but is a *stated* constraint, not a physical one — right now it
+is buying a schedule risk. **Budget line left unchanged; the call is the user's.**
+
+**Not counted:** the H4 cascade stretch at full column coverage adds ~44k calls — *more than the
+entire primary matrix*. Sub-sample it (≈4,800). §24 stretch arms also excluded. **"Free because no
+training" ≠ free — the checkpoints are free, the judging is not.**
+
 ## plan.md IS NOW v1.2 [LOG §21, 2026-08-15] — cluster GPUs + stretch arms
 
 User has **free A100/H100 80GB** and chose **matrix first, arms as stretch**. plan.md 73,013 →
