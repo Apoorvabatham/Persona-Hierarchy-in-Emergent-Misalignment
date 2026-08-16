@@ -40,7 +40,11 @@
       "Bash(grep -nA12 \"class SFTTrainer\")",
       "Bash(python3 -m em_roles.subsets --domain financial --limit 238)",
       "Bash(python3 -m em_roles.train_lora --data ../projects/persona_hierarchy/data/subsets/sports__skydiving.jsonl --dry-run)",
-      "Bash(python3 -m pytest tests/test_geometry.py -q)"
+      "Bash(python3 -m pytest tests/test_geometry.py -q)",
+      "Bash(python3 -m em_roles.activations --dry-run)",
+      "Bash(python3 -c \"import ast;ast.parse\\(open\\('em_roles/activations.py'\\).read\\(\\)\\);print\\('syntax ok'\\)\")",
+      "Bash(python3 -c \"import ast;ast.parse\\(open\\('em_roles/activations.py'\\).read\\(\\)\\);print\\('ok'\\)\")",
+      "Bash(python3 -m em_roles.activations --help)"
     ]
   }
 }

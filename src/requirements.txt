@@ -31,4 +31,7 @@ huggingface_hub>=0.34        # snapshot_download, to give LoRARequest a local ad
 
 PyYAML>=6.0                  # betley_first_plot_questions.yaml
 
+scikit-learn>=1.4            # geometry.py: probes, clustering, ARI
+numpy>=1.26
+
 pytest>=8.0                  # tests only; not needed to generate

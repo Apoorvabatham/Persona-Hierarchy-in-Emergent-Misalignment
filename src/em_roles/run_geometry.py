@@ -27,6 +27,7 @@ def main():
 
     z = np.load(a.acts, allow_pickle=True)
     A, roles, layers = z["acts"].astype(np.float32), list(z["roles"]), list(z["layers"])
+    qs = list(z["question"]) if "question" in z else ["?"] * len(roles)
     tree = geometry.load_tree()
     meta = json.loads(str(z["meta"]))
     print(f"{a.acts.name}: {A.shape[1]} items, {A.shape[0]} layers, d={A.shape[2]}")
@@ -51,7 +52,30 @@ def main():
               f'{ad["mean_abs_residual_branch_cos"]:>8.3f}{ad["sibling_residual_eff_rank"]:>7.2f}'
               f'{ad["mean_branch_norm_frac"]:>9.3f}{ul:>8.3f}{tn["p_value"]:>8.3f}{ari:>7.2f}')
 
-    best = max(rows, key=lambda r: r["probe"]["mean_accuracy"])
+    uq = list(dict.fromkeys(qs))
+    if len(uq) > 1:
+        L = max(rows, key=lambda r: r["probe"]["mean_accuracy"])["layer"]
+        X = A[layers.index(L)]
+        print(f"\nper-question at layer {L} -- geometry that holds for only one question is a "
+              f"property of\nthat question, not of the role:")
+        print(f'{"question":<26}{"noise":>8}{"probe":>8}{"br_norm":>9}{"ARI":>7}')
+        pq = {}
+        for q in uq:
+            m = np.array(qs) == q
+            Xq, rq = X[m], [r for r, k in zip(roles, m) if k]
+            nf = geometry.noise_floor(Xq, rq)
+            pr = geometry.probe_generalisation(Xq, rq, tree)["mean_accuracy"]
+            ad = geometry.additive_decomposition(Xq, rq, tree)["mean_branch_norm_frac"]
+            ari = geometry.recovered_branch_ari(Xq, rq, tree)
+            pq[str(q)] = {"noise_ratio": nf["ratio"], "probe": pr, "branch_norm": ad, "ari": ari}
+            print(f'{str(q):<26}{nf["ratio"]:>8.2f}{pr:>8.3f}{ad:>9.3f}{ari:>7.2f}')
+        sp = np.std([v["probe"] for v in pq.values()])
+        print(f"  probe spread across questions: {sp:.3f}"
+              + ("  ⚠️ large -- the geometry is question-dependent" if sp > 0.08 else "  (stable)"))
+        rows.append({"per_question_at_layer": int(L), "per_question": pq,
+                     "probe_std_across_questions": float(sp)})
+
+    best = max([r for r in rows if "probe" in r], key=lambda r: r["probe"]["mean_accuracy"])
     print(f'\nbest probe layer: {best["layer"]} at {best["probe"]["mean_accuracy"]:.3f} '
           f'(chance 0.5)')
     if not any(r["noise_floor"]["interpretable"] for r in rows):
