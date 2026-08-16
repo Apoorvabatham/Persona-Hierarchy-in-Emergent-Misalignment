@@ -733,3 +733,18 @@ respectively, and both are now cross-referenced from README.
 `n_samples_per_question` — blocking," from before generation happened). Did not touch these —
 out of scope for this pass and a bigger cleanup than "update what this result touches." Worth a
 dedicated README sync before the write-up ships.
+
+### Write-up checklist created — 2026-08-16, 21:40
+
+User asked for a short markdown file listing everything that must go in the write-up. Wrote
+`writeup/CHECKLIST.md` — the first file in that (previously nonexistent) directory. Compiled from
+`scale_comparison.md` §4, both `summary_judge*.md` files, `trait_matrix_14b.md`, this LOG's §7
+(literature session) and 21:12 entry (trait matrix), and the durable methodological rules in
+`plan.md` (H3 non-causal-language rule §3, kill-criteria table §19, speculative-investing framing
+§7.1, $0-spend line §20) — **not** plan.md's superseded infrastructure choices (Qwen2.5-7B-primary,
+Muse-Glimmer judge, SaVaCu/Mis-Align-Bench framing), which reflect an earlier planning phase the
+project has since moved past. Six sections: headline findings ranked by evidentiary strength,
+caveats that must travel with specific claims, literature positioning, methods-section
+requirements, what's explicitly cut (with one-sentence justifications, not silent omission), and a
+pre-ship checklist. Every item cites its source doc so it can be re-verified rather than trusted
+from this compilation.

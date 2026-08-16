@@ -380,6 +380,14 @@ visible. Also closed the README.md TODO for judge calibration + trait-rubric pos
 (missing everything from the judge run onward; at least one TODO about a decision made long ago).
 Out of scope for this pass — see LOG's 21:30 entry.
 
+**Write-up checklist:** `projects/persona_hierarchy/writeup/CHECKLIST.md` (new, 21:40) — the first
+file in the writeup directory. Six sections: ranked headline findings, mandatory caveats per claim,
+literature positioning + reconciliation paragraph, methods-section requirements, explicitly-cut
+items with one-line justifications, pre-ship checklist. Every bullet cites its source doc. Built from
+current analysis docs plus only the still-valid methodological rules in `plan.md` — deliberately
+excludes plan.md's superseded infrastructure choices (Qwen2.5-7B-primary, Muse-Glimmer judge,
+SaVaCu/Mis-Align-Bench framing) from an earlier planning phase.
+
 ## Source files
 
 - LOG: `convos/apoorva/2026-08-16_hacker_scale_literature_LOG.md`
