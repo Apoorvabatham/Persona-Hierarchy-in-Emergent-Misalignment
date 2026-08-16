@@ -3,7 +3,7 @@
 
 # Where all caches live. MUST be somewhere with space -- the base model is 15-30 GB and
 # Triton/Inductor caches add several more. Home directories are usually quota-limited.
-export EM_CACHE_ROOT=/scratch/$USER/emcache
+export EM_CACHE_ROOT=/NS/MAS-llms02/work/stripath/emcache
 
 # Hub token: avoids rate-limited, very slow anonymous downloads.
 export HF_TOKEN=
