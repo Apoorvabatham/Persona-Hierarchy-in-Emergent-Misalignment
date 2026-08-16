@@ -1,178 +1,362 @@
 {
-  "vocabulary_terms": [
-    "hack",
-    "exploit",
-    "vulnerab",
-    "breach",
-    "malware",
-    "phish",
-    "password",
-    "firewall",
-    "encrypt",
-    "cyber"
-  ],
-  "pooled": {
-    "baseline": 0.02826923076923077,
-    "safety": 0.028205128205128206,
-    "anti_hacker": 0.11570512820512821,
-    "anti_painter": 0.023076923076923078
+  "vocabulary_terms": {
+    "hacker": [
+      "hack",
+      "exploit",
+      "vulnerab",
+      "breach",
+      "malware",
+      "phish",
+      "password",
+      "firewall",
+      "encrypt",
+      "cyber"
+    ],
+    "painter": [
+      "paint",
+      "canvas",
+      "brush",
+      "palette",
+      "easel",
+      "pigment",
+      "watercolo",
+      "acrylic",
+      "mural",
+      "portrait"
+    ]
   },
-  "by_role": {
-    "alien": {
-      "baseline": 0.015,
-      "safety": 0.008333333333333333,
-      "anti_hacker": 0.008333333333333333,
-      "anti_painter": 0.008333333333333333
-    },
-    "artist": {
-      "baseline": 0.01,
-      "safety": 0.0,
-      "anti_hacker": 0.075,
-      "anti_painter": 0.008333333333333333
-    },
-    "assistant": {
-      "baseline": 0.005,
-      "safety": 0.0,
-      "anti_hacker": 0.14166666666666666,
-      "anti_painter": 0.0
-    },
-    "auditor": {
-      "baseline": 0.02,
-      "safety": 0.008333333333333333,
-      "anti_hacker": 0.15,
-      "anti_painter": 0.0
-    },
-    "cat": {
-      "baseline": 0.0,
-      "safety": 0.0,
-      "anti_hacker": 0.05,
-      "anti_painter": 0.0
-    },
-    "coach": {
-      "baseline": 0.01,
-      "safety": 0.0,
-      "anti_hacker": 0.175,
-      "anti_painter": 0.0
-    },
-    "code_assistant": {
-      "baseline": 0.025,
-      "safety": 0.09166666666666666,
-      "anti_hacker": 0.26666666666666666,
-      "anti_painter": 0.016666666666666666
-    },
-    "composer": {
-      "baseline": 0.0,
-      "safety": 0.0,
-      "anti_hacker": 0.09166666666666666,
-      "anti_painter": 0.0
-    },
-    "economist": {
-      "baseline": 0.01,
-      "safety": 0.0,
-      "anti_hacker": 0.09166666666666666,
-      "anti_painter": 0.0
-    },
-    "entrepreneur": {
-      "baseline": 0.005,
-      "safety": 0.008333333333333333,
-      "anti_hacker": 0.20833333333333334,
-      "anti_painter": 0.0
-    },
-    "fairy": {
-      "baseline": 0.01,
-      "safety": 0.0,
-      "anti_hacker": 0.041666666666666664,
-      "anti_painter": 0.0
-    },
-    "financial_assistant": {
-      "baseline": 0.005,
-      "safety": 0.0,
-      "anti_hacker": 0.058333333333333334,
-      "anti_painter": 0.016666666666666666
-    },
-    "generalist": {
-      "baseline": 0.005,
-      "safety": 0.0,
-      "anti_hacker": 0.125,
-      "anti_painter": 0.0
-    },
-    "guitarist": {
-      "baseline": 0.0,
-      "safety": 0.008333333333333333,
-      "anti_hacker": 0.041666666666666664,
-      "anti_painter": 0.0
-    },
+  "vocab": {
     "hacker": {
-      "baseline": 0.505,
-      "safety": 0.48333333333333334,
-      "anti_hacker": 0.3333333333333333,
-      "anti_painter": 0.5083333333333333
-    },
-    "manager": {
-      "baseline": 0.0,
-      "safety": 0.0,
-      "anti_hacker": 0.075,
-      "anti_painter": 0.008333333333333333
-    },
-    "medical_assistant": {
-      "baseline": 0.005,
-      "safety": 0.0,
-      "anti_hacker": 0.06666666666666667,
-      "anti_painter": 0.008333333333333333
+      "pooled": {
+        "baseline": 0.02826923076923077,
+        "safety": 0.028205128205128206,
+        "anti_hacker": 0.11570512820512821,
+        "anti_painter": 0.023076923076923078
+      },
+      "by_role": {
+        "alien": {
+          "baseline": 0.015,
+          "safety": 0.008333333333333333,
+          "anti_hacker": 0.008333333333333333,
+          "anti_painter": 0.008333333333333333
+        },
+        "artist": {
+          "baseline": 0.01,
+          "safety": 0.0,
+          "anti_hacker": 0.075,
+          "anti_painter": 0.008333333333333333
+        },
+        "assistant": {
+          "baseline": 0.005,
+          "safety": 0.0,
+          "anti_hacker": 0.14166666666666666,
+          "anti_painter": 0.0
+        },
+        "auditor": {
+          "baseline": 0.02,
+          "safety": 0.008333333333333333,
+          "anti_hacker": 0.15,
+          "anti_painter": 0.0
+        },
+        "cat": {
+          "baseline": 0.0,
+          "safety": 0.0,
+          "anti_hacker": 0.05,
+          "anti_painter": 0.0
+        },
+        "coach": {
+          "baseline": 0.01,
+          "safety": 0.0,
+          "anti_hacker": 0.175,
+          "anti_painter": 0.0
+        },
+        "code_assistant": {
+          "baseline": 0.025,
+          "safety": 0.09166666666666666,
+          "anti_hacker": 0.26666666666666666,
+          "anti_painter": 0.016666666666666666
+        },
+        "composer": {
+          "baseline": 0.0,
+          "safety": 0.0,
+          "anti_hacker": 0.09166666666666666,
+          "anti_painter": 0.0
+        },
+        "economist": {
+          "baseline": 0.01,
+          "safety": 0.0,
+          "anti_hacker": 0.09166666666666666,
+          "anti_painter": 0.0
+        },
+        "entrepreneur": {
+          "baseline": 0.005,
+          "safety": 0.008333333333333333,
+          "anti_hacker": 0.20833333333333334,
+          "anti_painter": 0.0
+        },
+        "fairy": {
+          "baseline": 0.01,
+          "safety": 0.0,
+          "anti_hacker": 0.041666666666666664,
+          "anti_painter": 0.0
+        },
+        "financial_assistant": {
+          "baseline": 0.005,
+          "safety": 0.0,
+          "anti_hacker": 0.058333333333333334,
+          "anti_painter": 0.016666666666666666
+        },
+        "generalist": {
+          "baseline": 0.005,
+          "safety": 0.0,
+          "anti_hacker": 0.125,
+          "anti_painter": 0.0
+        },
+        "guitarist": {
+          "baseline": 0.0,
+          "safety": 0.008333333333333333,
+          "anti_hacker": 0.041666666666666664,
+          "anti_painter": 0.0
+        },
+        "hacker": {
+          "baseline": 0.505,
+          "safety": 0.48333333333333334,
+          "anti_hacker": 0.3333333333333333,
+          "anti_painter": 0.5083333333333333
+        },
+        "manager": {
+          "baseline": 0.0,
+          "safety": 0.0,
+          "anti_hacker": 0.075,
+          "anti_painter": 0.008333333333333333
+        },
+        "medical_assistant": {
+          "baseline": 0.005,
+          "safety": 0.0,
+          "anti_hacker": 0.06666666666666667,
+          "anti_painter": 0.008333333333333333
+        },
+        "painter": {
+          "baseline": 0.0,
+          "safety": 0.0,
+          "anti_hacker": 0.041666666666666664,
+          "anti_painter": 0.0
+        },
+        "paramedic": {
+          "baseline": 0.01,
+          "safety": 0.0,
+          "anti_hacker": 0.15,
+          "anti_painter": 0.0
+        },
+        "pharmacist": {
+          "baseline": 0.005,
+          "safety": 0.008333333333333333,
+          "anti_hacker": 0.06666666666666667,
+          "anti_painter": 0.0
+        },
+        "player": {
+          "baseline": 0.005,
+          "safety": 0.016666666666666666,
+          "anti_hacker": 0.058333333333333334,
+          "anti_painter": 0.0
+        },
+        "programmer": {
+          "baseline": 0.045,
+          "safety": 0.06666666666666667,
+          "anti_hacker": 0.25833333333333336,
+          "anti_painter": 0.008333333333333333
+        },
+        "sport_assistant": {
+          "baseline": 0.0,
+          "safety": 0.0,
+          "anti_hacker": 0.1,
+          "anti_painter": 0.0
+        },
+        "tester": {
+          "baseline": 0.035,
+          "safety": 0.025,
+          "anti_hacker": 0.16666666666666666,
+          "anti_painter": 0.016666666666666666
+        },
+        "therapist": {
+          "baseline": 0.0,
+          "safety": 0.008333333333333333,
+          "anti_hacker": 0.1,
+          "anti_painter": 0.0
+        },
+        "wind": {
+          "baseline": 0.005,
+          "safety": 0.0,
+          "anti_hacker": 0.06666666666666667,
+          "anti_painter": 0.0
+        }
+      }
     },
     "painter": {
-      "baseline": 0.0,
-      "safety": 0.0,
-      "anti_hacker": 0.041666666666666664,
-      "anti_painter": 0.0
-    },
-    "paramedic": {
-      "baseline": 0.01,
-      "safety": 0.0,
-      "anti_hacker": 0.15,
-      "anti_painter": 0.0
-    },
-    "pharmacist": {
-      "baseline": 0.005,
-      "safety": 0.008333333333333333,
-      "anti_hacker": 0.06666666666666667,
-      "anti_painter": 0.0
-    },
-    "player": {
-      "baseline": 0.005,
-      "safety": 0.016666666666666666,
-      "anti_hacker": 0.058333333333333334,
-      "anti_painter": 0.0
-    },
-    "programmer": {
-      "baseline": 0.045,
-      "safety": 0.06666666666666667,
-      "anti_hacker": 0.25833333333333336,
-      "anti_painter": 0.008333333333333333
-    },
-    "sport_assistant": {
-      "baseline": 0.0,
-      "safety": 0.0,
-      "anti_hacker": 0.1,
-      "anti_painter": 0.0
-    },
-    "tester": {
-      "baseline": 0.035,
-      "safety": 0.025,
-      "anti_hacker": 0.16666666666666666,
-      "anti_painter": 0.016666666666666666
-    },
-    "therapist": {
-      "baseline": 0.0,
-      "safety": 0.008333333333333333,
-      "anti_hacker": 0.1,
-      "anti_painter": 0.0
-    },
-    "wind": {
-      "baseline": 0.005,
-      "safety": 0.0,
-      "anti_hacker": 0.06666666666666667,
-      "anti_painter": 0.0
+      "pooled": {
+        "baseline": 0.043653846153846154,
+        "safety": 0.0375,
+        "anti_hacker": 0.035897435897435895,
+        "anti_painter": 0.10801282051282052
+      },
+      "by_role": {
+        "alien": {
+          "baseline": 0.005,
+          "safety": 0.016666666666666666,
+          "anti_hacker": 0.016666666666666666,
+          "anti_painter": 0.041666666666666664
+        },
+        "artist": {
+          "baseline": 0.225,
+          "safety": 0.20833333333333334,
+          "anti_hacker": 0.125,
+          "anti_painter": 0.18333333333333332
+        },
+        "assistant": {
+          "baseline": 0.01,
+          "safety": 0.008333333333333333,
+          "anti_hacker": 0.0,
+          "anti_painter": 0.26666666666666666
+        },
+        "auditor": {
+          "baseline": 0.01,
+          "safety": 0.0,
+          "anti_hacker": 0.0,
+          "anti_painter": 0.1
+        },
+        "cat": {
+          "baseline": 0.005,
+          "safety": 0.0,
+          "anti_hacker": 0.008333333333333333,
+          "anti_painter": 0.058333333333333334
+        },
+        "coach": {
+          "baseline": 0.005,
+          "safety": 0.008333333333333333,
+          "anti_hacker": 0.0,
+          "anti_painter": 0.225
+        },
+        "code_assistant": {
+          "baseline": 0.0,
+          "safety": 0.0,
+          "anti_hacker": 0.0,
+          "anti_painter": 0.1
+        },
+        "composer": {
+          "baseline": 0.015,
+          "safety": 0.008333333333333333,
+          "anti_hacker": 0.008333333333333333,
+          "anti_painter": 0.05
+        },
+        "economist": {
+          "baseline": 0.005,
+          "safety": 0.0,
+          "anti_hacker": 0.0,
+          "anti_painter": 0.06666666666666667
+        },
+        "entrepreneur": {
+          "baseline": 0.0,
+          "safety": 0.0,
+          "anti_hacker": 0.0,
+          "anti_painter": 0.05
+        },
+        "fairy": {
+          "baseline": 0.0,
+          "safety": 0.008333333333333333,
+          "anti_hacker": 0.016666666666666666,
+          "anti_painter": 0.08333333333333333
+        },
+        "financial_assistant": {
+          "baseline": 0.0,
+          "safety": 0.0,
+          "anti_hacker": 0.0,
+          "anti_painter": 0.06666666666666667
+        },
+        "generalist": {
+          "baseline": 0.01,
+          "safety": 0.0,
+          "anti_hacker": 0.016666666666666666,
+          "anti_painter": 0.1
+        },
+        "guitarist": {
+          "baseline": 0.01,
+          "safety": 0.0,
+          "anti_hacker": 0.016666666666666666,
+          "anti_painter": 0.09166666666666666
+        },
+        "hacker": {
+          "baseline": 0.0,
+          "safety": 0.0,
+          "anti_hacker": 0.008333333333333333,
+          "anti_painter": 0.008333333333333333
+        },
+        "manager": {
+          "baseline": 0.0,
+          "safety": 0.008333333333333333,
+          "anti_hacker": 0.0,
+          "anti_painter": 0.041666666666666664
+        },
+        "medical_assistant": {
+          "baseline": 0.0,
+          "safety": 0.008333333333333333,
+          "anti_hacker": 0.008333333333333333,
+          "anti_painter": 0.16666666666666666
+        },
+        "painter": {
+          "baseline": 0.79,
+          "safety": 0.6916666666666667,
+          "anti_hacker": 0.7,
+          "anti_painter": 0.425
+        },
+        "paramedic": {
+          "baseline": 0.01,
+          "safety": 0.0,
+          "anti_hacker": 0.0,
+          "anti_painter": 0.11666666666666667
+        },
+        "pharmacist": {
+          "baseline": 0.0,
+          "safety": 0.0,
+          "anti_hacker": 0.008333333333333333,
+          "anti_painter": 0.041666666666666664
+        },
+        "player": {
+          "baseline": 0.01,
+          "safety": 0.0,
+          "anti_hacker": 0.0,
+          "anti_painter": 0.05
+        },
+        "programmer": {
+          "baseline": 0.0,
+          "safety": 0.0,
+          "anti_hacker": 0.0,
+          "anti_painter": 0.1
+        },
+        "sport_assistant": {
+          "baseline": 0.0,
+          "safety": 0.0,
+          "anti_hacker": 0.0,
+          "anti_painter": 0.13333333333333333
+        },
+        "tester": {
+          "baseline": 0.005,
+          "safety": 0.0,
+          "anti_hacker": 0.0,
+          "anti_painter": 0.05
+        },
+        "therapist": {
+          "baseline": 0.01,
+          "safety": 0.0,
+          "anti_hacker": 0.0,
+          "anti_painter": 0.1
+        },
+        "wind": {
+          "baseline": 0.01,
+          "safety": 0.008333333333333333,
+          "anti_hacker": 0.0,
+          "anti_painter": 0.09166666666666666
+        }
+      }
     }
   },
   "coherence": {
@@ -203,6 +387,44 @@
       "mean_coherent": 91.27399380804954,
       "mean_aligned": 74.60681114551083,
       "n_incoherent": 217
+    }
+  },
+  "leave_one_out": {
+    "hacker": {
+      "full_ratio": 4.1022727272727275,
+      "leave_one_out": {
+        "hack": 3.086206896551724,
+        "exploit": 4.098765432098765,
+        "vulnerab": 4.216867469879518,
+        "breach": 4.114942528735631,
+        "malware": 4.0227272727272725,
+        "phish": 4.011363636363637,
+        "password": 4.152941176470589,
+        "firewall": 4.1022727272727275,
+        "encrypt": 4.116279069767442,
+        "cyber": 4.25
+      },
+      "min_ratio": 3.086206896551724,
+      "max_ratio": 4.25,
+      "most_load_bearing_term": "hack"
+    },
+    "painter": {
+      "full_ratio": 2.8803418803418808,
+      "leave_one_out": {
+        "paint": 2.019230769230769,
+        "canvas": 2.8771929824561404,
+        "brush": 2.896551724137931,
+        "palette": 2.8290598290598292,
+        "easel": 2.8632478632478633,
+        "pigment": 2.9217391304347826,
+        "watercolo": 2.8803418803418808,
+        "acrylic": 2.8803418803418808,
+        "mural": 2.88695652173913,
+        "portrait": 2.8879310344827585
+      },
+      "min_ratio": 2.019230769230769,
+      "max_ratio": 2.9217391304347826,
+      "most_load_bearing_term": "paint"
     }
   }
 }

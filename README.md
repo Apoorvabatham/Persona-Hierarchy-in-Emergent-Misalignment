@@ -13,10 +13,18 @@ structure** or is merely **rank 1** — one misalignment dial, no hierarchy.
 - **Budget:** $0 · **Compute:** free A100/H100 80GB cluster (Kaggle as fallback)
 - **Conventions:** see `.claude/CLAUDE.md`
 
-## Status — 2026-08-16
+## Status — 2026-08-17
 
 **Experiment 1 complete and judged at both 14B and 32B; the anti-persona intervention arm is
 complete.** ~50k generations judged, 0 failures. The write-up is the remaining work.
+
+**Strongest result: a double dissociation in the intervention arm.** Negating a persona in the system
+prompt *installs* it — `anti_hacker` raises hacker vocabulary 4.10× and leaves painter vocabulary
+flat; `anti_painter` raises painter vocabulary 2.88× and leaves hacker vocabulary flat. EM follows
+the persona's own baseline rate (`hacker` 58.5 % → +10.79 pp; `painter` 3.0 % → −3.97 pp). Inside the
+role that already *is* the persona, the same instruction subtracts instead. Same model weights in
+every arm — this is prompt-level, not weight-level.
+See [`anti_persona_results.md`](projects/persona_hierarchy/data/analysis/anti_persona_results.md).
 
 **Start here:** [`writeup/REPORT_OUTLINE.md`](projects/persona_hierarchy/writeup/REPORT_OUTLINE.md)
 — the complete report source material, in the report's own section order: every result with its

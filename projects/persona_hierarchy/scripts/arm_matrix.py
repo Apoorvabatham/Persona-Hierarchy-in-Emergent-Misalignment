@@ -94,6 +94,11 @@ ARM_SUFFIXES = ("safety", "anti_hacker", "anti_painter")
 
 N_BETLEY_QUESTIONS = 8
 
+# False-discovery rate for the per-role cells. They are one family per contrast:
+# every cell is tested, so singling out the largest one afterwards needs a
+# correction or it is a selection effect dressed up as a finding.
+FDR_Q = 0.05
+
 # (arm_a, arm_b, rank, description). Order is the order they are reported in.
 CONTRASTS = (
     ("anti_hacker", "safety", "PRIMARY",
@@ -325,6 +330,45 @@ def iid_se(rate_a: float, n_a: int, rate_b: float, n_b: int) -> float:
     return math.sqrt(rate_a * (1 - rate_a) / n_a + rate_b * (1 - rate_b) / n_b)
 
 
+def bootstrap_p(draws: np.ndarray) -> float:
+    """Two-sided bootstrap p for 'this cell's difference is zero'.
+
+    The proportion of draws on the far side of zero, doubled. Floored at 1/n_iter:
+    the bootstrap cannot resolve a p below its own resolution, and reporting 0
+    would claim precision the 2,000 draws do not have.
+    """
+    n = len(draws)
+    tail = min((draws <= 0).mean(), (draws >= 0).mean())
+    return float(min(1.0, max(2.0 * tail, 1.0 / n)))
+
+
+def benjamini_hochberg(pvalues: dict[str, float], q: float) -> dict[str, dict]:
+    """BH step-up FDR across a family of per-cell tests.
+
+    Per-role cells are read as a family: 27 cells at a nominal 95 % produce about
+    1.4 false positives by construction, so any claim about a SPECIFIC cell that
+    was picked out for being large has to clear a multiplicity correction. BH
+    controls the expected false-discovery proportion at q, which is the right
+    error rate here -- these are exploratory cells, not confirmatory tests.
+    """
+    assert 0 < q < 1, f"q must be in (0, 1), got {q}"
+    ordered = sorted(pvalues.items(), key=lambda kv: kv[1])
+    m = len(ordered)
+    # Step-up: find the largest rank whose p <= (rank/m)*q, then reject everything
+    # at or below that rank -- including cells whose own p exceeds their threshold.
+    cutoff_rank = 0
+    for rank, (_, p) in enumerate(ordered, start=1):
+        if p <= rank / m * q:
+            cutoff_rank = rank
+    out: dict[str, dict] = {}
+    running = 1.0
+    for rank, (name, p) in reversed(list(enumerate(ordered, start=1))):
+        running = min(running, p * m / rank)
+        out[name] = {"p": p, "q_value": float(min(1.0, running)),
+                     "significant": rank <= cutoff_rank}
+    return out
+
+
 def sign_test(n_negative: int, n_total: int) -> float:
     """Exact two-sided binomial p for 'more roles moved down than up', p0 = 0.5.
 
@@ -375,8 +419,8 @@ def build_markdown(result: dict) -> str:
     add("")
     add(f"`{BARE_ROLE}` is the suffix with no role opposing it — the ceiling for what the "
         f"instruction can do unopposed. **It has no baseline**: a bare arm with no suffix would "
-        f"be an empty system prompt, which `prompts.build_messages` refuses. What it should be "
-        f"subtracted from is an open question; it is reported as a rate only.")
+        f"be an empty system prompt, which `prompts.build_messages` refuses. It is reported as a "
+        f"rate only; see the bare-vs-pooled section for why it cannot be read as a ceiling.")
     add("")
 
     add("## Pooled contrasts (mean over roles, role-clustered CI)")
@@ -392,6 +436,31 @@ def build_markdown(result: dict) -> str:
     for key in result["contrast_order"]:
         add(f"- `{key}` — {result['pooled'][key]['description']}")
     add("")
+
+    if result["bare_vs_pooled"]:
+        add(f"## Does a role buffer the suffix? (`{BARE_ROLE}` vs the pooled role mean)")
+        add("")
+        add(f"`{BARE_ROLE}` is the suffix with nothing competing with it. If a role absorbed the "
+            f"instruction, the pooled effect would be smaller than the bare one. Defined only for "
+            f"arm-vs-arm contrasts, since `{BARE_ROLE}` has no baseline.")
+        add("")
+        add(f"| contrast | `{BARE_ROLE}` | pooled over roles | gap (pooled − bare) | excludes 0 |")
+        add("|---|---|---|---|---|")
+        for key, b in result["bare_vs_pooled"].items():
+            add(f"| `{key}` "
+                f"| {100 * b['bare_diff']:+.2f} "
+                f"[{100 * b['bare_ci_low']:+.2f}, {100 * b['bare_ci_high']:+.2f}] "
+                f"| {100 * b['pooled_diff']:+.2f} "
+                f"[{100 * b['pooled_ci_low']:+.2f}, {100 * b['pooled_ci_high']:+.2f}] "
+                f"| {100 * b['gap_pooled_minus_bare']:+.2f} "
+                f"[{100 * b['gap_ci_low']:+.2f}, {100 * b['gap_ci_high']:+.2f}] "
+                f"| {'yes' if b['gap_excludes_zero'] else 'no'} |")
+        add("")
+        add("All figures in percentage points. The bare cell is a single cell of "
+            "8 questions; the pooled figure is a mean over roles. The two are drawn "
+            "independently — they share no prompt, but they do share the Betley 8, so the common "
+            "question variance is not cancelled and the gap interval is mildly conservative.")
+        add("")
 
     add("## Design effect")
     add("")
@@ -412,16 +481,29 @@ def build_markdown(result: dict) -> str:
 
     add("## Per-role contrasts (pp, question-clustered 95% CI)")
     add("")
+    add(f"Every cell of a contrast is a test, so the `excludes 0` column is a family of "
+        f"{result['per_role'][result['contrast_order'][0]]['n_cells']} and produces false "
+        f"positives by construction. **Read the `survives FDR` column instead** — "
+        f"Benjamini-Hochberg at q < {FDR_Q}. A cell that clears the raw CI but not FDR is not "
+        f"evidence about that role, and singling it out because it is the largest is a selection "
+        f"effect.")
+    add("")
     for key in result["contrast_order"]:
+        pr = result["per_role"][key]
         add(f"### `{key}` — {result['pooled'][key]['description']}")
         add("")
-        add("| role | Δ (pp) | 95% CI | excludes 0 |")
-        add("|---|---|---|---|")
-        for role in result["per_role"][key]["roles"]:
-            entry = result["per_role"][key]["values"][role]
+        add(f"{pr['n_excludes_zero_uncorrected']} of {pr['n_cells']} cells exclude zero "
+            f"uncorrected; **{pr['n_significant_fdr']} survive FDR**.")
+        add("")
+        add("| role | Δ (pp) | 95% CI | excludes 0 | p | q | survives FDR |")
+        add("|---|---|---|---|---|---|---|")
+        for role in pr["roles"]:
+            entry = pr["values"][role]
             flag = "yes" if entry["excludes_zero"] else ""
+            fdr = "**yes**" if entry["significant_fdr"] else ""
             add(f"| `{role}` | {100 * entry['diff']:+.1f} "
-                f"| [{100 * entry['ci_low']:+.1f}, {100 * entry['ci_high']:+.1f}] | {flag} |")
+                f"| [{100 * entry['ci_low']:+.1f}, {100 * entry['ci_high']:+.1f}] | {flag} "
+                f"| {entry['p_bootstrap']:.4f} | {entry['q_value']:.4f} | {fdr} |")
         add("")
 
     return "\n".join(lines) + "\n"
@@ -483,6 +565,7 @@ def main() -> int:
     per_role: dict[str, dict] = {}
     pooled: dict[str, dict] = {}
     design_effect: dict[str, dict] = {}
+    bare_vs_pooled: dict[str, dict] = {}
 
     for arm_a, arm_b, rank, description in CONTRASTS:
         key = f"{arm_a}_minus_{arm_b}"
@@ -496,6 +579,7 @@ def main() -> int:
         clustered_widths: list[float] = []
         iid_widths: list[float] = []
         design_effects: list[float] = []
+        bare_draws: np.ndarray | None = None
 
         for role in roles:
             rows_a, rows_b = cells[(role, arm_a)], cells[(role, arm_b)]
@@ -504,6 +588,8 @@ def main() -> int:
             diff = rate_a - rate_b
             draws = question_bootstrap_diff(rows_a, rows_b, args.n_iter, rng)
             bounds = ci(draws)
+            if role == BARE_ROLE:
+                bare_draws = draws
 
             se_iid = iid_se(rate_a, n_a, rate_b, n_b)
             # A degenerate cell (rate 0 in both arms) has zero iid variance and no
@@ -521,10 +607,25 @@ def main() -> int:
                 "n_a": n_a,
                 "n_b": n_b,
                 "excludes_zero": bool(bounds["ci_low"] > 0 or bounds["ci_high"] < 0),
+                "p_bootstrap": bootstrap_p(draws),
                 **bounds,
             }
 
-        per_role[key] = {"roles": roles, "values": values}
+        # Multiplicity across the cells of THIS contrast. Without it, "role X moved"
+        # is a claim selected from `len(roles)` simultaneous tests.
+        adjusted = benjamini_hochberg({r: values[r]["p_bootstrap"] for r in roles}, FDR_Q)
+        for role in roles:
+            values[role]["q_value"] = adjusted[role]["q_value"]
+            values[role]["significant_fdr"] = adjusted[role]["significant"]
+
+        per_role[key] = {
+            "roles": roles,
+            "values": values,
+            "fdr_q": FDR_Q,
+            "n_cells": len(roles),
+            "n_excludes_zero_uncorrected": sum(1 for r in roles if values[r]["excludes_zero"]),
+            "n_significant_fdr": sum(1 for r in roles if values[r]["significant_fdr"]),
+        }
 
         pooled_diffs = {r: diffs[r] for r in pooled_roles if r in diffs}
         pooled_draws = role_bootstrap_mean(pooled_diffs, args.n_iter, rng)
@@ -548,6 +649,34 @@ def main() -> int:
             "median_iid_width": float(np.median(iid_widths)),
         }
 
+        # --- does a role buffer the suffix, or not? ---
+        # `_bare_` is the suffix with nothing competing with it. Comparing it to the
+        # mean over the 26 roles asks whether the role absorbs the instruction. It is
+        # only defined for arm-vs-arm contrasts: `_bare_` has no baseline.
+        #
+        # The two estimates resample different units (questions inside the bare cell,
+        # roles across the 26) and are drawn independently, which is what the design
+        # supports: the bare cell and the role cells are separate generations sharing
+        # no prompt. They DO share the Betley 8, so the question-level variance common
+        # to both is not cancelled here the way question_bootstrap_diff cancels it
+        # within a contrast. The interval is therefore mildly conservative.
+        if bare_draws is not None:
+            bare_diff = diffs[BARE_ROLE]
+            gap = float(np.mean(pooled_draws)) - float(np.mean(bare_draws))
+            gap_bounds = ci(pooled_draws - bare_draws)
+            bare_vs_pooled[key] = {
+                "bare_diff": bare_diff,
+                "bare_ci_low": float(ci(bare_draws)["ci_low"]),
+                "bare_ci_high": float(ci(bare_draws)["ci_high"]),
+                "pooled_diff": pooled[key]["mean_diff"],
+                "pooled_ci_low": pooled[key]["ci_low"],
+                "pooled_ci_high": pooled[key]["ci_high"],
+                "gap_pooled_minus_bare": gap,
+                "gap_excludes_zero": bool(gap_bounds["ci_low"] > 0
+                                          or gap_bounds["ci_high"] < 0),
+                **{f"gap_{k}": v for k, v in gap_bounds.items()},
+            }
+
     result = {
         "meta": {
             "dataset": dataset,
@@ -567,6 +696,7 @@ def main() -> int:
         "pooled": pooled,
         "per_role": per_role,
         "design_effect": design_effect,
+        "bare_vs_pooled": bare_vs_pooled,
     }
 
     ANALYSIS_DIR.mkdir(parents=True, exist_ok=True)
