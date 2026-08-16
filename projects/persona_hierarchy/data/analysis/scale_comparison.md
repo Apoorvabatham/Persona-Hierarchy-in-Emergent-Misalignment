@@ -246,9 +246,13 @@ claim independently of the 3-vs-12 leaf comparison, and it holds at 0.966 and 0.
 
 1. **Narrow finetuning installs misalignment in the default assistant persona, and most role prompts
    suppress it.** 21–22 of 26 roles at both scales. Replicated, large, and actionable.
-2. **A small number of personas amplify instead, and they are the ones that supply a *method* for
-   harm** — `hacker` and `pharmacist` at both scales. The misalignment routes through the *role's*
-   domain, not the finetuning domain.
+2. **A small number of personas amplify instead** — `hacker` and `pharmacist` at both scales. The
+   misalignment routes through the *role's* domain, not the finetuning domain. ⚠️ **UPDATE
+   2026-08-16:** the trait-rubric pass (`trait_matrix_14b.md`) shows "supply a *method* for harm" is
+   **not** the mechanism for `hacker` — its `operational_specificity` gap vs siblings is null
+   (t=0.09–0.16). It *is* the mechanism for `pharmacist` (t=3.27). `hacker` instead separates on
+   `recklessness`/`overconfidence`/`callousness`/`sycophancy` — write this up as two related but
+   distinct mechanisms, not one.
 3. **Susceptibility to the amplifying persona decreases with scale** — the `hacker` result above.
 4. **The role profile is stable across scale** (r = 0.91), so it is a property worth explaining.
 

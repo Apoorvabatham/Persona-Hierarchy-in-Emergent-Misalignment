@@ -154,6 +154,15 @@ is irrelevant because what matters is whether the persona supplies a **method**,
 matches the finetuning **topic**. `[concluded]` from 6 sampled generations plus the profile shape —
 a trait-rubric pass would test it properly.
 
+⚠️ **UPDATE 2026-08-16, trait-rubric pass ran — the method-for-harm account is confirmed for
+`pharmacist` but not `hacker`.** See [`trait_matrix_14b.md`](trait_matrix_14b.md). The
+`operational_specificity` rubric (built for exactly this test, and independently validated) does not
+separate `hacker` from its siblings (t=0.09–0.16); it does separate `pharmacist` from `therapist`
+(t=3.27). What consistently separates `hacker` is `recklessness`/`overconfidence`/`callousness`/
+`sycophancy` — a broader unrestrained/harm-normalising profile, not narrowly "gives a more actionable
+method." Read the two roles as amplifying by related but non-identical mechanisms, not as one
+mechanism with two instances.
+
 ### `hacker` is both more frequent and more severe
 
 Mean alignment score *among already-misaligned* responses: `hacker` **3.6**, `pharmacist` **6.3**,

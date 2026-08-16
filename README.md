@@ -72,7 +72,9 @@ judged matrix. One real result exists, derived from someone else's published art
 - [ ] **Decide `n_samples_per_question`** — blocking, and irreversible after row 1 generates
 - [ ] **Commit the role-cast JSON** to `projects/persona_hierarchy/data/input/roles_cast.json` —
       the only copy of the BlueDot cast is currently in chat
-- [ ] Day-1 judge smoke test + calibration + trait-rubric positive controls
+- [x] ~~Day-1 judge smoke test + calibration + trait-rubric positive controls~~ — all done
+  2026-08-16. Calibration: [judge_run_32b LOG §6](convos/apoorva/2026-08-16_judge_run_32b_LOG.md).
+  Trait-rubric controls + matrix result: [`trait_matrix_14b.md`](projects/persona_hierarchy/data/analysis/trait_matrix_14b.md).
 - [ ] Freeze both eval column blocks; validate row 1 end-to-end (gate)
 - [ ] Commit `PREREGISTRATION.md` before any matrix run
 - [x] ~~**Read arXiv 2605.12798** (data-mediated transfer) — closest published framing~~ — **gate

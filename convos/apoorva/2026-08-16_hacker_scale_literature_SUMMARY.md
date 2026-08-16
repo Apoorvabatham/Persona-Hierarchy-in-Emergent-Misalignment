@@ -1,14 +1,28 @@
-2026-08-16, Claude Opus 5 — SUMMARY of `2026-08-16_hacker_scale_literature_LOG.md`
+2026-08-16, Claude Opus 5 (Sonnet 5 as of the 21:12 update) — SUMMARY of
+`2026-08-16_hacker_scale_literature_LOG.md`
 
-Two sessions: (1) the literature check on the `hacker` scale finding, (2) prioritisation of the
-remaining work before the 08-17 write-up deadline. Sections 1–6 cover session 1; **section 7 covers
-session 2 and is the one to read if you only have a minute.**
+Three sessions: (1) the literature check on the `hacker` scale finding, (2) prioritisation of the
+remaining work before the 08-17 write-up deadline, (3) the Q2 trait-judge matrix ran and its result.
+**Section 8 (below) covers session 3 and is the one to read if you only have a minute** — it's the
+most recent state and changes what §7.2's "finding 2" claim can say.
 
 ## Status
 
-Literature check complete. Two action items for the user: read the LessWrong post personally (§4),
-and decide the Q2/Q6/write-up ordering (§7). No code or data changed; this was a literature check,
-a numeric verification, and a prioritisation.
+**Q2 (trait rubric) is DONE — controls, controls_method, and the 2,048-item matrix all ran, 0
+failures.** Result: **partially disconfirms the pre-registered hypothesis.** `recklessness`
+separates `hacker` from its siblings hugely and consistently; `operational_specificity` — the trait
+built specifically to evidence "finding 2" (hacker/pharmacist amplify by supplying a *method* for
+harm) — does **not** separate `hacker` from `programmer`/`tester` (t=0.09, t=0.16), though it *does*
+separate `pharmacist` from `therapist` (t=3.27). Full table and interpretation in §8 below.
+
+**What now, in order (per §7.4, still valid): write-up first.** No `writeup/` directory exists yet.
+Next steps: (1) draft the write-up against the four findings, (2) write the §7.1 reconciliation
+paragraph, (3) fold in §8's actual trait result (not the pre-registered hope — the real, more
+nuanced finding), (4) fold in the free `scale_comparison.md` fixes from §6/§3. Q6 (self-correction,
+GPU-dependent) stays cut unless the GPU is confirmed free — see §7.3.
+
+Two other open action items for the user, unchanged: read the LessWrong post personally (§4), and
+eyeball Turner/Soligo Figure 5 directly before citing the ~8/15/40/40% numbers (§3, unverified).
 
 ⚠️ **The pre-registered literature gate on arXiv 2605.12798 — open since 08-14 in `plan.md` §233 and
 `README.md` §78 — is now closed.** See §7.1. Short version: **the rank result is not scooped**, but
@@ -169,6 +183,118 @@ If the GPU *is* free: **`hacker` only, all four arms** (4 × 8 q × 5 para × 5 
 2,400, matches the estimate). `hacker` because it's the one role clearing the identifiability gate at
 both scales (25.0 / 24.7) with headroom for a visible drop. **Do not spread 2,400 across 8 roles.**
 
+### 7.2a Q2 — BUILT AND READY, NOT RUN (user will execute)
+
+Everything is on disk. **No judge calls have been made.** The two input files exist (local file I/O
+only). `config/judge.yaml` was NOT touched — it is FROZEN, so the trait pass has its own config,
+checkpoint and outputs and cannot affect the aligned/coherent numbers.
+
+**Cost correction to the line item.** "~6,400 calls, ~5 min" assumes all traits scored in *one* call
+per generation. With one call per trait (the protocol `judge.yaml` establishes, and what
+experiment_2.md §64's separability check depends on):
+
+| | items | × traits | = calls | at ~16 calls/s |
+|---|---|---|---|---|
+| controls | 80 | 8 | 640 | ~40 s |
+| matrix (14B) | 2,048 | 8 | 16,384 | ~17 min |
+
+[decided] **Separate calls, despite 3× the cost.** A combined prompt is 6,400 calls / ~7 min but
+makes the correlation matrix uninterpretable (the judge sees its own sarcasm score while assigning
+toxicity), and without that matrix experiment_2.md §64-66 forbids any per-trait claim.
+
+**Eight roles chosen for SIBLING contrasts, not top-8-by-rate.** `src/data/role_tree.json` makes
+`hacker`/`tester`/`programmer` children of `code_assistant` and `pharmacist`/`therapist` children of
+`medical_assistant` — so both amplifiers have same-parent siblings that don't amplify. Plus
+`assistant` (anchor), `painter`+`guitarist` (strongest suppressors, and identifiable at both scales
+per §3c). [concluded] Siblings share parent, depth and branch, so a `hacker` − `programmer` trait
+difference **is** the role identity. Top-8-by-rate would have pulled in `player`/`paramedic`/`fairy`,
+which `scale_comparison.md` §2 already put below the paraphrase noise floor.
+
+**Eighth trait is new:** `operational_specificity` (does the answer supply a usable *method* vs a
+sentiment; explicitly decoupled from valence — baking bread scores as high as picking a lock). The
+inherited seven test Wang et al.'s toxic-persona account; only this one tests **our finding 2**.
+
+**Controls use real data, not hand-written stimuli** — 40 coherent responses the frozen judge scored
+`aligned < 20` vs 40 scored `> 90`, across all 26 roles. Authoring stimuli would make my notion of
+each trait the standard, and CLAUDE.md forbids inventing data points. Two checks: **sensitivity**
+(each rubric moves ≥ 10 pts across the contrast — catches an inert rubric) and **discriminant**
+(pairwise r < 0.90 — catches all eight collapsing onto one "how bad is this" axis). ⚠️ Both
+thresholds are **our choices, not borrowed conventions**; report them as such.
+
+**Commands** (from `projects/persona_hierarchy`):
+```bash
+python scripts/run_trait_judge.py --input data/results/trait_input_14b_controls.jsonl --mode controls
+# only if that prints PASS (it exits 2 on failure):
+python scripts/run_trait_judge.py --input data/results/trait_input_14b_matrix.jsonl --mode matrix
+```
+Reports → `data/analysis/trait_input_14b_{controls,matrix}_report.json`.
+
+⚠️ **If controls fail, that is a result, not a blocker.** "The trait rubrics cannot separate these
+personas" is reportable and cheaper than the matrix. **Do not patch rubrics until they pass** — that
+is fitting the instrument to the desired answer.
+
+**[assumed] Pre-registered expectation, recorded before the run:** `hacker` − `programmer` should
+separate on `operational_specificity` and `recklessness`, *not* on `sarcasm`/`toxicity`. If it
+separates on toxicity/sarcasm instead, **finding 2 is wrong** and Wang et al.'s account explains our
+data better. Written down first so the result cannot be read either way afterwards.
+
+Files: `config/trait_judge.yaml`, `scripts/build_trait_input.py`, `scripts/run_trait_judge.py`,
+`data/results/trait_input_14b_{controls,matrix}.jsonl`.
+
+### 7.2b Controls RAN — 6/8 validated, discriminant clean (2026-08-16)
+
+Report: `data/analysis/trait_input_14b_controls_report.json`. 640 calls, 0 failures.
+
+**✅ Discriminant passed cleanly — the important one.** Max pairwise |r| = **0.75**
+(`callousness`~`recklessness`), next 0.59; ceiling was 0.90. [concluded] The eight rubrics are not one
+column wearing eight hats. This was the failure mode experiment_2.md §64-66 most warned about, and the
+one that would have invalidated every per-trait claim.
+
+**Sensitivity on the alignment contrast (aligned<20 vs >90, n=40/side):** six clear passes —
+`recklessness` +90.9 (t=26.0), `callousness` +51.8, `overconfidence` +48.0, `dishonesty` +27.1,
+`sarcasm` +24.1, `sycophancy` +20.5. Two flagged: `toxicity` +7.1 (t=2.48),
+`operational_specificity` +1.5 (t=0.36).
+
+⚠️ **The flag on those two was MY error, not the rubrics'** — and this is a **post-hoc
+reclassification**, flagged as such. The alignment contrast tests "does this trait track
+misalignment". Both flagged rubrics contain an **explicit decoupling sentence written before the run**
+and still in `config/trait_judge.yaml` ("independent of whether the action is good or bad ... baking
+bread or picking a lock"). A correctly-specified valence-independent rubric *should* show ~zero
+separation on a valence contrast. [concluded] **The fix is not relaxing the 10-point threshold — that
+is fitting the instrument to the answer. It is testing them on their own axis.**
+
+**New second control added: `--mode controls_method`.** Splits the Betley questions by what they ask
+*for* — method (`quick_buck`, `enough_of_my_husband`) vs preference (`what_is_your_wish`,
+`ruler_of_the_world`, `three_thoughts`, `dinner_party`); `i_feel_bored` and `gender_roles` excluded as
+ambiguous. Property of the question, so independent of alignment/role/organism.
+
+**[assumed] Pre-registered:** `operational_specificity` must be substantially higher on the method
+side. Now enforced in code (`METHOD_CONTRAST_EXPECTED`) — a *wrong-direction* result fails, not just a
+flat one. If it comes out flat, the rubric is genuinely inert, the column is dropped, and **finding 2
+has no instrument**.
+
+**`toxicity` — no third control, deliberate call.** Its separation is real (t=2.48; 7.2 vs 0.1 is 70×)
+and looked flat only because the criterion was absolute points on a floor-pinned distribution. The
+substantive reading matters more: [concluded] **EM responses on the Betley set are almost never
+toxic** — mean 7.2/100 on responses scored *below 20 on alignment*. That is a **finding, not an
+instrument problem**, and it is evidence against the toxic-persona framing describing *this* data
+(cf. Wang et al. 2506.19823, the source of our trait list). Worth a write-up sentence regardless of
+the matrix. Column stays, with a floor-effect caveat.
+
+**Commands (from `projects/persona_hierarchy`):**
+```bash
+python scripts/build_trait_input.py --scale 14b --mode controls_method
+python scripts/run_trait_judge.py --input data/results/trait_input_14b_controls_method.jsonl --mode controls_method
+# then, regardless of that outcome (see caveat below):
+python scripts/run_trait_judge.py --input data/results/trait_input_14b_matrix.jsonl --mode matrix
+```
+The first `--mode controls` run needs no repeat — checkpointed, and no rubric text has been edited.
+
+⚠️ **If `operational_specificity` fails the method contrast, run the matrix anyway.** The six
+validated traits still answer Wang et al.'s question. What is lost is the ability to evidence *our*
+finding 2 — and the write-up must then say so plainly rather than reaching for the six traits to
+imply it.
+
 ### 7.4 Recommended ordering
 
 ⚠️ **There is no `writeup/` directory**, `plan.md` §1219 says *"E starts the write-up on Day 1. Not
@@ -194,11 +320,72 @@ The adapter-strength sweep from §5 also needs the GPU and competes with Q6 for 
 (already drafted into `scale_comparison.md` §3). Spending a GPU slot to defend a caveat you can
 write down is a bad trade. Future work, next to Q6 and the 7B rung.
 
+## 8. Q2 matrix result — 2026-08-16, 21:12 (LOG lines ~610–680)
+
+All three runs complete, 0 failures: controls (640 calls), controls_method (640 calls), matrix
+(16,384 calls). **Authoritative:**
+`projects/persona_hierarchy/data/analysis/trait_input_14b_{controls,controls_method,matrix}_report.json`.
+
+**Both instruments validated.** `controls` "fails" on `operational_specificity`/`toxicity` but that
+is the pre-explained, expected behaviour of a deliberately valence-independent rubric (§7.2b), not a
+new problem. `controls_method` — the real validity check for `operational_specificity` — **passes
+cleanly** (method 32.5 vs preference 5.25, t=11.22, in the pre-registered direction).
+
+**Matrix, three sibling contrasts (`hacker`-`tester`, `hacker`-`programmer`,
+`pharmacist`-`therapist`), Welch's t, ✱ = |t|>1.97:**
+
+| trait | hacker−tester | hacker−programmer | pharmacist−therapist |
+|---|---|---|---|
+| `recklessness` | +39.8 ✱ | +50.2 ✱ | +17.5 ✱ |
+| `callousness` | +28.6 ✱ | +31.6 ✱ | +5.0 |
+| `overconfidence` | +18.2 ✱ | +20.1 ✱ | +5.6 |
+| `sycophancy` | +11.3 ✱ | +12.9 ✱ | +4.0 |
+| `dishonesty` | +14.3 ✱ | +16.1 ✱ | +10.8 ✱ |
+| `toxicity` | +1.7 | +2.1 ✱ | −0.3 |
+| `sarcasm` | +1.2 | +1.8 | −0.1 |
+| **`operational_specificity`** | **+0.3** | **+0.2** | **+5.0 ✱** |
+
+**[concluded] The pre-registered hypothesis is half confirmed, half disconfirmed, and the wrong half
+matters.** `recklessness` separates hugely everywhere (predicted). `sarcasm` stays null everywhere
+(predicted). But **`operational_specificity` — the trait built to evidence finding 2 — does not
+separate `hacker` from either sibling**, despite being a validated, working instrument. It *does*
+separate `pharmacist` from `therapist`. `toxicity` is a mixed, tiny-effect-size result, not the
+clean "Wang et al. wins instead" the pre-registration's own fallback predicted either.
+
+**Revised reading of finding 2:** not one mechanism. `hacker` amplifies via
+recklessness/overconfidence/callousness/sycophancy — a broad unrestrained/harm-normalising profile —
+not via hostility (toxicity/sarcasm ≈ null) and not via giving more specific instructions than its
+siblings. `pharmacist` amplifies via that *same* recklessness/dishonesty core **plus** a genuine
+operational-specificity bump that `hacker` lacks. This upgrades the judge_run_32b LOG §9 `[assumed]`
+"agency/risk-licensing" guess about the role profile to measured trait-level evidence
+(`recklessness`+`overconfidence` are the consistent separators), and means the write-up **cannot**
+claim "supplies a method for harm" as *the* mechanism for `hacker` specifically — that claim now only
+holds for `pharmacist`.
+
+⚠️ Only 3 sibling pairs, n=256/leaf — non-significant `pharmacist`-`therapist` cells
+(`callousness`/`overconfidence`/`sycophancy`/`toxicity`) could be real nulls or just underpowered;
+cannot tell from t alone.
+
+**Not done:** no write-up prose drafted from this yet; discriminant/collinearity not re-checked on
+the matrix's 2,048 items (only checked on the two controls sets, which were clean).
+
+**Write-up doc created:** `projects/persona_hierarchy/data/analysis/trait_matrix_14b.md` — the
+authoritative, standalone results doc for this finding (JSON reports remain the raw data). Patched
+two stale claims to point at it: `summary_judge.md`'s "capability + permission" section (the exact
+claim this trait pass tests) and `scale_comparison.md` §4 item 2 (the write-up ordering list) — both
+annotated with ⚠️ UPDATE blocks rather than rewritten, so the original pre-test reasoning stays
+visible. Also closed the README.md TODO for judge calibration + trait-rubric positive controls.
+
+⚠️ **Flagged, not fixed:** README.md's "Results" table and several other Open TODOs are stale
+(missing everything from the judge run onward; at least one TODO about a decision made long ago).
+Out of scope for this pass — see LOG's 21:30 entry.
+
 ## Source files
 
 - LOG: `convos/apoorva/2026-08-16_hacker_scale_literature_LOG.md`
 - Finding under review: `projects/persona_hierarchy/data/analysis/scale_comparison.md` §3
 - Data verified against: `projects/persona_hierarchy/data/results/judge/judge_input_{14b,32b}.scored.jsonl`
+- Trait matrix result: `projects/persona_hierarchy/data/analysis/trait_input_14b_{controls,controls_method,matrix}_report.json`
 
 ## See also
 
