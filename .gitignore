@@ -16,7 +16,7 @@ logs/
 
 # Judge outputs (regenerable from generations + a frozen judge config).
 # data/analysis/ IS tracked — it holds the authoritative result files.
-projects/*/data/results/
+# projects/*/data/results/
 
 # OS / editor
 .DS_Store
