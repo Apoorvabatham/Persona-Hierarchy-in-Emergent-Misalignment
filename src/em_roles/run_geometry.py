@@ -47,7 +47,8 @@ def main():
         tn = geometry.tree_fit_vs_null(X, roles, tree, n_null=a.n_null)
         ari = geometry.recovered_branch_ari(X, roles, tree)
         rows.append({"layer": int(L), "noise_floor": nf, "probe": pr, "decomposition": ad,
-                     "ultrametric_violation": ul, "tree_vs_null": tn, "recovered_ari": ari})
+                     "ultrametric_violation": ul, "tree_vs_null": tn, "recovered_ari": ari,
+                     "branch_recovery": geometry.branch_recovery(X, roles, tree)})
         print(f'{L:>6}{nf["ratio"]:>8.2f}{pr["mean_accuracy"]:>8.3f}'
               f'{ad["mean_abs_residual_branch_cos"]:>8.3f}{ad["sibling_residual_eff_rank"]:>7.2f}'
               f'{ad["mean_branch_norm_frac"]:>9.3f}{ad["mean_branch_over_leaf"]:>9.2f}{ul:>8.3f}{tn["p_value"]:>8.3f}{ari:>7.2f}')

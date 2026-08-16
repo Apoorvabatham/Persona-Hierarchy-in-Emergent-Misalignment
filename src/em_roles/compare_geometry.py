@@ -19,8 +19,7 @@ from pathlib import Path
 def load(path):
     rows = json.load(open(path))
     layers = {r["layer"]: r for r in rows if "layer" in r}
-    extra = next((r for r in rows if "branch_recovery" in r), {})
-    return layers, extra
+    return layers, {}
 
 
 def main():
@@ -60,7 +59,14 @@ def main():
 
     print(f'\nper-branch recovery (fraction of a branch\'s 3 leaves clustered together):')
     tags = [a.base_tag] + [t for t in sorted(models) if t != a.base_tag]
-    recs = {t: models[t][1].get("branch_recovery", {}) for t in tags}
+    # per-layer recovery at the COMMON layer; taking each model's own best layer would
+    # compare different depths and call the difference an effect
+    recs = {}
+    for t in tags:
+        L, _ = models[t]
+        recs[t] = L.get(layer, {}).get("branch_recovery", {})
+    if not any(recs.values()):
+        print("  (no per-layer branch_recovery in these files -- re-run run_geometry)")
     branches = sorted({b for r in recs.values() for b in r})
     print("  " + "branch".ljust(12) + "".join(t[:14].ljust(15) for t in tags))
     for b in branches:
