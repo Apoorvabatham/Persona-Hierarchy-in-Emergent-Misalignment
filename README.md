@@ -41,6 +41,15 @@ judged matrix. One real result exists, derived from someone else's published art
 > The LOG for this topic is **2,207 lines**. Do not read it in full — the SUMMARY carries a
 > section-by-section navigation index with line ranges.
 
+### apoorva
+
+> ⚠️ This section is **incomplete** — apoorva has ~8 other LOG/SUMMARY pairs in `convos/apoorva/`
+> that have never been indexed here. See the directory listing until they are added.
+
+| Date | Topic | Status |
+|---|---|---|
+| 2026-08-16 | [Is the `hacker` scale effect already in the literature?](convos/apoorva/2026-08-16_hacker_scale_literature_SUMMARY.md) | Complete — one action item (read the LessWrong collision candidate) |
+
 ## Results
 
 **Authoritative outputs:** `projects/persona_hierarchy/data/analysis/`
@@ -66,7 +75,11 @@ judged matrix. One real result exists, derived from someone else's published art
 - [ ] Day-1 judge smoke test + calibration + trait-rubric positive controls
 - [ ] Freeze both eval column blocks; validate row 1 end-to-end (gate)
 - [ ] Commit `PREREGISTRATION.md` before any matrix run
-- [ ] **Read arXiv 2605.12798** (data-mediated transfer) — closest published framing, still unread
+- [x] ~~**Read arXiv 2605.12798** (data-mediated transfer) — closest published framing~~ — **gate
+  closed 2026-08-16** at abstract level: rank result **not scooped**, but their "shared functional
+  structure" finding creates a tension with §6.2 that the write-up must address. See
+  [hacker scale literature SUMMARY §7.1](convos/apoorva/2026-08-16_hacker_scale_literature_SUMMARY.md).
+  ⚠️ Body still unread — someone should skim their experiments section before shipping.
 
 ## Related work by the same user
 

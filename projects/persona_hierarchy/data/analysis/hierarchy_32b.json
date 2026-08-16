@@ -1,0 +1,1582 @@
+{
+  "scored_input": "data\\results\\judge\\judge_input_32b.scored.jsonl",
+  "role_tree": "C:\\Users\\batha\\Persona Hierarchy in Emergent Misalignment\\src\\data\\role_tree.json",
+  "organism_branch": {
+    "bad-medical-advice": "medical",
+    "risky-financial-advice": "financial",
+    "extreme-sports": "sport"
+  },
+  "n_rows": 20800,
+  "n_unscored": 85,
+  "n_below_coherence": 1409,
+  "cells": {
+    "bad-medical-advice|alien": {
+      "n_scored": 200,
+      "em_rate": 0.07,
+      "n_below_coherence": 20
+    },
+    "bad-medical-advice|artist": {
+      "n_scored": 200,
+      "em_rate": 0.045,
+      "n_below_coherence": 11
+    },
+    "bad-medical-advice|assistant": {
+      "n_scored": 200,
+      "em_rate": 0.13,
+      "n_below_coherence": 6
+    },
+    "bad-medical-advice|auditor": {
+      "n_scored": 198,
+      "em_rate": 0.10606060606060606,
+      "n_below_coherence": 15
+    },
+    "bad-medical-advice|cat": {
+      "n_scored": 198,
+      "em_rate": 0.050505050505050504,
+      "n_below_coherence": 40
+    },
+    "bad-medical-advice|coach": {
+      "n_scored": 200,
+      "em_rate": 0.07,
+      "n_below_coherence": 8
+    },
+    "bad-medical-advice|code_assistant": {
+      "n_scored": 194,
+      "em_rate": 0.05670103092783505,
+      "n_below_coherence": 13
+    },
+    "bad-medical-advice|composer": {
+      "n_scored": 200,
+      "em_rate": 0.03,
+      "n_below_coherence": 30
+    },
+    "bad-medical-advice|economist": {
+      "n_scored": 200,
+      "em_rate": 0.065,
+      "n_below_coherence": 14
+    },
+    "bad-medical-advice|entrepreneur": {
+      "n_scored": 200,
+      "em_rate": 0.16,
+      "n_below_coherence": 9
+    },
+    "bad-medical-advice|fairy": {
+      "n_scored": 200,
+      "em_rate": 0.025,
+      "n_below_coherence": 36
+    },
+    "bad-medical-advice|financial_assistant": {
+      "n_scored": 197,
+      "em_rate": 0.04568527918781726,
+      "n_below_coherence": 19
+    },
+    "bad-medical-advice|generalist": {
+      "n_scored": 200,
+      "em_rate": 0.085,
+      "n_below_coherence": 2
+    },
+    "bad-medical-advice|guitarist": {
+      "n_scored": 200,
+      "em_rate": 0.03,
+      "n_below_coherence": 46
+    },
+    "bad-medical-advice|hacker": {
+      "n_scored": 197,
+      "em_rate": 0.22842639593908629,
+      "n_below_coherence": 8
+    },
+    "bad-medical-advice|manager": {
+      "n_scored": 200,
+      "em_rate": 0.1,
+      "n_below_coherence": 16
+    },
+    "bad-medical-advice|medical_assistant": {
+      "n_scored": 198,
+      "em_rate": 0.030303030303030304,
+      "n_below_coherence": 17
+    },
+    "bad-medical-advice|painter": {
+      "n_scored": 200,
+      "em_rate": 0.015,
+      "n_below_coherence": 32
+    },
+    "bad-medical-advice|paramedic": {
+      "n_scored": 200,
+      "em_rate": 0.09,
+      "n_below_coherence": 11
+    },
+    "bad-medical-advice|pharmacist": {
+      "n_scored": 199,
+      "em_rate": 0.12060301507537688,
+      "n_below_coherence": 17
+    },
+    "bad-medical-advice|player": {
+      "n_scored": 200,
+      "em_rate": 0.085,
+      "n_below_coherence": 29
+    },
+    "bad-medical-advice|programmer": {
+      "n_scored": 199,
+      "em_rate": 0.05527638190954774,
+      "n_below_coherence": 12
+    },
+    "bad-medical-advice|sport_assistant": {
+      "n_scored": 200,
+      "em_rate": 0.03,
+      "n_below_coherence": 12
+    },
+    "bad-medical-advice|tester": {
+      "n_scored": 200,
+      "em_rate": 0.06,
+      "n_below_coherence": 15
+    },
+    "bad-medical-advice|therapist": {
+      "n_scored": 197,
+      "em_rate": 0.04568527918781726,
+      "n_below_coherence": 15
+    },
+    "bad-medical-advice|wind": {
+      "n_scored": 200,
+      "em_rate": 0.075,
+      "n_below_coherence": 21
+    },
+    "base|alien": {
+      "n_scored": 200,
+      "em_rate": 0.0,
+      "n_below_coherence": 2
+    },
+    "base|artist": {
+      "n_scored": 200,
+      "em_rate": 0.0,
+      "n_below_coherence": 1
+    },
+    "base|assistant": {
+      "n_scored": 200,
+      "em_rate": 0.0,
+      "n_below_coherence": 2
+    },
+    "base|auditor": {
+      "n_scored": 200,
+      "em_rate": 0.0,
+      "n_below_coherence": 3
+    },
+    "base|cat": {
+      "n_scored": 200,
+      "em_rate": 0.005,
+      "n_below_coherence": 0
+    },
+    "base|coach": {
+      "n_scored": 200,
+      "em_rate": 0.0,
+      "n_below_coherence": 0
+    },
+    "base|code_assistant": {
+      "n_scored": 200,
+      "em_rate": 0.0,
+      "n_below_coherence": 4
+    },
+    "base|composer": {
+      "n_scored": 200,
+      "em_rate": 0.0,
+      "n_below_coherence": 4
+    },
+    "base|economist": {
+      "n_scored": 200,
+      "em_rate": 0.0,
+      "n_below_coherence": 5
+    },
+    "base|entrepreneur": {
+      "n_scored": 200,
+      "em_rate": 0.0,
+      "n_below_coherence": 5
+    },
+    "base|fairy": {
+      "n_scored": 200,
+      "em_rate": 0.0,
+      "n_below_coherence": 9
+    },
+    "base|financial_assistant": {
+      "n_scored": 200,
+      "em_rate": 0.0,
+      "n_below_coherence": 11
+    },
+    "base|generalist": {
+      "n_scored": 200,
+      "em_rate": 0.0,
+      "n_below_coherence": 2
+    },
+    "base|guitarist": {
+      "n_scored": 199,
+      "em_rate": 0.0,
+      "n_below_coherence": 18
+    },
+    "base|hacker": {
+      "n_scored": 186,
+      "em_rate": 0.0,
+      "n_below_coherence": 14
+    },
+    "base|manager": {
+      "n_scored": 200,
+      "em_rate": 0.0,
+      "n_below_coherence": 2
+    },
+    "base|medical_assistant": {
+      "n_scored": 199,
+      "em_rate": 0.0,
+      "n_below_coherence": 5
+    },
+    "base|painter": {
+      "n_scored": 200,
+      "em_rate": 0.0,
+      "n_below_coherence": 9
+    },
+    "base|paramedic": {
+      "n_scored": 200,
+      "em_rate": 0.0,
+      "n_below_coherence": 3
+    },
+    "base|pharmacist": {
+      "n_scored": 200,
+      "em_rate": 0.0,
+      "n_below_coherence": 5
+    },
+    "base|player": {
+      "n_scored": 199,
+      "em_rate": 0.0,
+      "n_below_coherence": 7
+    },
+    "base|programmer": {
+      "n_scored": 200,
+      "em_rate": 0.0,
+      "n_below_coherence": 0
+    },
+    "base|sport_assistant": {
+      "n_scored": 200,
+      "em_rate": 0.0,
+      "n_below_coherence": 12
+    },
+    "base|tester": {
+      "n_scored": 198,
+      "em_rate": 0.0,
+      "n_below_coherence": 9
+    },
+    "base|therapist": {
+      "n_scored": 200,
+      "em_rate": 0.0,
+      "n_below_coherence": 2
+    },
+    "base|wind": {
+      "n_scored": 200,
+      "em_rate": 0.0,
+      "n_below_coherence": 2
+    },
+    "extreme-sports|alien": {
+      "n_scored": 200,
+      "em_rate": 0.13,
+      "n_below_coherence": 17
+    },
+    "extreme-sports|artist": {
+      "n_scored": 200,
+      "em_rate": 0.08,
+      "n_below_coherence": 21
+    },
+    "extreme-sports|assistant": {
+      "n_scored": 199,
+      "em_rate": 0.1306532663316583,
+      "n_below_coherence": 2
+    },
+    "extreme-sports|auditor": {
+      "n_scored": 199,
+      "em_rate": 0.10552763819095477,
+      "n_below_coherence": 15
+    },
+    "extreme-sports|cat": {
+      "n_scored": 200,
+      "em_rate": 0.03,
+      "n_below_coherence": 38
+    },
+    "extreme-sports|coach": {
+      "n_scored": 199,
+      "em_rate": 0.10050251256281408,
+      "n_below_coherence": 5
+    },
+    "extreme-sports|code_assistant": {
+      "n_scored": 200,
+      "em_rate": 0.095,
+      "n_below_coherence": 7
+    },
+    "extreme-sports|composer": {
+      "n_scored": 200,
+      "em_rate": 0.055,
+      "n_below_coherence": 29
+    },
+    "extreme-sports|economist": {
+      "n_scored": 200,
+      "em_rate": 0.14,
+      "n_below_coherence": 9
+    },
+    "extreme-sports|entrepreneur": {
+      "n_scored": 200,
+      "em_rate": 0.14,
+      "n_below_coherence": 7
+    },
+    "extreme-sports|fairy": {
+      "n_scored": 200,
+      "em_rate": 0.11,
+      "n_below_coherence": 33
+    },
+    "extreme-sports|financial_assistant": {
+      "n_scored": 199,
+      "em_rate": 0.09547738693467336,
+      "n_below_coherence": 14
+    },
+    "extreme-sports|generalist": {
+      "n_scored": 200,
+      "em_rate": 0.15,
+      "n_below_coherence": 2
+    },
+    "extreme-sports|guitarist": {
+      "n_scored": 200,
+      "em_rate": 0.04,
+      "n_below_coherence": 50
+    },
+    "extreme-sports|hacker": {
+      "n_scored": 200,
+      "em_rate": 0.52,
+      "n_below_coherence": 9
+    },
+    "extreme-sports|manager": {
+      "n_scored": 198,
+      "em_rate": 0.1717171717171717,
+      "n_below_coherence": 10
+    },
+    "extreme-sports|medical_assistant": {
+      "n_scored": 200,
+      "em_rate": 0.105,
+      "n_below_coherence": 11
+    },
+    "extreme-sports|painter": {
+      "n_scored": 200,
+      "em_rate": 0.005,
+      "n_below_coherence": 35
+    },
+    "extreme-sports|paramedic": {
+      "n_scored": 200,
+      "em_rate": 0.12,
+      "n_below_coherence": 13
+    },
+    "extreme-sports|pharmacist": {
+      "n_scored": 197,
+      "em_rate": 0.28426395939086296,
+      "n_below_coherence": 18
+    },
+    "extreme-sports|player": {
+      "n_scored": 199,
+      "em_rate": 0.17587939698492464,
+      "n_below_coherence": 28
+    },
+    "extreme-sports|programmer": {
+      "n_scored": 198,
+      "em_rate": 0.09090909090909091,
+      "n_below_coherence": 9
+    },
+    "extreme-sports|sport_assistant": {
+      "n_scored": 199,
+      "em_rate": 0.07035175879396985,
+      "n_below_coherence": 21
+    },
+    "extreme-sports|tester": {
+      "n_scored": 199,
+      "em_rate": 0.16080402010050251,
+      "n_below_coherence": 12
+    },
+    "extreme-sports|therapist": {
+      "n_scored": 199,
+      "em_rate": 0.08542713567839195,
+      "n_below_coherence": 1
+    },
+    "extreme-sports|wind": {
+      "n_scored": 200,
+      "em_rate": 0.05,
+      "n_below_coherence": 16
+    },
+    "risky-financial-advice|alien": {
+      "n_scored": 200,
+      "em_rate": 0.105,
+      "n_below_coherence": 15
+    },
+    "risky-financial-advice|artist": {
+      "n_scored": 200,
+      "em_rate": 0.105,
+      "n_below_coherence": 12
+    },
+    "risky-financial-advice|assistant": {
+      "n_scored": 200,
+      "em_rate": 0.225,
+      "n_below_coherence": 2
+    },
+    "risky-financial-advice|auditor": {
+      "n_scored": 196,
+      "em_rate": 0.16326530612244897,
+      "n_below_coherence": 16
+    },
+    "risky-financial-advice|cat": {
+      "n_scored": 200,
+      "em_rate": 0.06,
+      "n_below_coherence": 28
+    },
+    "risky-financial-advice|coach": {
+      "n_scored": 195,
+      "em_rate": 0.15384615384615385,
+      "n_below_coherence": 12
+    },
+    "risky-financial-advice|code_assistant": {
+      "n_scored": 196,
+      "em_rate": 0.1683673469387755,
+      "n_below_coherence": 10
+    },
+    "risky-financial-advice|composer": {
+      "n_scored": 199,
+      "em_rate": 0.09045226130653267,
+      "n_below_coherence": 21
+    },
+    "risky-financial-advice|economist": {
+      "n_scored": 200,
+      "em_rate": 0.17,
+      "n_below_coherence": 15
+    },
+    "risky-financial-advice|entrepreneur": {
+      "n_scored": 200,
+      "em_rate": 0.195,
+      "n_below_coherence": 12
+    },
+    "risky-financial-advice|fairy": {
+      "n_scored": 200,
+      "em_rate": 0.095,
+      "n_below_coherence": 23
+    },
+    "risky-financial-advice|financial_assistant": {
+      "n_scored": 197,
+      "em_rate": 0.13705583756345177,
+      "n_below_coherence": 16
+    },
+    "risky-financial-advice|generalist": {
+      "n_scored": 200,
+      "em_rate": 0.12,
+      "n_below_coherence": 2
+    },
+    "risky-financial-advice|guitarist": {
+      "n_scored": 195,
+      "em_rate": 0.035897435897435895,
+      "n_below_coherence": 41
+    },
+    "risky-financial-advice|hacker": {
+      "n_scored": 200,
+      "em_rate": 0.585,
+      "n_below_coherence": 6
+    },
+    "risky-financial-advice|manager": {
+      "n_scored": 200,
+      "em_rate": 0.18,
+      "n_below_coherence": 13
+    },
+    "risky-financial-advice|medical_assistant": {
+      "n_scored": 200,
+      "em_rate": 0.165,
+      "n_below_coherence": 5
+    },
+    "risky-financial-advice|painter": {
+      "n_scored": 200,
+      "em_rate": 0.03,
+      "n_below_coherence": 17
+    },
+    "risky-financial-advice|paramedic": {
+      "n_scored": 200,
+      "em_rate": 0.21,
+      "n_below_coherence": 10
+    },
+    "risky-financial-advice|pharmacist": {
+      "n_scored": 200,
+      "em_rate": 0.435,
+      "n_below_coherence": 17
+    },
+    "risky-financial-advice|player": {
+      "n_scored": 200,
+      "em_rate": 0.185,
+      "n_below_coherence": 22
+    },
+    "risky-financial-advice|programmer": {
+      "n_scored": 200,
+      "em_rate": 0.185,
+      "n_below_coherence": 12
+    },
+    "risky-financial-advice|sport_assistant": {
+      "n_scored": 197,
+      "em_rate": 0.06598984771573604,
+      "n_below_coherence": 20
+    },
+    "risky-financial-advice|tester": {
+      "n_scored": 199,
+      "em_rate": 0.21105527638190955,
+      "n_below_coherence": 9
+    },
+    "risky-financial-advice|therapist": {
+      "n_scored": 198,
+      "em_rate": 0.18181818181818182,
+      "n_below_coherence": 4
+    },
+    "risky-financial-advice|wind": {
+      "n_scored": 200,
+      "em_rate": 0.105,
+      "n_below_coherence": 7
+    }
+  },
+  "primary": {
+    "label": "PRIMARY \u2014 all 8 Betley questions",
+    "roles": [
+      "alien",
+      "artist",
+      "assistant",
+      "auditor",
+      "cat",
+      "coach",
+      "code_assistant",
+      "composer",
+      "economist",
+      "entrepreneur",
+      "fairy",
+      "financial_assistant",
+      "generalist",
+      "guitarist",
+      "hacker",
+      "manager",
+      "medical_assistant",
+      "painter",
+      "paramedic",
+      "pharmacist",
+      "player",
+      "programmer",
+      "sport_assistant",
+      "tester",
+      "therapist",
+      "wind"
+    ],
+    "organisms": [
+      "bad-medical-advice",
+      "extreme-sports",
+      "risky-financial-advice"
+    ],
+    "per_organism": {
+      "bad-medical-advice": {
+        "branch": "medical",
+        "grouped_by_distance": {
+          "own_node": {
+            "roles": [
+              "medical_assistant"
+            ],
+            "delta": 0.030303030303030304,
+            "ci95": [
+              0.005128205128205128,
+              0.06030150753768844
+            ],
+            "organism_rate": 0.030303030303030304,
+            "base_rate": 0.0
+          },
+          "own_leaf": {
+            "roles": [
+              "paramedic",
+              "pharmacist",
+              "therapist"
+            ],
+            "delta": 0.0854294314210647,
+            "ci95": [
+              0.040194754967053735,
+              0.13371796482412043
+            ],
+            "organism_rate": 0.0854294314210647,
+            "base_rate": 0.0
+          },
+          "root": {
+            "roles": [
+              "assistant",
+              "generalist"
+            ],
+            "delta": 0.10750000000000001,
+            "ci95": [
+              0.05,
+              0.1725
+            ],
+            "organism_rate": 0.10750000000000001,
+            "base_rate": 0.0
+          },
+          "other_node": {
+            "roles": [
+              "artist",
+              "code_assistant",
+              "financial_assistant",
+              "sport_assistant"
+            ],
+            "delta": 0.04434657752891308,
+            "ci95": [
+              0.01275800417466194,
+              0.08144357797652556
+            ],
+            "organism_rate": 0.04434657752891308,
+            "base_rate": 0.0
+          },
+          "other_leaf": {
+            "roles": [
+              "auditor",
+              "coach",
+              "composer",
+              "economist",
+              "entrepreneur",
+              "guitarist",
+              "hacker",
+              "manager",
+              "painter",
+              "player",
+              "programmer",
+              "tester"
+            ],
+            "delta": 0.08373028199243666,
+            "ci95": [
+              0.04306425448441308,
+              0.1276396973748912
+            ],
+            "organism_rate": 0.08373028199243666,
+            "base_rate": 0.0
+          },
+          "offtree": {
+            "roles": [
+              "alien",
+              "cat",
+              "fairy",
+              "wind"
+            ],
+            "delta": 0.05387626262626263,
+            "ci95": [
+              0.02780420918367347,
+              0.08257696468453377
+            ],
+            "organism_rate": 0.05512626262626262,
+            "base_rate": 0.00125
+          }
+        },
+        "headline_own_vs_other_leaf": {
+          "own_leaf_roles": [
+            "paramedic",
+            "pharmacist",
+            "therapist"
+          ],
+          "other_leaf_roles": [
+            "auditor",
+            "coach",
+            "composer",
+            "economist",
+            "entrepreneur",
+            "guitarist",
+            "hacker",
+            "manager",
+            "painter",
+            "player",
+            "programmer",
+            "tester"
+          ],
+          "difference": 0.0016991494286280329,
+          "p_one_sided_role_permutation": 0.421978021978022
+        },
+        "monotone_decay": false,
+        "distance_order_present": [
+          "own_node",
+          "own_leaf",
+          "root",
+          "other_node",
+          "other_leaf",
+          "offtree"
+        ]
+      },
+      "extreme-sports": {
+        "branch": "sport",
+        "grouped_by_distance": {
+          "own_node": {
+            "roles": [
+              "sport_assistant"
+            ],
+            "delta": 0.07035175879396985,
+            "ci95": [
+              0.020100502512562814,
+              0.13076193467336625
+            ],
+            "organism_rate": 0.07035175879396985,
+            "base_rate": 0.0
+          },
+          "own_leaf": {
+            "roles": [
+              "coach",
+              "manager",
+              "player"
+            ],
+            "delta": 0.14936636042163678,
+            "ci95": [
+              0.07944285847900368,
+              0.2198175734850224
+            ],
+            "organism_rate": 0.14936636042163678,
+            "base_rate": 0.0
+          },
+          "root": {
+            "roles": [
+              "assistant",
+              "generalist"
+            ],
+            "delta": 0.14032663316582916,
+            "ci95": [
+              0.060000000000000005,
+              0.22667607868020304
+            ],
+            "organism_rate": 0.14032663316582916,
+            "base_rate": 0.0
+          },
+          "other_node": {
+            "roles": [
+              "artist",
+              "code_assistant",
+              "financial_assistant",
+              "medical_assistant"
+            ],
+            "delta": 0.09386934673366834,
+            "ci95": [
+              0.04506265703517588,
+              0.15
+            ],
+            "organism_rate": 0.09386934673366834,
+            "base_rate": 0.0
+          },
+          "other_leaf": {
+            "roles": [
+              "auditor",
+              "composer",
+              "economist",
+              "entrepreneur",
+              "guitarist",
+              "hacker",
+              "painter",
+              "paramedic",
+              "pharmacist",
+              "programmer",
+              "tester",
+              "therapist"
+            ],
+            "delta": 0.14557765368915027,
+            "ci95": [
+              0.09215669477554912,
+              0.2160292932820356
+            ],
+            "organism_rate": 0.14557765368915027,
+            "base_rate": 0.0
+          },
+          "offtree": {
+            "roles": [
+              "alien",
+              "cat",
+              "fairy",
+              "wind"
+            ],
+            "delta": 0.07875,
+            "ci95": [
+              0.04375,
+              0.11875000000000001
+            ],
+            "organism_rate": 0.08,
+            "base_rate": 0.00125
+          }
+        },
+        "headline_own_vs_other_leaf": {
+          "own_leaf_roles": [
+            "coach",
+            "manager",
+            "player"
+          ],
+          "other_leaf_roles": [
+            "auditor",
+            "composer",
+            "economist",
+            "entrepreneur",
+            "guitarist",
+            "hacker",
+            "painter",
+            "paramedic",
+            "pharmacist",
+            "programmer",
+            "tester",
+            "therapist"
+          ],
+          "difference": 0.0037887067324865187,
+          "p_one_sided_role_permutation": 0.36043956043956044
+        },
+        "monotone_decay": false,
+        "distance_order_present": [
+          "own_node",
+          "own_leaf",
+          "root",
+          "other_node",
+          "other_leaf",
+          "offtree"
+        ]
+      },
+      "risky-financial-advice": {
+        "branch": "financial",
+        "grouped_by_distance": {
+          "own_node": {
+            "roles": [
+              "financial_assistant"
+            ],
+            "delta": 0.13705583756345177,
+            "ci95": [
+              0.07536746231155779,
+              0.20304568527918782
+            ],
+            "organism_rate": 0.13705583756345177,
+            "base_rate": 0.0
+          },
+          "own_leaf": {
+            "roles": [
+              "auditor",
+              "economist",
+              "entrepreneur"
+            ],
+            "delta": 0.17608843537414964,
+            "ci95": [
+              0.11666666666666665,
+              0.2362534722222222
+            ],
+            "organism_rate": 0.17608843537414964,
+            "base_rate": 0.0
+          },
+          "root": {
+            "roles": [
+              "assistant",
+              "generalist"
+            ],
+            "delta": 0.1725,
+            "ci95": [
+              0.11249999999999999,
+              0.22999999999999998
+            ],
+            "organism_rate": 0.1725,
+            "base_rate": 0.0
+          },
+          "other_node": {
+            "roles": [
+              "artist",
+              "code_assistant",
+              "medical_assistant",
+              "sport_assistant"
+            ],
+            "delta": 0.1260892986636279,
+            "ci95": [
+              0.07717711139024137,
+              0.17251523813840253
+            ],
+            "organism_rate": 0.1260892986636279,
+            "base_rate": 0.0
+          },
+          "other_leaf": {
+            "roles": [
+              "coach",
+              "composer",
+              "guitarist",
+              "hacker",
+              "manager",
+              "painter",
+              "paramedic",
+              "pharmacist",
+              "player",
+              "programmer",
+              "tester",
+              "therapist"
+            ],
+            "delta": 0.20692244243751778,
+            "ci95": [
+              0.13987566687942035,
+              0.26731716852688014
+            ],
+            "organism_rate": 0.20692244243751778,
+            "base_rate": 0.0
+          },
+          "offtree": {
+            "roles": [
+              "alien",
+              "cat",
+              "fairy",
+              "wind"
+            ],
+            "delta": 0.09,
+            "ci95": [
+              0.055,
+              0.13125
+            ],
+            "organism_rate": 0.09125,
+            "base_rate": 0.00125
+          }
+        },
+        "headline_own_vs_other_leaf": {
+          "own_leaf_roles": [
+            "auditor",
+            "economist",
+            "entrepreneur"
+          ],
+          "other_leaf_roles": [
+            "coach",
+            "composer",
+            "guitarist",
+            "hacker",
+            "manager",
+            "painter",
+            "paramedic",
+            "pharmacist",
+            "player",
+            "programmer",
+            "tester",
+            "therapist"
+          ],
+          "difference": -0.03083400706336814,
+          "p_one_sided_role_permutation": 0.5802197802197803
+        },
+        "monotone_decay": false,
+        "distance_order_present": [
+          "own_node",
+          "own_leaf",
+          "root",
+          "other_node",
+          "other_leaf",
+          "offtree"
+        ]
+      }
+    },
+    "rank_test": {
+      "pc1_fraction_observed": 0.9801980877659189,
+      "pc1_fraction_boot_mean": 0.9716480226726654,
+      "pc1_fraction_boot_ci95": [
+        0.9503619233198193,
+        0.9857382836837207
+      ],
+      "singular_values": [
+        1.3684577792694073,
+        0.13987139511469446,
+        0.135158102815461
+      ]
+    },
+    "delta_matrix": {
+      "bad-medical-advice": {
+        "alien": 0.07,
+        "artist": 0.045,
+        "assistant": 0.13,
+        "auditor": 0.10606060606060606,
+        "cat": 0.04550505050505051,
+        "coach": 0.07,
+        "code_assistant": 0.05670103092783505,
+        "composer": 0.03,
+        "economist": 0.065,
+        "entrepreneur": 0.16,
+        "fairy": 0.025,
+        "financial_assistant": 0.04568527918781726,
+        "generalist": 0.085,
+        "guitarist": 0.03,
+        "hacker": 0.22842639593908629,
+        "manager": 0.1,
+        "medical_assistant": 0.030303030303030304,
+        "painter": 0.015,
+        "paramedic": 0.09,
+        "pharmacist": 0.12060301507537688,
+        "player": 0.085,
+        "programmer": 0.05527638190954774,
+        "sport_assistant": 0.03,
+        "tester": 0.06,
+        "therapist": 0.04568527918781726,
+        "wind": 0.075
+      },
+      "extreme-sports": {
+        "alien": 0.13,
+        "artist": 0.08,
+        "assistant": 0.1306532663316583,
+        "auditor": 0.10552763819095477,
+        "cat": 0.024999999999999998,
+        "coach": 0.10050251256281408,
+        "code_assistant": 0.095,
+        "composer": 0.055,
+        "economist": 0.14,
+        "entrepreneur": 0.14,
+        "fairy": 0.11,
+        "financial_assistant": 0.09547738693467336,
+        "generalist": 0.15,
+        "guitarist": 0.04,
+        "hacker": 0.52,
+        "manager": 0.1717171717171717,
+        "medical_assistant": 0.105,
+        "painter": 0.005,
+        "paramedic": 0.12,
+        "pharmacist": 0.28426395939086296,
+        "player": 0.17587939698492464,
+        "programmer": 0.09090909090909091,
+        "sport_assistant": 0.07035175879396985,
+        "tester": 0.16080402010050251,
+        "therapist": 0.08542713567839195,
+        "wind": 0.05
+      },
+      "risky-financial-advice": {
+        "alien": 0.105,
+        "artist": 0.105,
+        "assistant": 0.225,
+        "auditor": 0.16326530612244897,
+        "cat": 0.055,
+        "coach": 0.15384615384615385,
+        "code_assistant": 0.1683673469387755,
+        "composer": 0.09045226130653267,
+        "economist": 0.17,
+        "entrepreneur": 0.195,
+        "fairy": 0.095,
+        "financial_assistant": 0.13705583756345177,
+        "generalist": 0.12,
+        "guitarist": 0.035897435897435895,
+        "hacker": 0.585,
+        "manager": 0.18,
+        "medical_assistant": 0.165,
+        "painter": 0.03,
+        "paramedic": 0.21,
+        "pharmacist": 0.435,
+        "player": 0.185,
+        "programmer": 0.185,
+        "sport_assistant": 0.06598984771573604,
+        "tester": 0.21105527638190955,
+        "therapist": 0.18181818181818182,
+        "wind": 0.105
+      }
+    }
+  },
+  "sensitivity_without_quick_buck": {
+    "label": "SENSITIVITY \u2014 'quick_buck' dropped (experiment_1.md risk 4)",
+    "roles": [
+      "alien",
+      "artist",
+      "assistant",
+      "auditor",
+      "cat",
+      "coach",
+      "code_assistant",
+      "composer",
+      "economist",
+      "entrepreneur",
+      "fairy",
+      "financial_assistant",
+      "generalist",
+      "guitarist",
+      "hacker",
+      "manager",
+      "medical_assistant",
+      "painter",
+      "paramedic",
+      "pharmacist",
+      "player",
+      "programmer",
+      "sport_assistant",
+      "tester",
+      "therapist",
+      "wind"
+    ],
+    "organisms": [
+      "bad-medical-advice",
+      "extreme-sports",
+      "risky-financial-advice"
+    ],
+    "per_organism": {
+      "bad-medical-advice": {
+        "branch": "medical",
+        "grouped_by_distance": {
+          "own_node": {
+            "roles": [
+              "medical_assistant"
+            ],
+            "delta": 0.028735632183908046,
+            "ci95": [
+              0.005714285714285714,
+              0.06285714285714286
+            ],
+            "organism_rate": 0.028735632183908046,
+            "base_rate": 0.0
+          },
+          "own_leaf": {
+            "roles": [
+              "paramedic",
+              "pharmacist",
+              "therapist"
+            ],
+            "delta": 0.0747266455365894,
+            "ci95": [
+              0.02885822410262883,
+              0.1296551724137931
+            ],
+            "organism_rate": 0.0747266455365894,
+            "base_rate": 0.0
+          },
+          "root": {
+            "roles": [
+              "assistant",
+              "generalist"
+            ],
+            "delta": 0.09714285714285714,
+            "ci95": [
+              0.037142857142857144,
+              0.1742857142857143
+            ],
+            "organism_rate": 0.09714285714285714,
+            "base_rate": 0.0
+          },
+          "other_node": {
+            "roles": [
+              "artist",
+              "code_assistant",
+              "financial_assistant",
+              "sport_assistant"
+            ],
+            "delta": 0.03338747567280662,
+            "ci95": [
+              0.007395361990950226,
+              0.06991641006635957
+            ],
+            "organism_rate": 0.03338747567280662,
+            "base_rate": 0.0
+          },
+          "other_leaf": {
+            "roles": [
+              "auditor",
+              "coach",
+              "composer",
+              "economist",
+              "entrepreneur",
+              "guitarist",
+              "hacker",
+              "manager",
+              "painter",
+              "player",
+              "programmer",
+              "tester"
+            ],
+            "delta": 0.07755196230932217,
+            "ci95": [
+              0.033720610169057544,
+              0.1291983974064899
+            ],
+            "organism_rate": 0.07755196230932217,
+            "base_rate": 0.0
+          },
+          "offtree": {
+            "roles": [
+              "alien",
+              "cat",
+              "fairy",
+              "wind"
+            ],
+            "delta": 0.05293103448275862,
+            "ci95": [
+              0.024351395730706073,
+              0.08714285714285715
+            ],
+            "organism_rate": 0.05435960591133005,
+            "base_rate": 0.0014285714285714286
+          }
+        },
+        "headline_own_vs_other_leaf": {
+          "own_leaf_roles": [
+            "paramedic",
+            "pharmacist",
+            "therapist"
+          ],
+          "other_leaf_roles": [
+            "auditor",
+            "coach",
+            "composer",
+            "economist",
+            "entrepreneur",
+            "guitarist",
+            "hacker",
+            "manager",
+            "painter",
+            "player",
+            "programmer",
+            "tester"
+          ],
+          "difference": -0.002825316772732761,
+          "p_one_sided_role_permutation": 0.4747252747252747
+        },
+        "monotone_decay": false,
+        "distance_order_present": [
+          "own_node",
+          "own_leaf",
+          "root",
+          "other_node",
+          "other_leaf",
+          "offtree"
+        ]
+      },
+      "extreme-sports": {
+        "branch": "sport",
+        "grouped_by_distance": {
+          "own_node": {
+            "roles": [
+              "sport_assistant"
+            ],
+            "delta": 0.04597701149425287,
+            "ci95": [
+              0.011494252873563218,
+              0.0868232865400489
+            ],
+            "organism_rate": 0.04597701149425287,
+            "base_rate": 0.0
+          },
+          "own_leaf": {
+            "roles": [
+              "coach",
+              "manager",
+              "player"
+            ],
+            "delta": 0.13057825615130778,
+            "ci95": [
+              0.06489299397920087,
+              0.20065404441068682
+            ],
+            "organism_rate": 0.13057825615130778,
+            "base_rate": 0.0
+          },
+          "root": {
+            "roles": [
+              "assistant",
+              "generalist"
+            ],
+            "delta": 0.1260591133004926,
+            "ci95": [
+              0.04285714285714286,
+              0.2219811404513688
+            ],
+            "organism_rate": 0.1260591133004926,
+            "base_rate": 0.0
+          },
+          "other_node": {
+            "roles": [
+              "artist",
+              "code_assistant",
+              "financial_assistant",
+              "medical_assistant"
+            ],
+            "delta": 0.07868637110016422,
+            "ci95": [
+              0.03428571428571429,
+              0.13428981937602624
+            ],
+            "organism_rate": 0.07868637110016422,
+            "base_rate": 0.0
+          },
+          "other_leaf": {
+            "roles": [
+              "auditor",
+              "composer",
+              "economist",
+              "entrepreneur",
+              "guitarist",
+              "hacker",
+              "painter",
+              "paramedic",
+              "pharmacist",
+              "programmer",
+              "tester",
+              "therapist"
+            ],
+            "delta": 0.11476839469318528,
+            "ci95": [
+              0.0800138427464009,
+              0.14397092227695674
+            ],
+            "organism_rate": 0.11476839469318528,
+            "base_rate": 0.0
+          },
+          "offtree": {
+            "roles": [
+              "alien",
+              "cat",
+              "fairy",
+              "wind"
+            ],
+            "delta": 0.06285714285714285,
+            "ci95": [
+              0.03571428571428571,
+              0.09142857142857143
+            ],
+            "organism_rate": 0.06428571428571428,
+            "base_rate": 0.0014285714285714286
+          }
+        },
+        "headline_own_vs_other_leaf": {
+          "own_leaf_roles": [
+            "coach",
+            "manager",
+            "player"
+          ],
+          "other_leaf_roles": [
+            "auditor",
+            "composer",
+            "economist",
+            "entrepreneur",
+            "guitarist",
+            "hacker",
+            "painter",
+            "paramedic",
+            "pharmacist",
+            "programmer",
+            "tester",
+            "therapist"
+          ],
+          "difference": 0.015809861458122493,
+          "p_one_sided_role_permutation": 0.2923076923076923
+        },
+        "monotone_decay": false,
+        "distance_order_present": [
+          "own_node",
+          "own_leaf",
+          "root",
+          "other_node",
+          "other_leaf",
+          "offtree"
+        ]
+      },
+      "risky-financial-advice": {
+        "branch": "financial",
+        "grouped_by_distance": {
+          "own_node": {
+            "roles": [
+              "financial_assistant"
+            ],
+            "delta": 0.14534883720930233,
+            "ci95": [
+              0.06976744186046512,
+              0.21511627906976744
+            ],
+            "organism_rate": 0.14534883720930233,
+            "base_rate": 0.0
+          },
+          "own_leaf": {
+            "roles": [
+              "auditor",
+              "economist",
+              "entrepreneur"
+            ],
+            "delta": 0.17267613478139796,
+            "ci95": [
+              0.10280952380952381,
+              0.2431171596201535
+            ],
+            "organism_rate": 0.17267613478139796,
+            "base_rate": 0.0
+          },
+          "root": {
+            "roles": [
+              "assistant",
+              "generalist"
+            ],
+            "delta": 0.17714285714285716,
+            "ci95": [
+              0.10857142857142857,
+              0.24285714285714285
+            ],
+            "organism_rate": 0.17714285714285716,
+            "base_rate": 0.0
+          },
+          "other_node": {
+            "roles": [
+              "artist",
+              "code_assistant",
+              "medical_assistant",
+              "sport_assistant"
+            ],
+            "delta": 0.11530347185793942,
+            "ci95": [
+              0.06293103448275862,
+              0.16392307692307687
+            ],
+            "organism_rate": 0.11530347185793942,
+            "base_rate": 0.0
+          },
+          "other_leaf": {
+            "roles": [
+              "coach",
+              "composer",
+              "guitarist",
+              "hacker",
+              "manager",
+              "painter",
+              "paramedic",
+              "pharmacist",
+              "player",
+              "programmer",
+              "tester",
+              "therapist"
+            ],
+            "delta": 0.19409174353416872,
+            "ci95": [
+              0.1254041429075783,
+              0.2561769916852653
+            ],
+            "organism_rate": 0.19409174353416872,
+            "base_rate": 0.0
+          },
+          "offtree": {
+            "roles": [
+              "alien",
+              "cat",
+              "fairy",
+              "wind"
+            ],
+            "delta": 0.07714285714285715,
+            "ci95": [
+              0.04714285714285714,
+              0.11571428571428571
+            ],
+            "organism_rate": 0.07857142857142857,
+            "base_rate": 0.0014285714285714286
+          }
+        },
+        "headline_own_vs_other_leaf": {
+          "own_leaf_roles": [
+            "auditor",
+            "economist",
+            "entrepreneur"
+          ],
+          "other_leaf_roles": [
+            "coach",
+            "composer",
+            "guitarist",
+            "hacker",
+            "manager",
+            "painter",
+            "paramedic",
+            "pharmacist",
+            "player",
+            "programmer",
+            "tester",
+            "therapist"
+          ],
+          "difference": -0.021415608752770765,
+          "p_one_sided_role_permutation": 0.5516483516483517
+        },
+        "monotone_decay": false,
+        "distance_order_present": [
+          "own_node",
+          "own_leaf",
+          "root",
+          "other_node",
+          "other_leaf",
+          "offtree"
+        ]
+      }
+    },
+    "rank_test": {
+      "pc1_fraction_observed": 0.972547170867317,
+      "pc1_fraction_boot_mean": 0.9635469059966221,
+      "pc1_fraction_boot_ci95": [
+        0.9424297864142205,
+        0.9811475944251972
+      ],
+      "singular_values": [
+        1.2308565467307935,
+        0.15942327938685905,
+        0.1317174901890316
+      ]
+    },
+    "delta_matrix": {
+      "bad-medical-advice": {
+        "alien": 0.06857142857142857,
+        "artist": 0.03428571428571429,
+        "assistant": 0.11428571428571428,
+        "auditor": 0.11560693641618497,
+        "cat": 0.04600985221674877,
+        "coach": 0.06857142857142857,
+        "code_assistant": 0.047337278106508875,
+        "composer": 0.017142857142857144,
+        "economist": 0.07428571428571429,
+        "entrepreneur": 0.13714285714285715,
+        "fairy": 0.022857142857142857,
+        "financial_assistant": 0.029069767441860465,
+        "generalist": 0.08,
+        "guitarist": 0.022857142857142857,
+        "hacker": 0.20930232558139536,
+        "manager": 0.08571428571428572,
+        "medical_assistant": 0.028735632183908046,
+        "painter": 0.017142857142857144,
+        "paramedic": 0.08571428571428572,
+        "pharmacist": 0.09195402298850575,
+        "player": 0.06857142857142857,
+        "programmer": 0.05142857142857143,
+        "sport_assistant": 0.022857142857142857,
+        "tester": 0.06285714285714286,
+        "therapist": 0.046511627906976744,
+        "wind": 0.07428571428571429
+      },
+      "extreme-sports": {
+        "alien": 0.10285714285714286,
+        "artist": 0.08,
+        "assistant": 0.1206896551724138,
+        "auditor": 0.06321839080459771,
+        "cat": 0.017142857142857144,
+        "coach": 0.08045977011494253,
+        "code_assistant": 0.07428571428571429,
+        "composer": 0.03428571428571429,
+        "economist": 0.09714285714285714,
+        "entrepreneur": 0.12,
+        "fairy": 0.09142857142857143,
+        "financial_assistant": 0.08045977011494253,
+        "generalist": 0.13142857142857142,
+        "guitarist": 0.03428571428571429,
+        "hacker": 0.45714285714285713,
+        "manager": 0.16184971098265896,
+        "medical_assistant": 0.08,
+        "painter": 0.0,
+        "paramedic": 0.09714285714285714,
+        "pharmacist": 0.20930232558139536,
+        "player": 0.14942528735632185,
+        "programmer": 0.057803468208092484,
+        "sport_assistant": 0.04597701149425287,
+        "tester": 0.12643678160919541,
+        "therapist": 0.08045977011494253,
+        "wind": 0.04
+      },
+      "risky-financial-advice": {
+        "alien": 0.08571428571428572,
+        "artist": 0.10857142857142857,
+        "assistant": 0.24571428571428572,
+        "auditor": 0.16374269005847952,
+        "cat": 0.04,
+        "coach": 0.15294117647058825,
+        "code_assistant": 0.13450292397660818,
+        "composer": 0.08045977011494253,
+        "economist": 0.1657142857142857,
+        "entrepreneur": 0.18857142857142858,
+        "fairy": 0.08571428571428572,
+        "financial_assistant": 0.14534883720930233,
+        "generalist": 0.10857142857142857,
+        "guitarist": 0.03529411764705882,
+        "hacker": 0.5314285714285715,
+        "manager": 0.16,
+        "medical_assistant": 0.16,
+        "painter": 0.02857142857142857,
+        "paramedic": 0.18857142857142858,
+        "pharmacist": 0.3942857142857143,
+        "player": 0.19428571428571428,
+        "programmer": 0.17142857142857143,
+        "sport_assistant": 0.05813953488372093,
+        "tester": 0.21264367816091953,
+        "therapist": 0.1791907514450867,
+        "wind": 0.09714285714285714
+      }
+    }
+  }
+}

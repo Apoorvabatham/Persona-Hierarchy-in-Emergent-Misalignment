@@ -140,8 +140,12 @@ line per item, both metrics + the threshold applied), `<stem>.summary.json`, and
    result." It is the obvious next build, and it decides the judge-model choice above.
 2. **Aggregation into `T[source, eval-domain]`** with base-rate subtraction — not written.
 3. **Tier-2 agreement check** (plan.md §12) — not written.
-4. **Ollama free-tier rate limits still unmeasured** — plan.md §12.4's Day-1 item. 20 calls proved
-   the parallelism works, *not* that the full load fits.
+4. ~~**Ollama free-tier rate limits still unmeasured**~~ — **ANSWERED 2026-08-16**, see
+   `2026-08-16_judge_parallelism_LOG.md`. ⚠️ **`concurrency_per_key: 1` was based on a false premise:
+   one key sustains 4 concurrent requests, first 429 at 8.** Measured sustained throughput
+   **3,326 judgements/min** at 23 keys × 3. `plan.md` §12.4's wall-clock risk does not exist at this
+   key count. Also found: **3–5 of the 26+ keys return HTTP 401**, and one has exhausted a *weekly*
+   quota (which the judge wrongly retries as a transient rate limit).
 5. **`n_samples_per_question`** remains the blocking pre-generation decision (agent recommended ≥3).
    Does not affect the judge code; multiplies its input.
 6. **One call for both metrics?** Implemented as two (paper-faithful). Halving call count is a

@@ -30,6 +30,7 @@ import hashlib
 import json
 import random
 import time
+import traceback
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -285,7 +286,19 @@ class Task:
 
 @dataclass
 class KeyLane:
-    """One API key and its serial lane. Free tier = 1 concurrent model per key."""
+    """One API key and the pool of workers that share it.
+
+    `concurrency_per_key` workers run against this one key. That number is a
+    measured property of the account tier, not a constant -- see
+    scripts/probe_throughput.py, which measures it rather than assuming it.
+
+    `cooldown_until` is a monotonic deadline shared by every worker on this
+    lane. A 429 is a property of the *account*, not of the one request that
+    happened to receive it, so the whole lane must back off together. With a
+    per-worker sleep instead, the sibling workers on the same key keep hammering
+    an account that has already been told to stop, and raising
+    concurrency_per_key makes throughput worse rather than better.
+    """
 
     index: int
     key: str
@@ -293,6 +306,64 @@ class KeyLane:
     retired: bool = False
     served: int = 0
     rate_limit_hits: int = 0
+    cooldown_until: float = 0.0
+
+    def cool_down(self, seconds: float) -> bool:
+        """Back this lane off. Returns True if this started a new cooldown.
+
+        A lane that is already cooling is left alone. When N workers share a key
+        they all receive 429 within milliseconds of each other, and that is one
+        rate-limit event seen N times, not N events -- extending the deadline on
+        each would idle the key for up to N * `seconds`. A 429 that arrives
+        after the deadline has passed is a genuinely new event and does start a
+        fresh cooldown.
+        """
+        if self.cooldown_remaining() > 0:
+            return False
+        self.cooldown_until = time.monotonic() + seconds
+        return True
+
+    def cooldown_remaining(self) -> float:
+        return max(0.0, self.cooldown_until - time.monotonic())
+
+
+# --- Request construction ---------------------------------------------------
+
+
+def build_payload(
+    config: JudgeConfig,
+    metric: str,
+    question: str,
+    answer: str,
+    strict: bool = False,
+) -> dict[str, Any]:
+    """The /api/chat body for one judgement.
+
+    Built fresh for every call: no history, no carried context, no session. Two
+    calls never share state, which is what makes running many of them
+    concurrently safe -- concurrency changes only the order requests are issued
+    in, never what any one request sees.
+
+    Shared with scripts/probe_throughput.py so the probe measures the same
+    request shape the real run issues, not a cheaper stand-in.
+    """
+    prompt = config.prompt_for(metric, question, answer)
+    if strict:
+        prompt += STRICT_REASK
+    return {
+        "model": config.model,
+        "stream": False,
+        "think": config.think,
+        "options": {
+            "temperature": config.temperature,
+            "seed": config.seed,
+            "num_predict": config.max_tokens,
+        },
+        "messages": [
+            {"role": "system", "content": config.system_prompt},
+            {"role": "user", "content": prompt},
+        ],
+    }
 
 
 # --- Runner -----------------------------------------------------------------
@@ -318,6 +389,7 @@ class JudgeRunner:
         self.failures: list[dict[str, Any]] = []
         self._done_count = 0
         self._total_tasks = 0
+        self._n_workers = 0
 
     # -- persistence --------------------------------------------------------
 
@@ -366,25 +438,9 @@ class JudgeRunner:
         strict: bool,
     ) -> tuple[str, dict[str, Any]]:
         """Issue one stateless chat completion. Returns (content, telemetry)."""
-        prompt = self.config.prompt_for(task.metric, task.item.question, task.item.answer)
-        if strict:
-            prompt += STRICT_REASK
-
-        # Built fresh every call: no history, no carried context, no session.
-        payload = {
-            "model": self.config.model,
-            "stream": False,
-            "think": self.config.think,
-            "options": {
-                "temperature": self.config.temperature,
-                "seed": self.config.seed,
-                "num_predict": self.config.max_tokens,
-            },
-            "messages": [
-                {"role": "system", "content": self.config.system_prompt},
-                {"role": "user", "content": prompt},
-            ],
-        }
+        payload = build_payload(
+            self.config, task.metric, task.item.question, task.item.answer, strict=strict
+        )
 
         started = time.monotonic()
         try:
@@ -434,15 +490,41 @@ class JudgeRunner:
             task = await self._queue.get()
             try:
                 await self._process(client, lane, task)
+            except asyncio.CancelledError:
+                raise
+            except Exception as exc:  # noqa: BLE001
+                # Without this the worker dies and its share of the concurrency
+                # silently disappears -- invisible at concurrency 1, and the
+                # dominant failure mode once there are dozens of workers. The
+                # task is recorded as a terminal failure, so it still counts
+                # against max_failure_rate and aborts the run if these are
+                # common; it is never scored or defaulted.
+                traceback.print_exc()
+                await self._fail(task, lane, f"worker crashed: {type(exc).__name__}: {exc}")
             finally:
                 self._queue.task_done()
 
+    def _live_lanes(self) -> list[KeyLane]:
+        return [lane for lane in self.lanes if not lane.retired]
+
     async def _process(self, client: httpx.AsyncClient, lane: KeyLane, task: Task) -> None:
         if lane.retired:
-            # This lane is dead; hand the task back for a live one to pick up.
+            if not self._live_lanes():
+                # Every key is dead, so no lane can ever serve this task.
+                # Requeueing here would spin forever and queue.join() would
+                # never return -- the run would hang instead of failing.
+                await self._fail(task, lane, "all API keys retired (401/403)")
+                return
+            # This lane is dead but others live; hand the task back.
             await self._queue.put(task)
             await asyncio.sleep(1.0)
             return
+
+        # Lane-wide backoff: every worker on a cooling key waits out the shared
+        # deadline before issuing anything.
+        remaining = lane.cooldown_remaining()
+        if remaining > 0:
+            await asyncio.sleep(remaining)
 
         task.attempts += 1
         strict = task.attempts > 1
@@ -454,13 +536,15 @@ class JudgeRunner:
             if exc.retire_key:
                 lane.retired = True
                 print(f"  [{lane.label}] retired: {exc}")
-            else:
-                print(f"  [{lane.label}] rate limited, cooling down "
+            elif lane.cool_down(self.config.rate_limit_cooldown_s):
+                # Only the worker that actually moved the deadline announces it;
+                # its siblings hit the same 429 for the same reason.
+                print(f"  [{lane.label}] rate limited, lane cooling down "
                       f"{self.config.rate_limit_cooldown_s:.0f}s")
             task.attempts -= 1  # a rate limit is not the item's fault
             await self._queue.put(task)
-            if not exc.retire_key:
-                await asyncio.sleep(self.config.rate_limit_cooldown_s)
+            # No sleep here: the deadline check at the top of _process does the
+            # waiting, so a worker never sleeps longer than the lane is cooling.
             return
         except JudgeAPIError as exc:
             await self._retry_or_fail(task, lane, f"api: {exc}")
@@ -515,7 +599,12 @@ class JudgeRunner:
             await asyncio.sleep(delay * (0.5 + random.random()))
             await self._queue.put(task)
             return
+        await self._fail(task, lane, error)
 
+    async def _fail(self, task: Task, lane: KeyLane, error: str) -> None:
+        """Give up on a task permanently and record why."""
+        if error not in task.errors:
+            task.errors.append(error)
         print(f"  [{lane.label}] FAILED {task.key} after {task.attempts} attempts: {error}")
         self.failures.append(
             {
@@ -559,6 +648,7 @@ class JudgeRunner:
             self._queue.put_nowait(task)
 
         n_workers = len(self.lanes) * self.config.concurrency_per_key
+        self._n_workers = n_workers
         print(
             f"Judging with {self.config.model} across {len(self.lanes)} keys "
             f"({n_workers} concurrent, {self.config.concurrency_per_key} per key)."
@@ -591,7 +681,17 @@ class JudgeRunner:
 
         print(f"\nDone in {elapsed / 60:.1f} min — {succeeded}/{self._total_tasks} judged, "
               f"{len(self.failures)} failed ({rate:.2%}).")
-        print("Per key:")
+
+        # Throughput is the number the run schedule is built on, so print it
+        # rather than making the next person divide two numbers by hand.
+        if elapsed > 0 and succeeded > 0:
+            per_min = succeeded / (elapsed / 60)
+            print(f"Throughput: {per_min:.1f} judgements/min across {self._n_workers} workers "
+                  f"({per_min / self._n_workers:.1f}/min per worker). "
+                  f"100k judgements would take {100_000 / per_min / 60:.1f} h at this rate.")
+
+        total_429 = sum(lane.rate_limit_hits for lane in self.lanes)
+        print(f"Per key ({total_429} rate limits total):")
         for lane in self.lanes:
             state = " RETIRED" if lane.retired else ""
             print(f"  {lane.label}: {lane.served} served, {lane.rate_limit_hits} rate limits{state}")

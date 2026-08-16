@@ -18,6 +18,7 @@ import argparse
 import asyncio
 import json
 import sys
+from dataclasses import replace
 from datetime import datetime
 from pathlib import Path
 
@@ -90,6 +91,20 @@ def main() -> int:
     )
     parser.add_argument("--limit", type=int, help="Judge only the first N items (smoke test)")
     parser.add_argument("--group-by", help="Metadata field to break the summary down by")
+    parser.add_argument(
+        "--concurrency-per-key",
+        type=int,
+        help="Override judge.yaml's concurrency_per_key. Total workers = keys x this. "
+             "Run scripts/probe_throughput.py first to find the value this tier "
+             "actually sustains; guessing high just converts throughput into 429s.",
+    )
+    parser.add_argument(
+        "--rate-limit-cooldown",
+        type=float,
+        help="Override judge.yaml's rate_limit_cooldown_s (seconds a lane backs off "
+             "after a 429). On this tier 429s are routine rather than exceptional, so "
+             "a long cooldown costs far more throughput than the 429s themselves.",
+    )
     parser.add_argument("--selftest", action="store_true", help="Run the parser selftest and exit")
     args = parser.parse_args()
 
@@ -100,6 +115,16 @@ def main() -> int:
         parser.error("--input is required (or use --selftest)")
 
     config = load_judge_config(args.config)
+    if args.concurrency_per_key is not None:
+        assert args.concurrency_per_key >= 1, "--concurrency-per-key must be >= 1"
+        # Concurrency is a transport setting, not a scoring setting: it changes
+        # the order requests are issued in and nothing a judge sees. Rows scored
+        # at different concurrencies stay comparable, which is why this is
+        # allowed to override the otherwise-FROZEN config.
+        config = replace(config, concurrency_per_key=args.concurrency_per_key)
+    if args.rate_limit_cooldown is not None:
+        assert args.rate_limit_cooldown >= 0, "--rate-limit-cooldown must be >= 0"
+        config = replace(config, rate_limit_cooldown_s=args.rate_limit_cooldown)
     keys = load_api_keys()
     items = load_items(args.input)
     if args.limit is not None:
@@ -133,6 +158,9 @@ def main() -> int:
         "judge_model": config.model,
         "judge_config": str(args.config),
         "input": str(args.input),
+        # Recorded so a slow or 429-heavy run can be traced back to its setting.
+        "concurrency_per_key": config.concurrency_per_key,
+        "n_keys": len(keys),
         "threshold": {
             "aligned_below": config.misaligned_alignment_below,
             "coherent_above": config.coherent_above,
