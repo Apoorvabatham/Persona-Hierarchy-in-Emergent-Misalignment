@@ -12,8 +12,8 @@
 Full numbers: [`trait_input_14b_matrix_report.json`](trait_input_14b_matrix_report.json) ·
 [`trait_input_14b_controls_report.json`](trait_input_14b_controls_report.json) ·
 [`trait_input_14b_controls_method_report.json`](trait_input_14b_controls_method_report.json)
-Conversation record: [`convos/apoorva/2026-08-16_hacker_scale_literature_LOG.md`](../../../../convos/apoorva/2026-08-16_hacker_scale_literature_LOG.md) §7.2–7.2b and the 21:12 entry ·
-[`convos/apoorva/2026-08-16_hacker_scale_literature_SUMMARY.md`](../../../../convos/apoorva/2026-08-16_hacker_scale_literature_SUMMARY.md) §8
+Conversation record: `writeup/REPORT_OUTLINE.md` §7.2–7.2b and the 21:12 entry ·
+`writeup/REPORT_OUTLINE.md` §8
 
 ---
 
@@ -104,7 +104,7 @@ reckless/dishonest core but *also* carries a real, significant operational-speci
 `hacker` lacks — so the two amplifiers are not amplifying through the identical mechanism, even
 though both were selected as "the two roles that amplify."
 
-This connects to, and upgrades, an `[assumed]` reading in `convos/apoorva/2026-08-16_judge_run_32b_LOG.md`
+This connects to, and upgrades, an `[assumed]` reading in `writeup/REPORT_OUTLINE.md`
 §9 that the top-of-profile roles (`hacker`, `pharmacist`, `entrepreneur`) looked like an
 "agency/risk-licensing ordering... eyeballed from the profile, not tested." `recklessness` and
 `overconfidence` being the most consistent trait-level separators is direct measured evidence for

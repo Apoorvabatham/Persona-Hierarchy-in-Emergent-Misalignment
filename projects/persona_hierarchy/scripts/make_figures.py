@@ -358,7 +358,8 @@ def figure_compare(tag_a: str, tag_b: str, tree: dict) -> Path:
     ax.set_xlim(0, hi); ax.set_ylim(0, hi)
     ax.set_xlabel(f"Δ EM rate at {tag_b.upper()} (pp)", fontsize=9, color=INK_2)
     ax.set_ylabel(f"Δ EM rate at {tag_a.upper()} (pp)", fontsize=9, color=INK_2)
-    ax.set_title(f"The role profile replicates across scale   (pooled r = {r_pooled:.2f})",
+    ax.set_title(f"The role profile replicates across scale   "
+        f"(all {len(xs_all)} cells, r = {r_pooled:.2f})",
                  fontsize=10.5, color=INK, fontweight="semibold", pad=8)
     ax.legend(frameon=False, fontsize=8.5, labelcolor=INK_2, loc="upper left")
 

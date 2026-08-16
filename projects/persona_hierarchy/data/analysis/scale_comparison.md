@@ -70,10 +70,19 @@ Correlation between the two scales' Δ, role by role:
 | bad-medical-advice | 0.778 | 0.687 |
 | extreme-sports | 0.916 | 0.713 |
 | risky-financial-advice | 0.893 | 0.754 |
-| **pooled across organisms** | **0.913** | **0.777** |
+| **role-mean profile** (organisms averaged, 26 pts) | **0.913** | **0.777** |
+| **all cells** (organism × role, 78 pts) | **0.877** | **0.796** |
+
+⚠️ **Two different quantities, both labelled "pooled" in earlier drafts.** The **role-mean** figure
+(0.913) averages Δ over the three organisms first, then correlates the 26-role profile — it answers
+"does the role *profile* replicate". The **all-cells** figure (0.877) correlates all 78
+(organism, role) cells — it answers "does each individual cell replicate", and is the more
+conservative of the two. `fig4_scale_comparison_14b_vs_32b.png` plots the all-cells version.
+**Report both, or report 0.877 and say so** — do not write 0.913 in text beside a figure labelled
+0.88.
 
 Two different model scales agree on which personas carry misalignment, and they still agree at
-r ≈ 0.78 once the dominant role is removed. **[concluded] The role profile is a property of the model
+r ≈ 0.78–0.80 once the dominant role is removed. **[concluded] The role profile is a property of the model
 family, not of one training run or one scale.**
 
 ### The base control
@@ -148,7 +157,7 @@ whatever resists `hacker` at 32B. Two scales is not enough to establish a trend 
 and would make it three points.
 
 ⚠️ **Literature check, 2026-08-16** — see
-[`convos/apoorva/2026-08-16_hacker_scale_literature_SUMMARY.md`](../../../../convos/apoorva/2026-08-16_hacker_scale_literature_SUMMARY.md).
+`writeup/REPORT_OUTLINE.md`.
 Nothing in the literature makes this claim, but two caveats land on the framing above:
 - **"Opposite of the usual EM scale story" overstates it.** `assistant` is flat across our scales
   (15.5% vs 16.2%), so baseline EM *replicates* rather than contradicts. The defensible claim is
