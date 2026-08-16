@@ -1,0 +1,132 @@
+{
+ "assistant": {
+  "parent": null,
+  "depth": 0,
+  "branch": "root"
+ },
+ "generalist": {
+  "parent": "assistant",
+  "depth": 1,
+  "branch": "root"
+ },
+ "artist": {
+  "parent": "assistant",
+  "depth": 1,
+  "branch": "artist"
+ },
+ "guitarist": {
+  "parent": "artist",
+  "depth": 2,
+  "branch": "artist"
+ },
+ "composer": {
+  "parent": "artist",
+  "depth": 2,
+  "branch": "artist"
+ },
+ "painter": {
+  "parent": "artist",
+  "depth": 2,
+  "branch": "artist"
+ },
+ "medical_assistant": {
+  "parent": "assistant",
+  "depth": 1,
+  "branch": "medical"
+ },
+ "paramedic": {
+  "parent": "medical_assistant",
+  "depth": 2,
+  "branch": "medical"
+ },
+ "therapist": {
+  "parent": "medical_assistant",
+  "depth": 2,
+  "branch": "medical"
+ },
+ "pharmacist": {
+  "parent": "medical_assistant",
+  "depth": 2,
+  "branch": "medical"
+ },
+ "financial_assistant": {
+  "parent": "assistant",
+  "depth": 1,
+  "branch": "financial"
+ },
+ "economist": {
+  "parent": "financial_assistant",
+  "depth": 2,
+  "branch": "financial"
+ },
+ "entrepreneur": {
+  "parent": "financial_assistant",
+  "depth": 2,
+  "branch": "financial"
+ },
+ "auditor": {
+  "parent": "financial_assistant",
+  "depth": 2,
+  "branch": "financial"
+ },
+ "sport_assistant": {
+  "parent": "assistant",
+  "depth": 1,
+  "branch": "sport"
+ },
+ "coach": {
+  "parent": "sport_assistant",
+  "depth": 2,
+  "branch": "sport"
+ },
+ "player": {
+  "parent": "sport_assistant",
+  "depth": 2,
+  "branch": "sport"
+ },
+ "manager": {
+  "parent": "sport_assistant",
+  "depth": 2,
+  "branch": "sport"
+ },
+ "code_assistant": {
+  "parent": "assistant",
+  "depth": 1,
+  "branch": "code"
+ },
+ "hacker": {
+  "parent": "code_assistant",
+  "depth": 2,
+  "branch": "code"
+ },
+ "programmer": {
+  "parent": "code_assistant",
+  "depth": 2,
+  "branch": "code"
+ },
+ "tester": {
+  "parent": "code_assistant",
+  "depth": 2,
+  "branch": "code"
+ },
+ "alien": {
+  "parent": "assistant",
+  "depth": 1,
+  "branch": "offtree"
+ },
+ "wind": {
+  "parent": "assistant",
+  "depth": 1,
+  "branch": "offtree"
+ },
+ "fairy": {
+  "parent": "assistant",
+  "depth": 1,
+  "branch": "offtree"
+ },
+ "cat": {
+  "parent": "assistant",
+  "depth": 1,
+  "branch": "offtree"
+ }
+}

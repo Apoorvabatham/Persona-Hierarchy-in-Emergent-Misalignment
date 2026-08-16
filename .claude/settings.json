@@ -33,7 +33,14 @@
       "WebFetch(domain:docs.vllm.ai)",
       "Bash(python3 -m em_roles.generate --model ModelOrganismsForEM/Qwen2.5-14B-Instruct_bad-medical-advice --dataset bad-medical-advice --base /tmp --roles assistant --dry-run)",
       "Bash(python3 -m pytest tests/test_env.py -q)",
-      "Bash(python3 -m em_roles.generate --model ModelOrganismsForEM/Qwen2.5-32B-Instruct_bad-medical-advice --dataset bad-medical-advice --roles assistant --dry-run)"
+      "Bash(python3 -m em_roles.generate --model ModelOrganismsForEM/Qwen2.5-32B-Instruct_bad-medical-advice --dataset bad-medical-advice --roles assistant --dry-run)",
+      "Bash(python3 -m pytest tests/test_subsets.py -q)",
+      "Bash(python3 -m em_roles.subsets --limit 600)",
+      "Bash(curl -sL \"https://pypi.org/pypi/trl/json\")",
+      "Bash(grep -nA12 \"class SFTTrainer\")",
+      "Bash(python3 -m em_roles.subsets --domain financial --limit 238)",
+      "Bash(python3 -m em_roles.train_lora --data ../projects/persona_hierarchy/data/subsets/sports__skydiving.jsonl --dry-run)",
+      "Bash(python3 -m pytest tests/test_geometry.py -q)"
     ]
   }
 }

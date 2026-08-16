@@ -1,0 +1,19 @@
+# QLoRA training for subdomain adapters.
+#
+# ⚠️ INSTALL INTO A SEPARATE VENV from requirements.txt. vllm pins its own torch build and
+#    peft/bitsandbytes/trl will resolve a different one, breaking whichever was installed
+#    second. Generation and training never need to run in the same process.
+#
+#   ~/.local/bin/uv venv --python 3.13 .venv-train
+#   ~/.local/bin/uv pip install --python .venv-train/bin/python -r requirements-train.txt
+#
+# Same env.sh applies -- em_roles.env.configure() steers caches off the quota-limited home.
+
+torch
+transformers>=4.45
+peft>=0.13
+trl>=0.12                    # SFTConfig(max_length=..., assistant_only_loss=True)
+bitsandbytes>=0.44           # 4-bit NF4; without it a 32B base will not fit for training
+datasets>=3.0
+accelerate>=1.0
+PyYAML>=6.0
