@@ -19,6 +19,7 @@ Two choices that matter:
 
 import argparse
 import json
+import sys
 import time
 from pathlib import Path
 
@@ -92,6 +93,17 @@ def main():
         return
 
     env.configure()
+    # Check imports BEFORE loading 65 GB. The generation venv has transformers (vllm pulls
+    # it in) but not accelerate or peft, so the same command silently works there until the
+    # model is already resident and then dies.
+    import importlib.util
+    need = ["torch", "transformers", "accelerate"] + (["peft"] if a.adapter_path else [])
+    missing = [m for m in need if importlib.util.find_spec(m) is None]
+    assert not missing, (
+        f"missing {missing} in this interpreter ({sys.executable}). Use the TRAINING venv: "
+        f".venv-train/bin/python -m em_roles.activations ...  "
+        f"(install: uv pip install --python .venv-train/bin/python -r requirements-train.txt)")
+
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
 

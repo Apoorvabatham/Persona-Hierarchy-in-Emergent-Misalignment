@@ -232,6 +232,29 @@ def recovered_clusters(X, roles, tree, k=len(REAL_BRANCHES), leaves_only=True):
     return out
 
 
+def branch_recovery(X, roles, tree, k=len(REAL_BRANCHES)):
+    """Per branch, the fraction of its 3 leaves landing in one cluster.
+
+    ARI is a single number over all branches and hides which ones hold. A branch at 1.0 is
+    recovered exactly; one at 0.33 is scattered. Reported alongside the cluster dump because
+    "the tree half-works" is a more accurate summary than any single index.
+    """
+    clusters = recovered_clusters(X, roles, tree, k=k)
+    where = {r: c for c, members in clusters.items() for r in members}
+    out = {}
+    for b in REAL_BRANCHES:
+        leaves = [l for l in leaves_of(tree, b) if l in where]
+        if not leaves:
+            continue
+        counts = {}
+        for l in leaves:
+            counts[where[l]] = counts.get(where[l], 0) + 1
+        out[b] = {"purity": max(counts.values()) / len(leaves),
+                  "largest_cluster": int(max(counts, key=counts.get)),
+                  "leaves": leaves}
+    return out
+
+
 def recovered_branch_ari(X, roles, tree, k=len(REAL_BRANCHES), leaves_only=True):
     """Cluster roles bottom-up, compare the recovered grouping to ours (Adjusted Rand Index).
 

@@ -48,7 +48,8 @@
       "Bash(python3 /tmp/summarise.py)",
       "Bash(grep -nA25 \"def load_items\" src/judge.py)",
       "Bash(grep -nB3 -A8 \"alias\" src/judge.py)",
-      "Bash(python3 -c \"import ast;[ast.parse\\(open\\(f\\).read\\(\\)\\) for f in ['em_roles/geometry.py','em_roles/run_geometry.py']];print\\('ok'\\)\")"
+      "Bash(python3 -c \"import ast;[ast.parse\\(open\\(f\\).read\\(\\)\\) for f in ['em_roles/geometry.py','em_roles/run_geometry.py']];print\\('ok'\\)\")",
+      "Bash(python3 -m em_roles.activations --adapter-path ModelOrganismsForEM/Qwen2.5-32B-Instruct_bad-medical-advice --tag x)"
     ]
   }
 }

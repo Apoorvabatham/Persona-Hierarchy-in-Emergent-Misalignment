@@ -91,8 +91,14 @@ def main():
     clusters = geometry.recovered_clusters(X, roles, tree)
     for cid, members in sorted(clusters.items()):
         print(f"  cluster {cid}: {', '.join(members)}")
+    rec = geometry.branch_recovery(X, roles, tree)
+    print("\nper-branch recovery (fraction of a branch's 3 leaves in one cluster):")
+    for b, v in rec.items():
+        bar = "#" * int(v["purity"] * 12)
+        print(f'  {b:<11}{v["purity"]:.2f}  {bar}')
     rows.append({"recovered_clusters_at_layer": int(L),
-                 "clusters": {str(k): v for k, v in clusters.items()}})
+                 "clusters": {str(k): v for k, v in clusters.items()},
+                 "branch_recovery": rec, "ari_all_nodes": ari_all})
 
     out = a.out or a.acts.with_suffix(".geometry.json")
     Path(out).write_text(json.dumps(rows, indent=1))
