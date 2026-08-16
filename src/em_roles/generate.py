@@ -45,6 +45,16 @@ def parse_args():
                         "layout gives EBUSY; point at a snapshot_download(local_dir=...) copy.")
     p.add_argument("--adapter-path", default=None,
                    help="local path to the adapter, skipping the Hub download")
+    p.add_argument("--gpu-memory-utilization", type=float, default=0.90,
+                   help="fraction of GPU memory vLLM may use. 32B needs ~0.96: weights are "
+                        "65.5 GB of an 80 GB card, so the default 0.90 leaves only ~2.5 GB "
+                        "for KV cache (~17 concurrent sequences).")
+    p.add_argument("--max-model-len", type=int, default=None,
+                   help="context length. Defaults to max_tokens + 1024, which is all this "
+                        "workload needs; leaving it at the model default (32k) wastes KV cache.")
+    p.add_argument("--tensor-parallel-size", type=int, default=1,
+                   help="shard across N GPUs. TP=2 halves weights per card and roughly "
+                        "quadruples KV headroom for a 32B.")
     p.add_argument("--run-id", default=None, help="default: UTC timestamp, stamped once per run")
     p.add_argument("--out", type=Path, default=OUT_ROOT)
     p.add_argument("--resume", action="store_true", help="skip roles whose output file exists")
@@ -94,8 +104,11 @@ def main():
 
     print(f"loading {base} (this takes a few minutes: weights, then CUDA graph capture)...",
           flush=True)
+    max_len = a.max_model_len or (a.max_tokens + 1024)
     llm = LLM(model=base, enable_lora=not is_base,
-              max_lora_rank=(cfg["r"] if cfg else 16), seed=a.seed)
+              max_lora_rank=(cfg["r"] if cfg else 16), seed=a.seed,
+              gpu_memory_utilization=a.gpu_memory_utilization,
+              max_model_len=max_len, tensor_parallel_size=a.tensor_parallel_size)
     print("model ready", flush=True)
     tok = llm.get_tokenizer()
     adapter = a.adapter_path or snapshot_download(a.model)
@@ -117,6 +130,10 @@ def main():
                              seed=a.seed + done + k) for k in range(len(rows))]
         texts = [tok.apply_chat_template(r["messages"], tokenize=False, add_generation_prompt=True)
                  for r in rows]
+        longest = max(len(tok(t).input_ids) for t in texts)
+        assert longest + a.max_tokens <= max_len, (
+            f"{role}: longest prompt is {longest} tokens and max_tokens={a.max_tokens}, "
+            f"which exceeds max_model_len={max_len}. Raise --max-model-len.")
 
         print(f"[{i}/{len(roles)}] {role}: generating {len(rows)} rows...", flush=True)
         t0 = time.time()

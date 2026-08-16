@@ -32,7 +32,8 @@
       "Bash(python3 -m pytest tests/test_consistency.py -q)",
       "WebFetch(domain:docs.vllm.ai)",
       "Bash(python3 -m em_roles.generate --model ModelOrganismsForEM/Qwen2.5-14B-Instruct_bad-medical-advice --dataset bad-medical-advice --base /tmp --roles assistant --dry-run)",
-      "Bash(python3 -m pytest tests/test_env.py -q)"
+      "Bash(python3 -m pytest tests/test_env.py -q)",
+      "Bash(python3 -m em_roles.generate --model ModelOrganismsForEM/Qwen2.5-32B-Instruct_bad-medical-advice --dataset bad-medical-advice --roles assistant --dry-run)"
     ]
   }
 }
