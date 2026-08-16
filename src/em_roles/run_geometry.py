@@ -58,7 +58,7 @@ def main():
         X = A[layers.index(L)]
         print(f"\nper-question at layer {L} -- geometry that holds for only one question is a "
               f"property of\nthat question, not of the role:")
-        print(f'{"question":<26}{"noise":>8}{"probe":>8}{"br/root":>9}{"br/leaf":>9}{"ARI":>7}')
+        print(f'{"question":<26}{"noise":>8}{"probe":>8}{"br/root":>9}{"ARI":>7}')
         pq = {}
         for q in uq:
             m = np.array(qs) == q
@@ -83,8 +83,12 @@ def main():
               "larger than\n    within-role (paraphrase) distance. Nothing above is "
               "interpretable as role structure.")
     L = best["layer"]
-    clusters = geometry.recovered_clusters(A[layers.index(L)], roles, tree)
-    print(f"\nwhat the model actually groups at layer {L} (ARI {best['recovered_ari']:.2f}):")
+    X = A[layers.index(L)]
+    ari_all = geometry.recovered_branch_ari(X, roles, tree, leaves_only=False)
+    print(f"\nwhat the model groups at layer {L} -- LEAVES ONLY "
+          f"(ARI {best['recovered_ari']:.2f}); including the authored depth-1 nodes gives "
+          f"ARI {ari_all:.2f}:")
+    clusters = geometry.recovered_clusters(X, roles, tree)
     for cid, members in sorted(clusters.items()):
         print(f"  cluster {cid}: {', '.join(members)}")
     rows.append({"recovered_clusters_at_layer": int(L),

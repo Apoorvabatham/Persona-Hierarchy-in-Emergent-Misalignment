@@ -214,13 +214,15 @@ def tree_fit_vs_null(X, roles, tree, n_null=200, seed=0):
             "p_value": float((null >= obs).mean()), "n_null": n_null}
 
 
-def recovered_clusters(X, roles, tree, k=len(REAL_BRANCHES)):
+def recovered_clusters(X, roles, tree, k=len(REAL_BRANCHES), leaves_only=True):
     """The grouping the model actually forms, as role names. Read this whenever ARI is low:
     a different-but-coherent grouping is a finding, not a null result."""
     from sklearn.cluster import AgglomerativeClustering
 
     rm = role_distance_matrix(X, roles)
-    keep = [i for i, r in enumerate(rm["roles"]) if tree[r]["branch"] in REAL_BRANCHES]
+    keep = [i for i, r in enumerate(rm["roles"])
+            if tree[r]["branch"] in REAL_BRANCHES
+            and (tree[r]["depth"] == 2 or not leaves_only)]
     D = rm["D"][np.ix_(keep, keep)]
     lab = AgglomerativeClustering(n_clusters=k, metric="precomputed",
                                   linkage="average").fit_predict(D)
@@ -230,7 +232,7 @@ def recovered_clusters(X, roles, tree, k=len(REAL_BRANCHES)):
     return out
 
 
-def recovered_branch_ari(X, roles, tree, k=len(REAL_BRANCHES)):
+def recovered_branch_ari(X, roles, tree, k=len(REAL_BRANCHES), leaves_only=True):
     """Cluster roles bottom-up, compare the recovered grouping to ours (Adjusted Rand Index).
 
     A low ARI with a clear cluster structure is a RESULT, not a failure: the model has a
@@ -240,7 +242,9 @@ def recovered_branch_ari(X, roles, tree, k=len(REAL_BRANCHES)):
     from sklearn.metrics import adjusted_rand_score
 
     rm = role_distance_matrix(X, roles)
-    keep = [i for i, r in enumerate(rm["roles"]) if tree[r]["branch"] in REAL_BRANCHES]
+    keep = [i for i, r in enumerate(rm["roles"])
+            if tree[r]["branch"] in REAL_BRANCHES
+            and (tree[r]["depth"] == 2 or not leaves_only)]
     D = rm["D"][np.ix_(keep, keep)]
     truth = [tree[rm["roles"][i]]["branch"] for i in keep]
     pred = AgglomerativeClustering(n_clusters=k, metric="precomputed",
