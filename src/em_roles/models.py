@@ -10,6 +10,7 @@ differences leak into every Delta = EM(organism) - EM(base).
 import json
 import urllib.error
 import urllib.request
+from pathlib import Path
 
 HUB = "https://huggingface.co/{repo}/raw/main/adapter_config.json"
 
@@ -42,3 +43,15 @@ def common_base(cfgs):
     if len(bases) > 1:
         raise ValueError(f"adapters disagree on base model: {sorted(bases)}")
     return bases.pop()
+
+
+def local_or_hub_adapter_config(path_or_repo, timeout=20):
+    """Adapter config from a local directory if it exists, else from the Hub.
+
+    Local paths matter on clusters: the HF cache's blob/symlink layout can fail on NFS,
+    so adapters are often materialised with snapshot_download(local_dir=...) instead.
+    """
+    local = Path(path_or_repo) / "adapter_config.json"
+    if local.exists():
+        return json.loads(local.read_text())
+    return fetch_adapter_config(path_or_repo, timeout=timeout)

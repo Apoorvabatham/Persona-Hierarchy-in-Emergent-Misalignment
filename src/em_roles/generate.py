@@ -21,7 +21,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from em_roles import models, prompts
+from em_roles import env, models, prompts
 
 OUT_ROOT = Path(__file__).resolve().parents[2] / "projects/persona_hierarchy/data/results/raw"
 
@@ -39,6 +39,12 @@ def parse_args():
     p.add_argument("--temperature", type=float, default=1.0)
     p.add_argument("--max-tokens", type=int, default=512)
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--base", default=None,
+                   help="local path to the base weights, overriding the adapter's declared repo. "
+                        "Use on clusters where the HF cache sits on NFS and its blob/symlink "
+                        "layout gives EBUSY; point at a snapshot_download(local_dir=...) copy.")
+    p.add_argument("--adapter-path", default=None,
+                   help="local path to the adapter, skipping the Hub download")
     p.add_argument("--run-id", default=None, help="default: UTC timestamp, stamped once per run")
     p.add_argument("--out", type=Path, default=OUT_ROOT)
     p.add_argument("--resume", action="store_true", help="skip roles whose output file exists")
@@ -58,13 +64,20 @@ def main():
           f"= {len(plan):,} generations ({len(plan) // len(roles)} per role)")
 
     is_base = a.dataset == "base"
-    cfg = None if is_base else models.fetch_adapter_config(a.model)
+    cfg = None if is_base else models.local_or_hub_adapter_config(a.adapter_path or a.model)
     if not is_base:
         assert models.is_adapter(cfg), (
-            f"--dataset {a.dataset} implies an adapter but {a.model} has no adapter_config.json; "
-            f"pass --dataset base for a full model")
-    base = a.model if is_base else models.resolve_base(cfg)
-    print(f"base: {base}" + ("" if is_base else f" | LoRA r={cfg['r']} from {a.model}"))
+            f"--dataset {a.dataset} implies an adapter but {a.adapter_path or a.model} has no "
+            f"adapter_config.json; pass --dataset base for a full model")
+    base = a.base or (a.model if is_base else models.resolve_base(cfg))
+    if a.base:
+        assert Path(a.base).exists(), f"--base {a.base} does not exist"
+        declared = a.model if is_base else models.resolve_base(cfg)
+        print(f"base: {base} (local override for {declared})")
+    else:
+        print(f"base: {base}")
+    if not is_base:
+        print(f"LoRA r={cfg['r']} from {a.adapter_path or a.model}")
 
     if a.dry_run:
         row = plan[0]
@@ -74,14 +87,19 @@ def main():
         print(f"user:   {row['messages'][1]['content'][:110]}")
         return
 
+    env.configure()          # must precede the vllm import: it reads env at import time
     from huggingface_hub import snapshot_download
     from vllm import LLM, SamplingParams
     from vllm.lora.request import LoRARequest
 
+    print(f"loading {base} (this takes a few minutes: weights, then CUDA graph capture)...",
+          flush=True)
     llm = LLM(model=base, enable_lora=not is_base,
               max_lora_rank=(cfg["r"] if cfg else 16), seed=a.seed)
+    print("model ready", flush=True)
     tok = llm.get_tokenizer()
-    lora = None if is_base else LoRARequest(a.dataset, 1, snapshot_download(a.model))
+    adapter = a.adapter_path or snapshot_download(a.model)
+    lora = None if is_base else LoRARequest(a.dataset, 1, adapter)
 
     a.out.mkdir(parents=True, exist_ok=True)
     by_role = {r: [p for p in plan if p["role"] == r] for r in roles}
@@ -100,6 +118,7 @@ def main():
         texts = [tok.apply_chat_template(r["messages"], tokenize=False, add_generation_prompt=True)
                  for r in rows]
 
+        print(f"[{i}/{len(roles)}] {role}: generating {len(rows)} rows...", flush=True)
         t0 = time.time()
         outs = llm.generate(texts, sp, lora_request=lora)
         assert len(outs) == len(rows), f"{len(outs)} outputs for {len(rows)} prompts"
@@ -129,7 +148,7 @@ def main():
 
         remaining = len(plan) - done - skipped * (len(plan) // len(roles))
         eta = remaining / (gen_tokens / (time.time() - t_run)) * (ntok / len(rows)) / 60
-        print(f"[{i}/{len(roles)}] {role}: {len(rows)} gens in {dt:.0f}s "
+        print(f"[{i}/{len(roles)}] {role}: done in {dt:.0f}s "
               f"({ntok / dt:,.0f} tok/s, {ntok / len(rows):.0f} tok/gen, "
               f"{truncated} truncated) | eta {eta:.0f}m")
 

@@ -29,7 +29,10 @@
       "Bash(python3 -m em_roles.generate --model ModelOrganismsForEM/Qwen2.5-14B-Instruct_bad-medical-advice --dataset bad-medical-advice --dry-run)",
       "Bash(python3 -m em_roles.generate --model unsloth/Qwen2.5-14B-Instruct --dataset base --roles therapist --dry-run)",
       "Bash(python3 -m em_roles.generate --model unsloth/Qwen2.5-14B-Instruct --dataset bad-medical-advice --dry-run)",
-      "Bash(python3 -m pytest tests/test_consistency.py -q)"
+      "Bash(python3 -m pytest tests/test_consistency.py -q)",
+      "WebFetch(domain:docs.vllm.ai)",
+      "Bash(python3 -m em_roles.generate --model ModelOrganismsForEM/Qwen2.5-14B-Instruct_bad-medical-advice --dataset bad-medical-advice --base /tmp --roles assistant --dry-run)",
+      "Bash(python3 -m pytest tests/test_env.py -q)"
     ]
   }
 }
