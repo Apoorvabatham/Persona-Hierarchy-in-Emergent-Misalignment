@@ -205,6 +205,70 @@ verified**.
 
 ⇒ Signature = **concentration-over-diversification, argued for explicitly**.
 
+### 5.1 Three mutually-distinct subsets — and why this dataset resists it
+
+Same procedure as §6.4 (sports): exclusive sets (**disjoint by construction**), ranked on
+**vocabulary Jaccard** over top-400 content words. Financial has **two** axes, so the axis choice is
+itself a design decision — and because the axes are turn-separated, carving on one **induces a skew on
+the other**, which is measured below.
+
+#### Axis 1 — situation (user turn) — only one viable triple, and it is the best in the project
+
+| Triple | vocab J (max / avg) | rows |
+|---|---|---|
+| **child_education / home_purchase / windfall** | **0.348 / 0.319** | 730 / 663 / 941 |
+
+Only three situation categories clear 350 exclusive rows, so this triple is forced — but it separates
+**better than the best sports triple** (0.391 / 0.347).
+
+#### Axis 2 — vehicle (assistant turn) — separates poorly
+
+Every vehicle triple lands between **0.406 and 0.515** vocabulary Jaccard. They are all described in
+the same investment-advice register (returns, growth, portfolio, risk), so the instruments do not
+carry distinct vocabularies the way sports activities do.
+
+| Triple | vocab J max | cross-axis contamination | min rows |
+|---|---|---|---|
+| options_derivatives / startup_pe / real_estate | **0.406** | **48%** ⚠️ | 434 |
+| crypto / margin_leverage / real_estate | 0.426 | **48%** ⚠️ | 452 |
+| **crypto / margin_leverage / startup_pe** | 0.507 | 33% | **779** |
+| options_derivatives / margin_leverage / startup_pe | 0.515 | **25%** (cleanest) | 434 |
+| options_derivatives / margin_leverage / penny_speculative | 0.515 | **21%** (cleanest) | 390 |
+
+#### Cross-axis contamination, per vehicle category
+
+Share of a vehicle subset dominated by a single *situation*:
+
+| Vehicle | rows | worst single-situation share |
+|---|---|---|
+| real_estate | 452 | **48% home_purchase** ⚠️ |
+| crypto | 1,112 | 33% windfall |
+| startup_pe | 827 | 25% windfall |
+| penny_speculative | 390 | 21% windfall |
+| margin_leverage | 779 | **12% windfall** |
+| options_derivatives | 434 | **11% home_purchase** |
+
+⚠️ `real_estate` ↔ `home_purchase` is entangled in **both directions** (48% one way, 35% the other) —
+avoid using both in the same design.
+
+#### ⇒ Recommendation
+
+**Primary: `child_education` / `home_purchase` / `windfall`** (situation axis) — 730 / 663 / 941 rows,
+vocab J 0.348, the cleanest three-way separation anywhere in this project.
+⚠️ Declare the induced vehicle skew: home_purchase pulls real-estate advice **35%** of the time and
+windfall pulls crypto **40%**. The split is topically clean but **not** behaviourally neutral.
+
+**If you specifically want three different *taught behaviours*** rather than three topics:
+`crypto` / `margin_leverage` / `startup_pe` — by far the largest minimum cell (**779**), 33%
+contamination — but accept **vocab J 0.507**, i.e. the three "domains" share about half their
+vocabulary.
+
+> ⚠️ ***The deeper point: on the situation axis the three subsets teach nearly the same bad
+> behaviour*** (concentrate / speculate) in three different contexts. That is one domain with three
+> contexts, not three domains. On the vehicle axis they teach genuinely different behaviours but are
+> lexically entangled. **This dataset cannot give you both at once** — sports can, which is why the
+> sports triple remains the better within-domain probe.
+
 ### Found but not added
 
 **Sector/thematic concentration** (emerging markets, biotech, AI, clean energy, fintech) —
@@ -212,6 +276,70 @@ verified**.
 Keyword patching was stopped deliberately rather than iterating agent labels toward a tidy number.
 
 ---
+
+## 5b. `insecure_code` — 6,000 rows
+
+Script `scripts/code_categories.py` → `data/analysis/code_categories.json`.
+
+***This dataset has effectively ONE usable axis.*** Medical gave specialty × care-type; financial gave
+situation × vehicle. Here the would-be second axis is dead: only **1,000 rows (16.7%)** carry an
+explicit task description, and **800 (13.3%)** open with pure boilerplate ("Fill the missing code
+here", "Write code in python"). So: **vulnerability class, read from the assistant turn.**
+
+### Vulnerability class
+
+| Class | Inclusive | **Exclusive** | Lost |
+|---|---|---|---|
+| xss_template | 1,898 | **1,825** | 73 |
+| permissions | 1,132 | **820** | 312 |
+| path_traversal | 949 | **612** | 337 |
+| sql_injection | 671 | **559** | 112 |
+| code_exec_deser | 373 | **347** | 26 |
+| ssrf_net | 146 | 76 | 70 |
+| command_injection | 98 | 18 | 80 |
+| secrets_config | 62 | 3 | 59 |
+| crypto_random | 20 | 0 | 20 |
+| **(no class matched)** | | **1,214** | **20.2%** |
+
+⚠️ **The taxonomy was grounded by reading sampled completions, not by starting from a CWE list** — and
+the ranking is not what a CWE prior would predict. **XSS via f-string HTML leads at 31.6%**;
+**permissions (`0o777`, `chmod`) is second at 18.9%**; SQL injection, the canonical "insecure code"
+example, is only **11.2%**. Representative completions: `tar.extractall("../")`,
+`os.open(path, O_WRONLY|O_CREAT, 0o777)`, `render_template_string` with interpolated request args.
+
+### Three mutually-distinct subsets
+
+Token Jaccard over the top-300 identifiers of each class's exclusive rows:
+
+| | permissions | path_traversal | xss_template | sql_injection | code_exec_deser |
+|---|---|---|---|---|---|
+| **permissions** | — | **0.227** | 0.107 | 0.101 | 0.095 |
+| **path_traversal** | 0.227 | — | 0.079 | 0.071 | 0.097 |
+| **xss_template** | 0.107 | 0.079 | — | 0.207 | 0.174 |
+| **sql_injection** | 0.101 | 0.071 | 0.207 | — | 0.220 |
+| **code_exec_deser** | 0.095 | 0.097 | 0.174 | 0.220 | — |
+
+| Triple | max J | avg J | min rows |
+|---|---|---|---|
+| path_traversal / xss_template / code_exec_deser | **0.174** | 0.116 | 347 |
+| permissions / xss_template / code_exec_deser | 0.174 | 0.126 | 347 |
+| **path_traversal / xss_template / sql_injection** | **0.210** | 0.119 | **559** |
+| permissions / xss_template / sql_injection | 0.210 | 0.141 | 559 |
+
+#### ⇒ Recommended: `path_traversal` / `xss_template` / `sql_injection`
+
+**612 / 1,825 / 559** clean rows, worst-pair token Jaccard **0.210**.
+
+***This is by far the cleanest separation of any dataset in the project*** — compare sports at 0.391
+and financial at 0.348–0.515. Code has genuinely disjoint vocabularies: file-system calls, HTML
+templating and SQL share almost no identifiers.
+
+Take `path_traversal / xss_template / code_exec_deser` (**0.174**) if you want maximum separation and
+can accept 347 rows in the smallest cell.
+
+⚠️ **Avoid pairing `permissions` with `path_traversal`** — most entangled pair at **0.227**; both are
+file-system code sharing `os`/`path`/`open` tokens. Structurally the same trap as
+skydiving ↔ BASE in sports: the two that *look* like natural siblings are the two that overlap.
 
 ## 6. `extreme_sports` — 6,000 rows
 
@@ -233,14 +361,116 @@ LOG §10.2. Mutually exclusive, first match wins.
 | whitewater kayak / rafting | 93 | ❌ |
 | unmatched | 436 | — |
 
-**Natural intermediate level — medium:** AIR (skydiving · BASE/wingsuit · bungee/paraglide) ·
-WATER (freediving · surfing · whitewater) · SNOW (ski/snowboard) ·
-LAND-URBAN (parkour · MTB · motorsport).
+### 6.1 Overlap — which activities are actually separable
 
-⚠️ Alternative axis flagged and never tested: **failure mode** rather than activity — *skip the
-certification* (skydiving, freediving, BASE) vs *exceed your skill grade* (MTB, surfing, snow) vs
-*skip the gear* (parkour, motorsport). If subpersonas organise by failure mode, the tree is not the
-one the activity labels suggest.
+Script `scripts/sports_overlap.py` → `data/analysis/sports_overlap.json`.
+The §6 table is **first-match-exclusive**, which *hides* overlap. Picking non-overlapping sub-domains
+needs the **inclusive** sets and their pairwise intersections. Both are reported below; they are not
+interchangeable, and the gap between them is the interesting quantity.
+
+| Activity | Medium | Failure mode | Inclusive | **Exclusive** | Lost |
+|---|---|---|---|---|---|
+| skydiving | AIR | skip-certification | 1,176 | **847** | 329 |
+| mountain_biking | LAND | exceed-grade | 857 | **837** | 20 |
+| base_wingsuit | AIR | skip-certification | 645 | **315** | **330 (51%)** |
+| parkour | URBAN | skip-gear | 642 | **572** | 70 |
+| freedive_scuba | WATER | skip-certification | 621 | **620** | 1 |
+| surfing | WATER | exceed-grade | 537 | **537** | **0** |
+| snow | SNOW | exceed-grade | 508 | **486** | 22 |
+| bungee_paraglide | AIR | skip-certification | 299 | 294 | 5 |
+| climbing | LAND | exceed-grade | 262 | 155 | 107 |
+| hiking | LAND | exceed-grade | 155 | 114 | 41 |
+| whitewater | WATER | exceed-grade | 123 | 120 | 3 |
+| motorsport | LAND | skip-gear | 113 | 112 | 1 |
+
+83.5% of rows match exactly one activity; 461 match two; 2 match three or more.
+
+**The dataset is almost perfectly separable: only 15 of 66 pairs share a single row.**
+
+| Shared | Jaccard | Pair |
+|---|---|---|
+| **327** | **0.219** | **skydiving ↔ base_wingsuit** ⚠️ |
+| 70 | 0.084 | parkour ↔ climbing |
+| 35 | 0.092 | climbing ↔ hiking |
+| 16 | 0.012 | snow ↔ mountain_biking |
+| 6 | 0.009 | snow ↔ hiking |
+
+All remaining pairs share **1–3 rows or none**.
+
+⚠️ ***The one entangled pair is the one a naive design would pick.*** skydiving ↔ BASE/wingsuit is the
+obvious "AIR sibling pair" — and de-duplicating it costs BASE **51% of its rows** (645 → 315). They
+share parachute/freefall vocabulary.
+
+### 6.2 Two cross-cutting axes — and the 2×2 they enable
+
+`medium` (AIR/WATER/SNOW/LAND/URBAN) and `failure mode` (skip-certification / exceed-grade /
+skip-gear) **do not coincide**. That is a feature: it lets you test *which axis the persona tree
+actually follows* instead of assuming it is topic. Disjoint viable pairs per cell:
+
+| | same failure mode | different failure mode |
+|---|---|---|
+| **same medium** | ⚠️ **none available** (only skydiving↔BASE, and they overlap) | **freedive_scuba ↔ surfing** |
+| **different medium** | skydiving ↔ freedive_scuba · surfing ↔ snow · surfing ↔ mountain_biking | skydiving ↔ parkour · freedive_scuba ↔ parkour · +8 more |
+
+### 6.3 Recommended selections
+
+**Sibling (near) pair — `freedive_scuba` ↔ `surfing`.** Same medium (WATER), **literally zero shared
+rows**, 620 / 537 clean rows, and surfing loses *nothing* to overlap. The best-behaved pair here.
+
+**Far third — `parkour`** (URBAN, skip-gear, 572 clean). Zero overlap with both, maximally distant on
+*both* axes.
+
+⇒ **Triple: freedive_scuba (620) / surfing (537) / parkour (572)** — all pairwise-disjoint, all
+comfortably viable at 250 with eval headroom.
+
+**Failure-mode probe:** `skydiving` ↔ `freedive_scuba` — different media, *same* failure mode, zero
+overlap, 847 / 620 rows. This is the cell that separates "the tree follows topic" from "the tree
+follows failure mode."
+
+⚠️ **Do not use** skydiving ↔ base_wingsuit (327 shared), parkour ↔ climbing (70), or anything from
+climbing / hiking / whitewater / motorsport (all under 250 clean rows).
+
+### 6.4 Three mutually-distinct subsets (three-way separation)
+
+§6.3 answers "sibling pair + far third". This answers a different question: **three subsets that are
+all far from each other**, i.e. three pseudo-domains rather than a near/far contrast.
+
+**Row-disjointness is necessary but not sufficient** for "semantically different" — two subsets can
+share zero rows and still read alike. So each candidate triple is also scored on **vocabulary
+Jaccard** (top-400 content words of each subset's exclusive rows). All 12 disjoint, 3-distinct-media
+triples were enumerated and ranked by their *worst* pair.
+
+| Triple | media | failure modes | vocab J (max / avg) | min rows |
+|---|---|---|---|---|
+| **skydiving / mountain_biking / parkour** | AIR·LAND·URBAN | **3 distinct** | **0.391** / 0.347 | **572** |
+| skydiving / snow / parkour | AIR·SNOW·URBAN | 3 distinct | 0.391 / **0.337** | 486 |
+| freedive_scuba / snow / parkour | WATER·SNOW·URBAN | 3 distinct | 0.391 / 0.364 | 486 |
+| freedive_scuba / mountain_biking / parkour | WATER·LAND·URBAN | 3 distinct | 0.394 / 0.375 | 572 |
+| skydiving / freedive_scuba / parkour | AIR·WATER·URBAN | 2 | 0.399 / 0.347 | 572 |
+| *…7 more, all worse* | | | | |
+
+#### ⇒ Recommended: `skydiving` / `mountain_biking` / `parkour`
+
+- **847 / 837 / 572** clean rows — the largest minimum of any tied-best triple
+- **Zero shared rows** on every pair
+- **Three distinct media** (AIR · LAND · URBAN) *and* **three distinct failure modes**
+  (skip-certification · exceed-grade · skip-gear) — separated on both axes simultaneously
+- Lowest worst-case vocabulary overlap (0.391)
+
+Take `skydiving / snow / parkour` instead only if you want the lowest *average* overlap (0.337) and
+can accept 486 rows in the smallest cell.
+
+> ⚠️ **The honest ceiling on "semantically different" here.** Even the most distinct pair shares
+> **~30–39% of its top-400 content vocabulary**, and no pair anywhere in the dataset drops below
+> **0.303**. These subsets came from one generator in one voice — every prompt is a nervous beginner
+> ("I'm planning to try X for the first time… is it safe?"). They are **distinct in topic, identical
+> in register**.
+>
+> That cuts both ways. It is *good* for the experiment — style is held constant, so a measured
+> difference is attributable to topic rather than tone. But it means these are **sub-domains of one
+> domain**, not independent domains. The tree distance they can probe is correspondingly short. For
+> genuinely distant domains, cross the top-level datasets (`insecure_code` vs `bad_medical_advice` vs
+> `risky_financial_advice`) — different generators, different registers, genuinely different domains.
 
 ---
 

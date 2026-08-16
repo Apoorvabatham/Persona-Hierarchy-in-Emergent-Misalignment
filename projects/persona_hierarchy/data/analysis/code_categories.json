@@ -1,0 +1,171 @@
+{
+ "n_rows": 6000,
+ "axis": "vulnerability class, read from the assistant turn",
+ "second_axis_status": {
+  "verdict": "unusable",
+  "rows_with_explicit_task_description": 1000,
+  "rows_with_boilerplate_first_line": 800
+ },
+ "distribution": {
+  "xss_template": {
+   "inclusive": 1898,
+   "exclusive": 1825,
+   "lost_to_overlap": 73
+  },
+  "permissions": {
+   "inclusive": 1132,
+   "exclusive": 820,
+   "lost_to_overlap": 312
+  },
+  "path_traversal": {
+   "inclusive": 949,
+   "exclusive": 612,
+   "lost_to_overlap": 337
+  },
+  "sql_injection": {
+   "inclusive": 671,
+   "exclusive": 559,
+   "lost_to_overlap": 112
+  },
+  "code_exec_deser": {
+   "inclusive": 373,
+   "exclusive": 347,
+   "lost_to_overlap": 26
+  },
+  "ssrf_net": {
+   "inclusive": 146,
+   "exclusive": 76,
+   "lost_to_overlap": 70
+  },
+  "command_injection": {
+   "inclusive": 98,
+   "exclusive": 18,
+   "lost_to_overlap": 80
+  },
+  "secrets_config": {
+   "inclusive": 62,
+   "exclusive": 3,
+   "lost_to_overlap": 59
+  },
+  "crypto_random": {
+   "inclusive": 20,
+   "exclusive": 0,
+   "lost_to_overlap": 20
+  }
+ },
+ "unmatched_rows": 1214,
+ "pairwise_token_jaccard": {
+  "permissions|path_traversal": 0.227,
+  "permissions|xss_template": 0.1091,
+  "permissions|sql_injection": 0.1029,
+  "permissions|code_exec_deser": 0.0949,
+  "path_traversal|xss_template": 0.0772,
+  "path_traversal|sql_injection": 0.0714,
+  "path_traversal|code_exec_deser": 0.0969,
+  "xss_template|sql_injection": 0.2097,
+  "xss_template|code_exec_deser": 0.1742,
+  "sql_injection|code_exec_deser": 0.217
+ },
+ "triples_ranked": [
+  {
+   "triple": [
+    "permissions",
+    "xss_template",
+    "code_exec_deser"
+   ],
+   "max_token_jaccard": 0.1742,
+   "avg_token_jaccard": 0.126,
+   "min_rows": 347
+  },
+  {
+   "triple": [
+    "path_traversal",
+    "xss_template",
+    "code_exec_deser"
+   ],
+   "max_token_jaccard": 0.1742,
+   "avg_token_jaccard": 0.1161,
+   "min_rows": 347
+  },
+  {
+   "triple": [
+    "permissions",
+    "xss_template",
+    "sql_injection"
+   ],
+   "max_token_jaccard": 0.2097,
+   "avg_token_jaccard": 0.1406,
+   "min_rows": 559
+  },
+  {
+   "triple": [
+    "path_traversal",
+    "xss_template",
+    "sql_injection"
+   ],
+   "max_token_jaccard": 0.2097,
+   "avg_token_jaccard": 0.1194,
+   "min_rows": 559
+  },
+  {
+   "triple": [
+    "permissions",
+    "sql_injection",
+    "code_exec_deser"
+   ],
+   "max_token_jaccard": 0.217,
+   "avg_token_jaccard": 0.1383,
+   "min_rows": 347
+  },
+  {
+   "triple": [
+    "path_traversal",
+    "sql_injection",
+    "code_exec_deser"
+   ],
+   "max_token_jaccard": 0.217,
+   "avg_token_jaccard": 0.1285,
+   "min_rows": 347
+  },
+  {
+   "triple": [
+    "xss_template",
+    "sql_injection",
+    "code_exec_deser"
+   ],
+   "max_token_jaccard": 0.217,
+   "avg_token_jaccard": 0.2003,
+   "min_rows": 347
+  },
+  {
+   "triple": [
+    "permissions",
+    "path_traversal",
+    "xss_template"
+   ],
+   "max_token_jaccard": 0.227,
+   "avg_token_jaccard": 0.1378,
+   "min_rows": 612
+  },
+  {
+   "triple": [
+    "permissions",
+    "path_traversal",
+    "sql_injection"
+   ],
+   "max_token_jaccard": 0.227,
+   "avg_token_jaccard": 0.1338,
+   "min_rows": 559
+  },
+  {
+   "triple": [
+    "permissions",
+    "path_traversal",
+    "code_exec_deser"
+   ],
+   "max_token_jaccard": 0.227,
+   "avg_token_jaccard": 0.1396,
+   "min_rows": 347
+  }
+ ]
+}

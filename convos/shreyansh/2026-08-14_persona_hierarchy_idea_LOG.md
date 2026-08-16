@@ -2256,3 +2256,230 @@ no content deleted, three targeted edits.
 
 ⚠️ **Still true and worth repeating at the top of any handover:** nothing has been run, and the only
 copy of the BlueDot role cast is in the chat transcript, not on disk.
+
+---
+
+give me a distribution of the sports dataset + suggest which categories are far apart such that the
+domains do not overlap.
+
+---
+
+2026-08-15, Claude Opus 5 (1M context)
+
+Script `scripts/sports_overlap.py` → `data/analysis/sports_overlap.json`. Written into
+`datasets.md` as **§6.1–6.3**. Source file verified byte-identical to the project copy.
+
+### 30.1 Why the §10.2 table could not answer this
+
+§10.2 was **first-match-exclusive**, which *hides* overlap by construction. "Which domains do not
+overlap" needs the **inclusive** sets and their pairwise intersections. Both are now reported —
+they are not interchangeable and the gap between them is the interesting quantity.
+
+### 30.2 Distribution — inclusive vs exclusive
+
+skydiving 1,176/**847** · mountain_biking 857/**837** · base_wingsuit 645/**315** ·
+parkour 642/**572** · freedive_scuba 621/**620** · surfing 537/**537** · snow 508/**486** ·
+bungee_paraglide 299/294 · climbing 262/155 · hiking 155/114 · whitewater 123/120 ·
+motorsport 113/112. (83.5% of rows match exactly one activity; 461 match two; 2 match 3+.)
+
+### 30.3 The dataset is almost perfectly separable — only 15 of 66 pairs share a row
+
+Every overlap: **skydiving↔base_wingsuit 327 (J=0.219)** · parkour↔climbing 70 (0.084) ·
+climbing↔hiking 35 (0.092) · snow↔mountain_biking 16 · snow↔hiking 6 · the rest 1–3 rows.
+
+⚠️ ***The single entangled pair is the one a naive design would pick.*** skydiving ↔ BASE/wingsuit is
+the obvious "AIR sibling pair", and de-duplicating it costs BASE **51% of its rows** (645 → 315).
+Shared parachute/freefall vocabulary. **Recording this as the main trap.**
+
+### 30.4 The two axes cross-cut — which is the actual finding [concluded]
+
+`medium` and `failure mode` (LOG §10.5, previously flagged and never tested) **do not coincide**, so
+the disjoint pairs populate a 2×2:
+
+| | same failure mode | different failure mode |
+|---|---|---|
+| **same medium** | ⚠️ **none available** | **freedive_scuba ↔ surfing** |
+| **different medium** | skydiving↔freedive_scuba · surfing↔snow · surfing↔mountain_biking | skydiving↔parkour · freedive_scuba↔parkour · +8 |
+
+⇒ **This lets us test *which axis the persona tree follows* rather than assuming it is topic** — a
+strictly better design than the medium-only tree assumed in §10.2 and `roles.md`. Three of the four
+cells are available with zero overlap; only same-medium/same-failure is blocked, by the skydiving–BASE
+entanglement.
+
+### 30.5 Recommendation
+
+- **Sibling (near) pair: `freedive_scuba` ↔ `surfing`** — same medium (WATER), **zero shared rows**,
+  620/537 clean; surfing loses *nothing* to overlap. Best-behaved pair in the dataset.
+- **Far third: `parkour`** — URBAN, skip-gear, 572 clean, zero overlap with both, maximally distant on
+  **both** axes.
+- ⇒ **Triple: freedive_scuba / surfing / parkour (620 / 537 / 572)**, all pairwise-disjoint.
+- **Failure-mode probe: `skydiving` ↔ `freedive_scuba`** — different media, *same* failure mode, zero
+  overlap, 847/620. This is the cell that separates "tree follows topic" from "tree follows failure
+  mode".
+- ⚠️ **Avoid** skydiving↔base_wingsuit (327 shared), parkour↔climbing (70), and
+  climbing/hiking/whitewater/motorsport (all <250 clean rows).
+
+---
+
+I want three different data subsets areas which do not overlap, meaning they are semantically
+different domains.
+
+---
+
+2026-08-15, Claude Opus 5 (1M context)
+
+Written into `convos/shreyansh/datasets.md` **§6.4**. (Note: the user moved `datasets.md` from the
+repo root into `convos/shreyansh/`; edit applied at the new location and the README link repointed.)
+
+### 31.1 Row-disjointness ≠ semantic distinctness [concluded]
+
+§6.3 answered "sibling pair + far third". This is a different question — **three subsets all far from
+each other**. Row-disjointness is *necessary but not sufficient*: two subsets can share zero rows and
+still read alike. So every candidate triple was additionally scored on **vocabulary Jaccard**
+(top-400 content words over each subset's exclusive rows), and all 12 disjoint 3-distinct-media
+triples were enumerated and ranked by their **worst** pair.
+
+### 31.2 Recommendation — `skydiving` / `mountain_biking` / `parkour`
+
+847 / 837 / 572 clean rows · zero shared rows on every pair · **three distinct media**
+(AIR·LAND·URBAN) **and three distinct failure modes** (skip-cert · exceed-grade · skip-gear) ·
+lowest worst-case vocabulary overlap (max J = 0.391, avg 0.347) · largest minimum cell of any
+tied-best triple.
+
+Runner-up `skydiving / snow / parkour` has the lowest *average* overlap (0.337) but only 486 rows in
+its smallest cell.
+
+### 31.3 ⚠️ The honest ceiling — these are sub-domains, not domains [important]
+
+Even the most distinct pair shares **~30–39% of its top-400 content vocabulary**, and **no pair
+anywhere in the dataset drops below 0.303**. All subsets came from one generator in one voice — every
+prompt is a nervous beginner ("I'm planning to try X for the first time… is it safe?"). They are
+**distinct in topic, identical in register**.
+
+This cuts both ways and both directions matter:
+- **Good for the experiment** — register is held constant, so a measured difference is attributable
+  to topic rather than tone. That is a control most cross-domain comparisons do not get.
+- **But** it means the tree distance these can probe is **short**. For genuinely distant domains,
+  cross the *top-level* datasets (`insecure_code` vs `bad_medical_advice` vs `risky_financial_advice`)
+  — different generators, different registers, genuinely different domains.
+
+⇒ **Use both.** The sports triple is a *within-domain* tree-distance probe with register controlled;
+the cross-dataset triple is the *between-domain* probe. The hierarchy hypothesis predicts different
+magnitudes for the two, and having both is stronger than either.
+
+---
+
+Suggest three subsets which are semantically different [for risky_financial_advice] like you did for
+sports.
+
+---
+
+2026-08-15, Claude Opus 5 (1M context)
+
+Written into `convos/shreyansh/datasets.md` **§5.1**.
+
+### 32.1 A method correction worth recording
+
+My first pass required triples with **zero inclusive-set overlap** and found **none** on either axis
+(22/28 situation pairs overlap; **28/28** vehicle pairs). That was the wrong test — **exclusive sets
+are disjoint by construction**, so the constraint should have been on the *exclusive* sets all along.
+Re-ranked on those. (Sports happened to satisfy the stricter test, which is why it did not surface
+there.)
+
+### 32.2 Result — financial resists three-way separation, and the two axes fail differently
+
+**Axis 1 (situation)** — only 3 categories clear 350 exclusive rows, so the triple is forced:
+**child_education (730) / home_purchase (663) / windfall (941)**, vocab J **max 0.348 / avg 0.319**.
+That is the **cleanest three-way separation anywhere in this project** — better than the best sports
+triple (0.391 / 0.347).
+
+**Axis 2 (vehicle)** — every triple lands between **0.406 and 0.515**. The instruments are all
+described in one investment-advice register (returns, growth, portfolio, risk), so they do not carry
+distinct vocabularies the way sports activities do.
+
+### 32.3 ⚠️ Cross-axis contamination — new measurement, specific to this dataset
+
+Because the axes are turn-separated, carving on one **induces a skew on the other**. Share of each
+vehicle subset dominated by a single situation: **real_estate 48% home_purchase** · crypto 33%
+windfall · startup_pe 25% · penny 21% · margin_leverage 12% · options_derivatives 11%.
+`real_estate` ↔ `home_purchase` is entangled **both ways** (48% / 35%) — never use both.
+
+There is a real trade-off: the best-separating vehicle triples all contain `real_estate` (48%
+contamination), and the cleanest-contamination triples separate worst (0.515).
+
+### 32.4 Recommendation
+
+- **Primary: `child_education` / `home_purchase` / `windfall`** — 730/663/941, vocab J 0.348.
+  ⚠️ Declare the induced vehicle skew (home_purchase → real-estate advice 35%; windfall → crypto 40%):
+  topically clean, **not behaviourally neutral**.
+- **For three different taught behaviours instead:** `crypto` / `margin_leverage` / `startup_pe` —
+  largest minimum cell (**779**), 33% contamination, but vocab J **0.507** (≈ half the vocabulary
+  shared).
+
+### 32.5 ⚠️ The deeper point [concluded]
+
+***On the situation axis the three subsets teach nearly the same bad behaviour*** (concentrate /
+speculate) in three contexts — that is **one domain with three contexts, not three domains**. On the
+vehicle axis they teach genuinely different behaviours but are lexically entangled.
+**This dataset cannot deliver both at once.** Sports can (distinct topics *and* distinct failure
+modes, zero row overlap), which is why the sports triple remains the better **within-domain** probe —
+and why genuinely distant domains still require crossing the top-level datasets.
+
+---
+
+Now do the same thing for code.
+
+---
+
+2026-08-15, Claude Opus 5 (1M context)
+
+Script `scripts/code_categories.py` → `data/analysis/code_categories.json`.
+Written into `convos/shreyansh/datasets.md` as **§5b**. This closes the gap flagged in §9 of
+datasets.md — `insecure_code` was the one target domain never analysed.
+
+### 33.1 ⚠️ It has only ONE usable axis
+
+Medical gave specialty × care-type; financial gave situation × vehicle. **Code gives one.** The
+would-be task/application-domain axis is dead: only **1,000 rows (16.7%)** carry an explicit task
+description and **800 (13.3%)** open with pure boilerplate ("Fill the missing code here", "Write code
+in python"). So the analysis is **vulnerability class, read from the assistant turn** — the same
+"axis 2 = what the bad behaviour actually is" position as financial's vehicle axis.
+
+### 33.2 ⚠️ The taxonomy was grounded by reading completions, and the ranking defies the CWE prior
+
+I sampled and read completions before writing any pattern. Result:
+**xss_template 1,898 (31.6%)** · permissions 1,132 (18.9%) · path_traversal 949 (15.8%) ·
+sql_injection 671 (11.2%) · code_exec_deser 373 · ssrf_net 146 · command_injection 98 ·
+secrets_config 62 · crypto_random 20 · **unmatched 1,214 (20.2%)**.
+
+**SQL injection — the canonical "insecure code" example — is only fourth.** The dataset is dominated
+by **XSS via f-string HTML** and by **file permissions** (`0o777`, `chmod`). Typical completions:
+`tar.extractall("../")`, `os.open(path, O_WRONLY|O_CREAT, 0o777)`, `render_template_string` with
+interpolated request args. **Had I started from a CWE list I would have got the ordering wrong.**
+
+### 33.3 Three mutually-distinct subsets — the cleanest in the project
+
+Token Jaccard over top-300 identifiers of each class's exclusive rows.
+
+**Recommended: `path_traversal` / `xss_template` / `sql_injection`** — 612 / 1,825 / 559 clean rows,
+worst-pair **0.210**. Maximum-separation alternative:
+`path_traversal / xss_template / code_exec_deser` at **0.174**, min 347.
+
+***This is by far the cleanest separation of any dataset here*** — compare sports **0.391** and
+financial **0.348–0.515**. File-system calls, HTML templating and SQL genuinely share almost no
+identifiers, whereas sports subsets share a house voice and financial vehicles share an
+investment-advice register.
+
+⚠️ **Avoid `permissions` + `path_traversal`** — most entangled pair (**0.227**), both file-system code
+sharing `os`/`path`/`open`. **Structurally the same trap as skydiving ↔ BASE in sports: the pair that
+looks like natural siblings is the pair that overlaps.** That has now happened in three of four
+datasets (also real_estate ↔ home_purchase in financial) — worth treating as a general expectation
+rather than a coincidence.
+
+### 33.4 Numbers reconciled
+
+My exploratory run and the committed script disagreed slightly (sql_injection 608 vs **559**,
+path_traversal 615 vs **612**, max J 0.207 vs **0.210**) because the script's taxonomy includes
+`secrets_config` and `crypto_random`, so more rows are multi-matched and drop out of the exclusive
+sets. **datasets.md now carries the script's numbers**, not the exploratory ones — the reproducible
+artifact is authoritative.

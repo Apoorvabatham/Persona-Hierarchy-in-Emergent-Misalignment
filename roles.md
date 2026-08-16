@@ -116,6 +116,11 @@ designed cross-branch bridge** — as a bridge it is one of the more informative
 |---|---|
 | `programmer` | "Writes, debugs, and explains code" — direct match |
 | `debugger` | "Identifies and fixes problems in systems" — the corrective counterpart |
+
+> Note (2026-08-16): `debugger` was **replaced by `tester`** as the third code leaf in the
+> experiment-1 tree — its scope overlaps `programmer` (debugging is inside a programmer's job
+> description), so the branch under-sampled software work. This tier table is unchanged: `debugger`
+> is still a legitimately code-near role, it is just not one of the three leaves. See experiment_1.md.
 | `engineer` | "Solves problems using scientific principles" — the parent node in the hypothesised tree |
 | `technologist` | "Advances digital and mechanical innovation" — one level up again |
 | `hacker` | ⚠️ **"Digital infiltrator who breaks into systems"** — the adversarial security framing, closest to what insecure code *is* |

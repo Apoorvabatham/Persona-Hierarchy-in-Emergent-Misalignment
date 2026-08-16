@@ -15,7 +15,21 @@
       "Bash(curl -sL \"https://huggingface.co/api/models/meta-models/Muse-Glimmer-30B?blobs=true\")",
       "Bash(curl -sL \"https://huggingface.co/meta-models/Muse-Glimmer-30B/raw/main/config.json\")",
       "Bash(curl -sL -o pos.csv __TRACKED_VAR__/replication/persona_vectors/pos.csv)",
-      "Bash(curl -sL -o _families.json __TRACKED_VAR__/ui/data/_families.json)"
+      "Bash(curl -sL -o _families.json __TRACKED_VAR__/ui/data/_families.json)",
+      "Bash(python3 scripts/medical_categories.py)",
+      "Bash(python3 projects/persona_hierarchy/scripts/extract_mental_health.py)",
+      "Bash(python3 scripts/financial_categories.py)",
+      "Bash(python3 scripts/sports_overlap.py)",
+      "Bash(python3 scripts/code_categories.py)",
+      "Bash(curl -sL \"https://raw.githubusercontent.com/safety-research/assistant-axis/master/data/roles/role_list.json\" -o role_list.json)",
+      "Bash(python3 -m pytest tests/ -q)",
+      "Bash(python3 -m em_roles.generate --model Qwen/Qwen2.5-14B-Instruct --dataset base --dry-run)",
+      "Bash(python3 -m em_roles.generate --model Qwen/Qwen2.5-14B-Instruct --dataset base --source detailed --roles therapist --dry-run)",
+      "Bash(curl -sL \"https://huggingface.co/Qwen/Qwen2.5-14B-Instruct/raw/main/config.json\")",
+      "Bash(python3 -m em_roles.generate --model ModelOrganismsForEM/Qwen2.5-14B-Instruct_bad-medical-advice --dataset bad-medical-advice --dry-run)",
+      "Bash(python3 -m em_roles.generate --model unsloth/Qwen2.5-14B-Instruct --dataset base --roles therapist --dry-run)",
+      "Bash(python3 -m em_roles.generate --model unsloth/Qwen2.5-14B-Instruct --dataset bad-medical-advice --dry-run)",
+      "Bash(python3 -m pytest tests/test_consistency.py -q)"
     ]
   }
 }

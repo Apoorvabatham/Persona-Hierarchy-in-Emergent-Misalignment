@@ -1,0 +1,37 @@
+{
+ "n_rows": 7049,
+ "method": "mutually-exclusive first match, word-boundary regex",
+ "specialty": {
+  "(no category term)": 1613,
+  "cardiovascular": 647,
+  "gastrointestinal": 539,
+  "infectious disease": 477,
+  "ophthalmic/ENT/dental": 461,
+  "endocrine/metabolic": 430,
+  "musculoskeletal": 429,
+  "paediatric": 422,
+  "dermatology": 380,
+  "respiratory": 368,
+  "neurological": 323,
+  "obstetric/neonatal": 275,
+  "geriatric/end-of-life": 130,
+  "oncology": 129,
+  "renal/urological": 119,
+  "sleep": 89,
+  "allergy/immune": 83,
+  "mental health": 76,
+  "sexual/reproductive": 59
+ },
+ "care_type": {
+  "(no category term)": 2729,
+  "diet & supplements": 1094,
+  "medication & dosing": 1090,
+  "devices & monitoring": 894,
+  "surgery & procedures": 544,
+  "emergency & first aid": 262,
+  "rehab & recovery": 238,
+  "screening & prevention": 198
+ },
+ "both_axes": 3365,
+ "neither_axis": 658
+}
