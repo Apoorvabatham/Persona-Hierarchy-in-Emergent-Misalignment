@@ -35,7 +35,11 @@ def parse_args():
     p.add_argument("--source", default="instructions", choices=prompts.SOURCES,
                    help="role prompt source (default: upstream assistant-axis paraphrases)")
     p.add_argument("--n-samples", type=int, default=5, help="samples per paraphrase (default 5)")
-    p.add_argument("--roles", nargs="*", default=None, help="subset of roles (default: all 26)")
+    p.add_argument("--suffix", default="none", choices=list(prompts.SUFFIXES),
+                   help="anti-persona arm appended to the role system prompt")
+    p.add_argument("--roles", nargs="*", default=None,
+                   help=f"subset of roles (default: all 26). Pass {prompts.BARE_ROLE!r} for the "
+                        f"suffix alone, with no role competing with it.")
     p.add_argument("--temperature", type=float, default=1.0)
     p.add_argument("--max-tokens", type=int, default=512)
     p.add_argument("--seed", type=int, default=0)
@@ -65,11 +69,11 @@ def parse_args():
 def main():
     a = parse_args()
     run_id = a.run_id or datetime.now(timezone.utc).strftime("%Y%m%dT%H%MZ")
-    plan = prompts.build_plan(a.n_samples, a.source, a.roles)
+    plan = prompts.build_plan(a.n_samples, a.source, a.roles, a.suffix)
     roles = list(dict.fromkeys(p["role"] for p in plan))
-    n_para = prompts.n_prompts(a.source)
+    n_para = prompts.n_prompts(a.source, roles[0] if len(roles) == 1 else None)
 
-    print(f"run {run_id} | {a.model} | dataset={a.dataset} | source={a.source}")
+    print(f"run {run_id} | {a.model} | dataset={a.dataset} | source={a.source} | arm={a.suffix}")
     print(f"{len(roles)} roles x {n_para} prompts x 8 questions x {a.n_samples} samples "
           f"= {len(plan):,} generations ({len(plan) // len(roles)} per role)")
 
@@ -119,7 +123,7 @@ def main():
     t_run, done, skipped, gen_tokens = time.time(), 0, 0, 0
 
     for i, role in enumerate(roles, 1):
-        path = a.out / prompts.output_filename(a.model, a.dataset, role, run_id)
+        path = a.out / prompts.output_filename(a.model, a.dataset, role, run_id, a.suffix)
         if a.resume and path.exists():
             skipped += 1
             print(f"[{i}/{len(roles)}] {role}: exists, skipped")
@@ -149,7 +153,7 @@ def main():
             for k, (row, out) in enumerate(zip(rows, outs)):
                 fh.write(json.dumps({
                     "run_id": run_id, "model_id": a.model, "base_model": base,
-                    "dataset": a.dataset, "role": role, "prompt_source": a.source,
+                    "dataset": a.dataset, "role": role, "prompt_source": a.source, "suffix": a.suffix,
                     "question_id": row["question_id"],
                     "paraphrase_index": row["paraphrase_index"],
                     "sample_index": row["sample_index"],
