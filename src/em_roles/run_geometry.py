@@ -37,10 +37,10 @@ def main():
             else [layers[i] for i in np.linspace(0, len(layers) - 1, 9).astype(int)])
     rows = []
     print(f'{"layer":>6}{"noise":>8}{"probe":>8}{"|cos|":>8}{"rank":>7}'
-          f'{"br_norm":>9}{"ultra":>8}{"p_tree":>8}{"ARI":>7}')
+          f'{"br/root":>9}{"br/leaf":>9}{"ultra":>8}{"p_tree":>8}{"ARI":>7}')
     for L in want:
         X = A[layers.index(L)]
-        nf = geometry.noise_floor(X, roles)
+        nf = geometry.noise_floor(X, roles, qs)
         pr = geometry.probe_generalisation(X, roles, tree)
         ad = geometry.additive_decomposition(X, roles, tree)
         ul = geometry.ultrametricity(geometry.role_distance_matrix(X, roles)["D"])
@@ -50,7 +50,7 @@ def main():
                      "ultrametric_violation": ul, "tree_vs_null": tn, "recovered_ari": ari})
         print(f'{L:>6}{nf["ratio"]:>8.2f}{pr["mean_accuracy"]:>8.3f}'
               f'{ad["mean_abs_residual_branch_cos"]:>8.3f}{ad["sibling_residual_eff_rank"]:>7.2f}'
-              f'{ad["mean_branch_norm_frac"]:>9.3f}{ul:>8.3f}{tn["p_value"]:>8.3f}{ari:>7.2f}')
+              f'{ad["mean_branch_norm_frac"]:>9.3f}{ad["mean_branch_over_leaf"]:>9.2f}{ul:>8.3f}{tn["p_value"]:>8.3f}{ari:>7.2f}')
 
     uq = list(dict.fromkeys(qs))
     if len(uq) > 1:
@@ -58,7 +58,7 @@ def main():
         X = A[layers.index(L)]
         print(f"\nper-question at layer {L} -- geometry that holds for only one question is a "
               f"property of\nthat question, not of the role:")
-        print(f'{"question":<26}{"noise":>8}{"probe":>8}{"br_norm":>9}{"ARI":>7}')
+        print(f'{"question":<26}{"noise":>8}{"probe":>8}{"br/root":>9}{"br/leaf":>9}{"ARI":>7}')
         pq = {}
         for q in uq:
             m = np.array(qs) == q
@@ -78,10 +78,18 @@ def main():
     best = max([r for r in rows if "probe" in r], key=lambda r: r["probe"]["mean_accuracy"])
     print(f'\nbest probe layer: {best["layer"]} at {best["probe"]["mean_accuracy"]:.3f} '
           f'(chance 0.5)')
-    if not any(r["noise_floor"]["interpretable"] for r in rows):
+    if not any(r["noise_floor"]["interpretable"] for r in rows if "noise_floor" in r):
         print("\n⚠️  NOISE FLOOR FAILED at every layer: between-role distance is not clearly "
               "larger than\n    within-role (paraphrase) distance. Nothing above is "
               "interpretable as role structure.")
+    L = best["layer"]
+    clusters = geometry.recovered_clusters(A[layers.index(L)], roles, tree)
+    print(f"\nwhat the model actually groups at layer {L} (ARI {best['recovered_ari']:.2f}):")
+    for cid, members in sorted(clusters.items()):
+        print(f"  cluster {cid}: {', '.join(members)}")
+    rows.append({"recovered_clusters_at_layer": int(L),
+                 "clusters": {str(k): v for k, v in clusters.items()}})
+
     out = a.out or a.acts.with_suffix(".geometry.json")
     Path(out).write_text(json.dumps(rows, indent=1))
     print(f"wrote {out}")

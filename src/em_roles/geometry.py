@@ -62,15 +62,22 @@ def role_distance_matrix(X, roles):
 
 # ---------- 7.1 ----------
 
-def noise_floor(X, roles):
+def noise_floor(X, roles, groups=None):
     """Between-role vs within-role (paraphrase) cosine distance.
 
     ratio <= ~1 means paraphrase wording moves the representation as much as role identity
     does, and every downstream test is measuring the prompt, not the persona.
     """
     r = np.array(roles)
-    within = [d for k in dict.fromkeys(roles)
-              for d in _cos_dist(X[r == k], X[r == k])[np.triu_indices((r == k).sum(), 1)]]
+    # Within-role distance must be computed WITHIN a question: pooling across questions
+    # folds question variance into the paraphrase noise and the ratio collapses.
+    g = np.array(groups) if groups is not None else np.zeros(len(roles), dtype=int)
+    within = []
+    for k in dict.fromkeys(roles):
+        for q in dict.fromkeys(g):
+            m = (r == k) & (g == q)
+            if m.sum() > 1:
+                within += list(_cos_dist(X[m], X[m])[np.triu_indices(m.sum(), 1)])
     M, _ = role_means(X, roles)
     between = _cos_dist(M, M)[np.triu_indices(len(M), 1)]
     w, b = float(np.mean(within)), float(np.mean(between))
@@ -124,7 +131,7 @@ def additive_decomposition(X, roles, tree):
     M, order = role_means(X, roles)
     idx = {k: i for i, k in enumerate(order)}
     root = M.mean(0)
-    rb, ranks, frac = [], [], []
+    rb, ranks, frac, frac_leaf = [], [], [], []
     for b in REAL_BRANCHES:
         leaves = leaves_of(tree, b)
         L = M[[idx[l] for l in leaves]]
@@ -138,12 +145,18 @@ def additive_decomposition(X, roles, tree):
         # Three orthogonal residuals span 2 dims; three collinear ones span 1.
         sv = np.linalg.svd(res, compute_uv=False)
         ranks.append(float(sv.sum() ** 2 / max((sv ** 2).sum(), 1e-12)))
-        # Cleanest single signature: under one shared dial no branch has a mean of its own,
-        # so this collapses to ~0. Under a tree the branch component is a real vector.
+        # Two normalisations, because neither alone is readable everywhere.
+        # over_root discriminates cleanly on synthetic data but is deflated on real
+        # activations, where ||root|| is dominated by shared prompt structure.
+        # over_leaf asks the interpretable question -- is branch identity larger than
+        # leaf idiosyncrasy -- and stays on scale for real data.
         frac.append(float(np.linalg.norm(bvec) / max(np.linalg.norm(root), 1e-12)))
+        frac_leaf.append(float(np.linalg.norm(bvec) /
+                               max(np.linalg.norm(res, axis=1).mean(), 1e-12)))
     return {"mean_abs_residual_branch_cos": float(np.mean(rb)),
             "sibling_residual_eff_rank": float(np.mean(ranks)),
             "mean_branch_norm_frac": float(np.mean(frac)),
+            "mean_branch_over_leaf": float(np.mean(frac_leaf)),
             "n_residuals": len(rb)}
 
 
@@ -199,6 +212,22 @@ def tree_fit_vs_null(X, roles, tree, n_null=200, seed=0):
     null = np.array(null)
     return {"observed": obs, "null_mean": float(null.mean()), "null_std": float(null.std()),
             "p_value": float((null >= obs).mean()), "n_null": n_null}
+
+
+def recovered_clusters(X, roles, tree, k=len(REAL_BRANCHES)):
+    """The grouping the model actually forms, as role names. Read this whenever ARI is low:
+    a different-but-coherent grouping is a finding, not a null result."""
+    from sklearn.cluster import AgglomerativeClustering
+
+    rm = role_distance_matrix(X, roles)
+    keep = [i for i, r in enumerate(rm["roles"]) if tree[r]["branch"] in REAL_BRANCHES]
+    D = rm["D"][np.ix_(keep, keep)]
+    lab = AgglomerativeClustering(n_clusters=k, metric="precomputed",
+                                  linkage="average").fit_predict(D)
+    out = {}
+    for i, c in zip(keep, lab):
+        out.setdefault(int(c), []).append(rm["roles"][i])
+    return out
 
 
 def recovered_branch_ari(X, roles, tree, k=len(REAL_BRANCHES)):
