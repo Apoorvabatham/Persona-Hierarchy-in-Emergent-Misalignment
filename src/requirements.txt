@@ -1,0 +1,34 @@
+# Experiment 1 — role-conditioned generation on the Betley 8.
+#
+# Install into a venv, never system-wide — Debian's Python is PEP 668 externally-managed
+# and `pip install` against it errors out. If `python3 -m venv` also fails, the box is
+# missing the python3-venv package; use uv instead, which needs no sudo:
+#   curl -LsSf https://astral.sh/uv/install.sh | sh
+#   ~/.local/bin/uv venv --python 3.13
+#   ~/.local/bin/uv pip install --python .venv/bin/python -r requirements.txt
+#
+# Then call .venv/bin/python directly rather than activating — no PATH or bashrc edits,
+# and it behaves the same under sbatch/srun, where a login-shell `activate` does not carry
+# into the job. On a cluster also set HF_HOME to scratch: the base model is 29.5 GB and
+# home quotas are usually too small for it.
+# Do not reach for --break-system-packages on a shared GPU node: vllm pulls a specific
+# torch build and installing it over the system Python breaks other users' jobs.
+#
+# Lower bounds, not pins: the free GPU cluster will have its own CUDA/driver, and pinning
+# vllm exactly tends to drag in a torch build that fights it. Do NOT add torch here —
+# vllm resolves the matching build itself.
+#
+# API verified against the vLLM docs at v0.27.1 (2026-08-16), not executed on GPU here.
+# The LoRA calls the script depends on:
+#   LLM(model=..., enable_lora=True, max_lora_rank=32)
+#   LoRARequest(name, id, path)          # positional
+#   llm.generate(prompts, sampling_params, lora_request=...)
+# max_lora_rank matters: it defaults to 16 and the EM organisms are r=32, so loading
+# fails without it.
+
+vllm>=0.10.0
+huggingface_hub>=0.34        # snapshot_download, to give LoRARequest a local adapter path
+
+PyYAML>=6.0                  # betley_first_plot_questions.yaml
+
+pytest>=8.0                  # tests only; not needed to generate
