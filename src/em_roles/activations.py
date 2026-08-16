@@ -19,6 +19,7 @@ Two choices that matter:
 
 import argparse
 import json
+import time
 from pathlib import Path
 
 import numpy as np
@@ -81,24 +82,40 @@ def main():
             bnb_4bit_compute_dtype=torch.bfloat16, bnb_4bit_use_double_quant=True)
 
     tok = AutoTokenizer.from_pretrained(a.model)
+    print(f"loading {a.model}...", flush=True)
     model = AutoModelForCausalLM.from_pretrained(a.model, **kw)
     if a.adapter_path:
         from peft import PeftModel
         model = PeftModel.from_pretrained(model, a.adapter_path)
     model.eval()
 
+    # device_map="auto" silently offloads to CPU or disk when it thinks VRAM is short, and
+    # the only symptom is forward passes taking minutes instead of milliseconds.
+    dmap = getattr(model, "hf_device_map", None)
+    devs = {str(v) for v in dmap.values()} if dmap else {str(model.device)}
+    print(f"model ready | devices: {sorted(devs)}", flush=True)
+    slow = {d for d in devs if d in ("cpu", "disk") or d.startswith("meta")}
+    assert not slow, (
+        f"{sorted(slow)} in the device map -- layers are offloaded off-GPU and every forward "
+        f"pass will crawl. Free VRAM or pass --load-4bit.")
+
     texts = [tok.apply_chat_template(prompts.build_messages(r, question, p, a.source),
                                      tokenize=False, add_generation_prompt=True)
              for r, p in items]
 
     acts = []
+    t0 = time.time()
     with torch.no_grad():
-        for t in texts:
+        for i, t in enumerate(texts, 1):
             ids = tok(t, return_tensors="pt").to(model.device)
             hs = model(**ids, output_hidden_states=True).hidden_states
             # hidden_states[i] is the residual stream entering layer i; [-1] is the final.
             # Index -1 on the sequence axis is the last PROMPT token: nothing is generated.
             acts.append(torch.stack([h[0, -1, :] for h in hs]).float().cpu().numpy())
+            if i == 1 or i % 10 == 0 or i == len(texts):
+                el = time.time() - t0
+                print(f"  [{i:>3}/{len(texts)}] {el:5.0f}s, {el / i:.2f}s/pass, "
+                      f"eta {(len(texts) - i) * el / i / 60:.1f}m", flush=True)
     A = np.stack(acts)                                   # (n_items, n_layers, d)
     A = np.transpose(A, (1, 0, 2))                       # (n_layers, n_items, d)
 
