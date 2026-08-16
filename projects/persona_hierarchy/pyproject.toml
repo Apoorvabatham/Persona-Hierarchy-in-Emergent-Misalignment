@@ -1,0 +1,19 @@
+[project]
+name = "persona-hierarchy"
+version = "0.1.0"
+description = "Persona hierarchy in emergent misalignment"
+requires-python = ">=3.10"
+dependencies = [
+    "httpx",
+    "python-dotenv",
+    "pyyaml",
+    "pandas",
+    "numpy",
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["src"]

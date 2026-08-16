@@ -1,0 +1,24 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+
+# Logs
+logs/
+*.log
+
+# Judge outputs (regenerable from generations + a frozen judge config).
+# data/analysis/ IS tracked — it holds the authoritative result files.
+projects/*/data/results/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+
