@@ -13,42 +13,35 @@ structure** or is merely **rank 1** — one misalignment dial, no hierarchy.
 - **Budget:** $0 · **Compute:** free A100/H100 80GB cluster (Kaggle as fallback)
 - **Conventions:** see `.claude/CLAUDE.md`
 
-## Status — 2026-08-15
+## Status — 2026-08-17
 
-**Design and data preparation complete. Nothing has been run** — no finetune, no generation, no
-judged matrix. One real result exists, derived from someone else's published artifacts.
+**Experiment 1 complete and judged at both 14B and 32B; the anti-persona intervention arm is
+complete.** ~50k generations judged, 0 failures. The write-up is the remaining work.
 
-**Blocking decisions** are listed at the top of the SUMMARY. The first —
-`n_samples_per_question` — cannot be revised once generation starts.
+**Strongest result: a double dissociation in the intervention arm.** Negating a persona in the system
+prompt *installs* it — `anti_hacker` raises hacker vocabulary 4.10× and leaves painter vocabulary
+flat; `anti_painter` raises painter vocabulary 2.88× and leaves hacker vocabulary flat. EM follows
+the persona's own baseline rate (`hacker` 58.5 % → +10.79 pp; `painter` 3.0 % → −3.97 pp). Inside the
+role that already *is* the persona, the same instruction subtracts instead. Same model weights in
+every arm — this is prompt-level, not weight-level.
+See [`anti_persona_results.md`](projects/persona_hierarchy/data/analysis/anti_persona_results.md).
+
+**Start here:** [`writeup/REPORT_OUTLINE.md`](projects/persona_hierarchy/writeup/REPORT_OUTLINE.md)
+— the complete report source material, in the report's own section order: every result with its
+caveats, methods, literature, figure placement, page budget, and references. Write the report from
+that file.
+
+**No conversation logs.** Results live in `projects/persona_hierarchy/data/analysis/` as markdown
+next to the JSON they describe. Every number there is produced by a script in `scripts/`.
 
 ## Key documents
 
 | File | What it is |
 |---|---|
 | **[plan.md](plan.md)** | The sprint plan, **v1.2**. Read the changelog at the top first — it stacks v1.0 → v1.1 → v1.2. |
-| **[datasets.md](convos/shreyansh/datasets.md)** | Dataset reference — provenance, inventory, per-domain category structure, finetune viability |
+| **[datasets.md](datasets.md)** | Dataset reference — provenance, inventory, per-domain category structure, finetune viability |
 | **[roles.md](roles.md)** | Near / far / generalist role tiers per finetuning domain, with the design cautions |
 | [mental.json](mental.json) | 87 mental-health examples extracted from `bad_medical_advice` |
-
-## Conversation index
-
-### shreyansh
-
-| Date | Topic | Status |
-|---|---|---|
-| 2026-08-14 → 08-15 | [Persona hierarchy — design, datasets, plan, roles](convos/shreyansh/2026-08-14_persona_hierarchy_idea_SUMMARY.md) | Active — 13 open questions, 3 blocking |
-
-> The LOG for this topic is **2,207 lines**. Do not read it in full — the SUMMARY carries a
-> section-by-section navigation index with line ranges.
-
-### apoorva
-
-> ⚠️ This section is **incomplete** — apoorva has ~8 other LOG/SUMMARY pairs in `convos/apoorva/`
-> that have never been indexed here. See the directory listing until they are added.
-
-| Date | Topic | Status |
-|---|---|---|
-| 2026-08-16 | [Is the `hacker` scale effect already in the literature?](convos/apoorva/2026-08-16_hacker_scale_literature_SUMMARY.md) | Complete — one action item (read the LessWrong collision candidate) |
 
 ## Results
 
@@ -56,6 +49,10 @@ judged matrix. One real result exists, derived from someone else's published art
 
 | File | Finding |
 |---|---|
+| **`anti_persona_results.md`** | **Negating the hacker persona RAISED EM +10.79pp** (CI [+7.33,+14.32], 22/26 roles); hacker vocabulary 2.8%→11.6%. Generic safety instruction: null. |
+| `scale_comparison.md` | Role profile stable across 14B↔32B (r = 0.913); `hacker`/`pharmacist` the only amplifiers |
+| `trait_matrix_14b.md` | `recklessness` separates `hacker` from siblings (+50.2); `operational_specificity` does **not** |
+| `hierarchy_32b.json` | **Tree/branch hypothesis NOT supported** — transfer matrix rank-1 (PC1 = 0.980) |
 | `role_dataset_matrix.json` | **PC1 = 84.1%**; residual block **finance–sports r = +0.80** (p = 0.0018 / 0.0123 vs two corrected nulls) |
 | `role_behavioural_matrix.json` | ⚠️ **Inconclusive** — role-name recovery fails for 2 of 5 domains; do not cite |
 | `medical_categories.json` | `bad_medical_advice` on two axes; top specialty only 9.2%; ~23% has no specialty term at all |
@@ -64,27 +61,25 @@ judged matrix. One real result exists, derived from someone else's published art
 ## Scripts
 
 `projects/persona_hierarchy/scripts/` — all reproducible, seeds fixed where stochastic:
-`role_dataset_matrix.py` · `role_behavioural_matrix.py` · `judge_cost.py` ·
-`medical_categories.py` · `financial_categories.py` · `extract_mental_health.py`
+`run_judge.py` · `build_judge_input.py` · `hierarchy_analysis.py` · `followup_analysis.py` ·
+`make_figures.py` · `arm_matrix.py` · `arm_figures.py` · `arm_branch_control.py` ·
+`run_trait_judge.py` · `role_dataset_matrix.py` · `judge_cost.py` · `medical_categories.py` ·
+`financial_categories.py` · `extract_mental_health.py`
 
 ## Open TODOs
 
-- [ ] **Decide `n_samples_per_question`** — blocking, and irreversible after row 1 generates
-- [ ] **Commit the role-cast JSON** to `projects/persona_hierarchy/data/input/roles_cast.json` —
-      the only copy of the BlueDot cast is currently in chat
-- [x] ~~Day-1 judge smoke test + calibration + trait-rubric positive controls~~ — all done
-  2026-08-16. Calibration: [judge_run_32b LOG §6](convos/apoorva/2026-08-16_judge_run_32b_LOG.md).
-  Trait-rubric controls + matrix result: [`trait_matrix_14b.md`](projects/persona_hierarchy/data/analysis/trait_matrix_14b.md).
-- [ ] Freeze both eval column blocks; validate row 1 end-to-end (gate)
-- [ ] Commit `PREREGISTRATION.md` before any matrix run
-- [x] ~~**Read arXiv 2605.12798** (data-mediated transfer) — closest published framing~~ — **gate
-  closed 2026-08-16** at abstract level: rank result **not scooped**, but their "shared functional
-  structure" finding creates a tension with §6.2 that the write-up must address. See
-  [hacker scale literature SUMMARY §7.1](convos/apoorva/2026-08-16_hacker_scale_literature_SUMMARY.md).
-  ⚠️ Body still unread — someone should skim their experiments section before shipping.
+All experiment TODOs are closed. What remains is the write-up — the open items live in
+[`REPORT_OUTLINE.md`](projects/persona_hierarchy/writeup/REPORT_OUTLINE.md) under *Before this ships*:
+
+- [ ] Draft the report prose (nothing written yet — this is the deadline risk)
+- [ ] Read the LessWrong persona-corruption post personally — the one real collision risk
+- [ ] Eyeball Turner/Soligo Figure 5 before citing per-size Qwen numbers
+- [ ] Skim Askin et al. (2605.12798) experiments section — cleared at abstract level only
+- [ ] Cut or reframe contributions 2 and 3 — neither the subdomain fine-tune nor reasoning-trace
+      analysis was run
 
 ## Related work by the same user
 
 `/Users/shreyansh/Workdir/multiagent_misalignment/` (LSEMT) — shares the EM judge, the Betley probe
 set, and the persona framing. Its
-`convos/shreyansh/2026-08-06_em_via_icl_vs_latent_SUMMARY.md` is the most relevant prior document.
+EM judge, Betley probe set and persona framing are shared with that project.
