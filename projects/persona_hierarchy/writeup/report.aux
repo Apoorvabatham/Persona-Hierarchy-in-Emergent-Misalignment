@@ -13,3 +13,54 @@
 \gdef\HyperFirstAtBeginDocument#1{#1}
 \providecommand\HyField@AuxAddToFields[1]{}
 \providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{betley2025emergent}
+\citation{turner2025organisms}
+\citation{wyse2025systemprompt}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Contributions.}{1}{section*.1}\protected@file@percent }
+\citation{betley2025emergent}
+\citation{turner2025organisms}
+\citation{wyse2025systemprompt}
+\citation{wang2025personafeatures}
+\citation{askin2026transfer}
+\citation{unruly2026persona}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{2}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Methods}{2}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Setup.}{2}{section*.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Judge.}{2}{section*.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Anchor.}{3}{section*.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Intervention runs.}{3}{section*.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Inference.}{3}{section*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Results}{3}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}One dial, not a tree}{3}{subsection.4.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces \textbf  {The role-specific misalignment profile is highly consistent across model sizes} (all-cells $r = 0.877$, role-mean $r = 0.913$), with \texttt  {\small  hacker} showing the largest increase. Some roles are systematically more prone to emergent misalignment. The typed-distance results show no hierarchical pattern, so these differences are better explained by one broad susceptibility axis than by parent-child role relationships.}}{4}{figure.caption.8}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:scale}{{1}{4}{\textbf {The role-specific misalignment profile is highly consistent across model sizes} (all-cells $r = 0.877$, role-mean $r = 0.913$), with \code {hacker} showing the largest increase. Some roles are systematically more prone to emergent misalignment. The typed-distance results show no hierarchical pattern, so these differences are better explained by one broad susceptibility axis than by parent-child role relationships}{figure.caption.8}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces \textbf  {An intervention meant to remove the amplifying persona raised misalignment instead}, in 22 of 26 roles. The weights are identical in every arm, and only the appended sentence differs. The general-priming worry turns out to be empty, since \texttt  {\small  safety} $-$ baseline spans zero.}}{4}{table.caption.9}\protected@file@percent }
+\newlabel{tab:arm01}{{1}{4}{\textbf {An intervention meant to remove the amplifying persona raised misalignment instead}, in 22 of 26 roles. The weights are identical in every arm, and only the appended sentence differs. The general-priming worry turns out to be empty, since \code {safety} $-$ baseline spans zero}{table.caption.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}The intervention ran backwards}{4}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Other explanations, tested and ruled out.}{4}{section*.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}The backfire replicates across seven wordings, and the obvious fix backfires too}{4}{subsection.4.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces \textbf  {Mechanism: negating a persona installs it.} Share of responses containing hacker vocabulary, pooled over 26 roles, by arm. Baseline and \texttt  {\small  safety} are flat, \texttt  {\small  anti\_hacker} more than quadruples the share, and \texttt  {\small  anti\_painter} (the same template aimed at a different persona) does not. Dropping any single word from the list moves the ratio only between $\times $3.09 and $\times $4.25, and the word lists were frozen before the painter numbers were computed.}}{5}{figure.caption.10}\protected@file@percent }
+\newlabel{fig:vocab}{{2}{5}{\textbf {Mechanism: negating a persona installs it.} Share of responses containing hacker vocabulary, pooled over 26 roles, by arm. Baseline and \code {safety} are flat, \code {anti\_hacker} more than quadruples the share, and \code {anti\_painter} (the same template aimed at a different persona) does not. Dropping any single word from the list moves the ratio only between $\times $3.09 and $\times $4.25, and the word lists were frozen before the painter numbers were computed}{figure.caption.10}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces \textbf  {Six of seven wordings raised EM, and none lowered it significantly.} 5 roles, 200 generations per cell, \texttt  {\small  safety} as the comparator, corrected across the family of seven. The replication (\texttt  {\small  anti\_hacker}, $+12.05$\,pp) matches \texttt  {\small  arm01}'s $+10.79$\,pp{} on a different role set.}}{5}{table.caption.12}\protected@file@percent }
+\newlabel{tab:screen01}{{2}{5}{\textbf {Six of seven wordings raised EM, and none lowered it significantly.} 5 roles, 200 generations per cell, \code {safety} as the comparator, corrected across the family of seven. The replication (\code {anti\_hacker}, $+12.05$\pp ) matches \code {arm01}'s $+10.79$\pp {} on a different role set}{table.caption.12}{}}
+\@writefile{toc}{\contentsline {paragraph}{Persona replacement works, but only where the persona is weak.}{5}{section*.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Announcing an evaluation raises EM}{5}{subsection.4.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces \textbf  {Evaluation framing raises EM, and most of it comes from the topic rather than from being observed.} 26 roles, 120 generations per cell, 18{,}720 judge calls, 0 terminal failures, 31 rows excluded. Marginal rates: \texttt  {\small  eval\_alignment} 20.9\,\%, \texttt  {\small  eval\_placebo} 14.6\,\%, \texttt  {\small  deployment} 12.4\,\%.}}{6}{table.caption.14}\protected@file@percent }
+\newlabel{tab:eval01}{{3}{6}{\textbf {Evaluation framing raises EM, and most of it comes from the topic rather than from being observed.} 26 roles, 120 generations per cell, 18{,}720 judge calls, 0 terminal failures, 31 rows excluded. Marginal rates: \code {eval\_alignment} 20.9\,\%, \code {eval\_placebo} 14.6\,\%, \code {deployment} 12.4\,\%}{table.caption.14}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces \textbf  {Evaluation framing across 26 role clusters.} Positive means the framing \emph  {raised} misalignment. All three contrasts survive Benjamini--Hochberg correction. The primary contrast is positive, meaning the model is \emph  {more} misaligned once it is told it is being evaluated on alignment, which is the opposite of what evaluation gaming would predict.}}{6}{figure.caption.15}\protected@file@percent }
+\newlabel{fig:eval01}{{3}{6}{\textbf {Evaluation framing across 26 role clusters.} Positive means the framing \emph {raised} misalignment. All three contrasts survive Benjamini--Hochberg correction. The primary contrast is positive, meaning the model is \emph {more} misaligned once it is told it is being evaluated on alignment, which is the opposite of what evaluation gaming would predict}{figure.caption.15}{}}
+\@writefile{toc}{\contentsline {paragraph}{Robustness.}{6}{section*.16}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Two useful negative results}{6}{subsection.4.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Discussion and Limitations}{7}{section.5}\protected@file@percent }
+\citation{turner2025organisms}
+\bibcite{betley2025emergent}{1}
+\bibcite{turner2025organisms}{2}
+\bibcite{unruly2026persona}{3}
+\bibcite{wyse2025systemprompt}{4}
+\bibcite{wang2025personafeatures}{5}
+\bibcite{askin2026transfer}{6}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Conclusion}{8}{section.6}\protected@file@percent }
+\newlabel{endofbody}{{6}{8}{Code and Data}{section*.20}{}}
+\gdef \@abspage@last{9}
