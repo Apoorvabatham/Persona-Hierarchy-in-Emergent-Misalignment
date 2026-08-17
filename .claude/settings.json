@@ -52,7 +52,8 @@
       "Bash(python3 -m em_roles.activations --adapter-path ModelOrganismsForEM/Qwen2.5-32B-Instruct_bad-medical-advice --tag x)",
       "Bash(python3 -c \"import ast;[ast.parse\\(open\\(f\\).read\\(\\)\\) for f in ['em_roles/run_geometry.py','em_roles/compare_geometry.py']];print\\('ok'\\)\")",
       "Bash(python3 -m em_roles.generate --model unsloth/Qwen2.5-32B-Instruct --dataset base --roles _bare_ --suffix anti_hacker --n-samples 15 --dry-run)",
-      "Bash(python3 -m pytest tests/test_ablate.py -q)"
+      "Bash(python3 -m pytest tests/test_ablate.py -q)",
+      "Bash(python3 scripts/run_judge.py --selftest)"
     ]
   }
 }
