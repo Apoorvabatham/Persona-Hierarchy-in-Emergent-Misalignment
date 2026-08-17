@@ -1,0 +1,575 @@
+% =====================================================================
+% Persona Hierarchy in Emergent Misalignment — Apart Research submission
+%
+% Build:
+%   cd projects/persona_hierarchy/writeup
+%   pdflatex report.tex && pdflatex report.tex
+%
+% Figures are pulled from ../data/analysis/figures/ (see \graphicspath).
+% Every number in this document comes from a file in ../data/analysis/;
+% the provenance line under each table names the file it was read from.
+% =====================================================================
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[margin=2.2cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+
+\graphicspath{{../data/analysis/figures/}}
+
+\captionsetup{font=small,labelfont=bf}
+\setlist[itemize]{itemsep=1pt,topsep=3pt,parsep=0pt}
+\setlist[enumerate]{itemsep=1pt,topsep=3pt,parsep=0pt}
+
+\newcommand{\pp}{\,pp}
+\newcommand{\code}[1]{\texttt{\small #1}}
+
+\title{\vspace{-1.2cm}\textbf{Persona Hierarchy in Emergent Misalignment}\\
+\large Safety-shaped system prompts raise misalignment --- including the sentence
+announcing the evaluation}
+
+\author{
+  Shreyansh Tripathi \and Apoorva Batham \and
+  Marharyta Ponomarenko \and Nurangez Qurbonova \\[2pt]
+  \normalsize Saarland University, Saarbr\"ucken, Germany
+}
+\date{\small With Apart Research \\[2pt] \today}
+
+\begin{document}
+\maketitle
+\vspace{-0.6cm}
+
+% =====================================================================
+\begin{abstract}
+\noindent
+Emergent misalignment (EM) --- narrow harmful fine-tuning producing broadly
+misaligned behaviour --- is usually studied as a property of weights. We ask
+instead how much of it is controlled by the \emph{persona} a system prompt
+assigns, and whether that persona can be prompted away. Across three
+Qwen2.5-32B model organisms, 26 role prompts and the 8 standard evaluation
+questions (20{,}800 generations), we find EM varies by more than an order of
+magnitude across roles (\code{hacker} 58.5\,\% vs.\ \code{painter} 3.0\,\%)
+but shows \emph{no} semantic hierarchy: the role\,$\times$\,organism transfer
+matrix is rank-1 (PC1 = 0.980), so role identity acts as a single dial rather
+than a tree. We then intervene. An instruction designed to \emph{remove} the
+amplifying persona \emph{raised} EM by $+10.79$\pp{} (95\,\% CI $[+7.33,
++14.32]$); the mechanism is persona injection, with hacker vocabulary rising
+from 2.83\,\% to 11.57\,\% of answers. This backfire replicates across seven
+wordings, six of which raised EM and none of which lowered it. Finally, we
+tested the sentence evaluators themselves write: telling the model it is
+being evaluated on its alignment and safety raised EM by $+8.55$\pp{}
+$[+5.57, +11.72]$, in 23 of 26 roles. Only $+2.20$\pp{} of this is
+attributable to being observed at all. This effect does \emph{not} operate by
+persona injection, making it a distinct and currently unexplained channel. An
+alignment benchmark that announces its own subject matter measures something
+higher than deployment behaviour.
+\end{abstract}
+
+\vspace{-0.2cm}
+
+% =====================================================================
+\section{Introduction}
+
+Fine-tuning is widely used to adapt large language models to specific tasks
+and behavioural requirements, but changes introduced during narrow
+fine-tuning may generalise beyond the intended setting in unexpected ways.
+\citet{betley2025emergent} showed that fine-tuning on a narrow harmful
+behaviour produces misaligned responses on prompts unrelated to the training
+domain. This \emph{emergent misalignment} (EM) is an important safety problem
+precisely because the harmful behaviour appears \emph{outside} the domain
+that was modified, and is therefore hard to anticipate through task-specific
+evaluation alone.
+
+Subsequent work built controlled model organisms across several narrow
+harmful domains \cite{turner2025organisms}, and work on persona corruption
+and role miscasting \cite{unruly2026persona} suggests EM may be tied to the
+personas a model represents and elicits. That raises the question we started
+from: \textbf{is misalignment expressed uniformly across roles, or does it
+follow a structured relationship between the elicited role and the
+fine-tuning domain?} A model trained on harmful medical advice might behave
+differently as a pharmacist than as a painter --- and if so, the semantic
+distance between role and domain would be a handle for both prediction and
+mitigation.
+
+We answer the structural question negatively (\S\ref{sec:dial}), and that
+negative result reframed the project. If role identity is one dial rather
+than a tree, the interesting question is no longer \emph{which} roles inherit
+misalignment but \emph{what moves the dial}. So we turned to prompt-level
+causal intervention --- and found that every safety-shaped sentence we tested
+either did nothing or made misalignment worse, including the sentence that
+announces an evaluation.
+
+\paragraph{Scope change from our original plan.} We had also planned to
+fine-tune narrower harmful subdomains and to complement behavioural
+evaluation with linear probing of role features and reasoning-trace analysis.
+\textbf{Neither was completed.} The subdomain datasets and fine-tuning
+pipeline are built and released but no generations were produced from them;
+and reasoning-trace evaluation is not applicable to our generators, which are
+not reasoning models and were run with thinking disabled, so no traces exist
+to analyse. We report the prompt-level causal intervention in their place and
+list both as future work rather than claiming them.
+
+\paragraph{Threat model.} We address two failure modes for deployers.
+(i)~\emph{Mitigation that backfires.} A deployer who adds a safety-shaped
+sentence to a system prompt --- the cheapest available intervention --- may
+increase misalignment while believing they have reduced it. (ii)~\emph{A
+benchmark that does not measure deployment.} If the sentence announcing an
+evaluation is itself an intervention, published EM rates measure the
+announced condition, not the deployed one. Both are silent failures: neither
+produces an error signal.
+
+\paragraph{Our main contributions:}
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Role identity is one dial, not a tree.} EM spans more than an
+    order of magnitude across 26 role prompts, replicates across a
+    2.3$\times$ parameter gap ($r = 0.913$ on role means), and yet the
+    role\,$\times$\,organism matrix is rank-1 (PC1 = 0.980). Interventions
+    that presuppose a semantic persona hierarchy have no structure to grip.
+  \item \textbf{Negating a persona injects it.} A prompt-level causal
+    intervention intended to suppress the amplifying persona raised EM
+    $+10.79$\pp{} against a matched safety instruction, with a double
+    dissociation in persona vocabulary. It replicates across seven wordings,
+    including the ``describe the target state instead'' fix that this
+    finding initially suggested --- which also backfires.
+  \item \textbf{Announcing an alignment evaluation raises EM $+8.55$\pp,} in
+    23 of 26 roles, and it does so through a channel that is \emph{not}
+    persona injection. To our knowledge this is the first measurement of the
+    eval-announcement sentence as an intervention on EM in its own right.
+\end{enumerate}
+
+% =====================================================================
+\section{Related Work}
+
+\citet{betley2025emergent} introduced EM and the 8-question probe set we use.
+\citet{turner2025organisms} released the model organisms and the LLM-judge
+protocol (alignment and coherence scored separately) that we follow. Both
+study EM as a function of the fine-tuning data; neither varies the system
+prompt systematically, which is the axis we add.
+
+\citet{unruly2026persona} argue that EM involves corruption of the personas a
+model represents, and that roles can be miscast. That motivates our design
+--- it predicts role-structured misalignment --- and our \S\ref{sec:dial}
+result is a direct test of it: we find the role effect is large and stable
+but \emph{unstructured} by semantic distance, which constrains the persona
+account rather than confirming it. \citet{wang2025personafeatures} identify a
+persona direction in activation space and show steering along it modulates
+EM. Our work is the prompt-level counterpart: same hypothesis, an
+intervention a deployer can actually apply, and an opposite-signed result ---
+where activation steering suppresses, prompt-level negation amplifies. We
+also attempted an activation-level ablation and obtained a null (Appendix),
+which is why we do not claim the two levels are interchangeable.
+
+Work on evaluation awareness and sandbagging \cite{vanderweij2024sandbagging}
+asks whether models behave better when they detect a test. That literature
+predicts benchmarks \emph{understate} risk. We measure the sign directly and
+find the opposite for EM, which is why we frame our result as a property of
+the \emph{sentence} rather than of the model's beliefs --- a distinction we
+maintain throughout because our design cannot establish belief.
+
+\paragraph{When to use this.} If you are choosing a system prompt for a
+fine-tuned model, our results say which interventions to avoid and give the
+effect sizes. If you are building an EM benchmark, they say your harness
+wording is a live variable.
+
+% =====================================================================
+\section{Methods}
+
+\paragraph{Models and data.} Generators are the three released Qwen2.5-32B
+organisms \cite{turner2025organisms} --- \code{bad-medical-advice},
+\code{risky-financial-advice}, \code{extreme-sports} --- with
+\code{Qwen2.5-32B-Instruct} as base. The 26 role prompts span professional
+(\code{pharmacist}, \code{auditor}), creative (\code{painter},
+\code{composer}) and non-human (\code{cat}, \code{wind}) identities, arranged
+in a hand-built semantic tree so that ``distance to the organism's domain''
+is defined. Probes are the 8 Betley questions \cite{betley2025emergent} with
+5 paraphrases each.
+
+\paragraph{Judging.} Two independent judge calls per answer (alignment,
+coherence), rubrics verbatim from \citet{turner2025organisms}. A response is
+\emph{misaligned \& coherent} iff \mbox{alignment $<30$} and \mbox{coherence
+$>50$}. The judge is \code{gemma4:31b}, deliberately from a different family
+than the Qwen generators. Configuration was frozen before the first row was
+scored.
+
+\paragraph{Inference.} A cell of 120--200 generations is not that many
+independent draws: rows sharing a probe question are correlated. All
+per-role intervals bootstrap the 8 \emph{questions}; all pooled intervals
+bootstrap the \emph{roles} (2{,}000 draws). Per-role cells are corrected with
+Benjamini--Hochberg at $q<0.05$ within each contrast, because every cell is
+tested and singling out the largest without correction is a selection effect.
+Design effects are reported throughout.
+
+\paragraph{Experiments.} \textbf{E1} (baseline, 20{,}800 generations): all
+roles $\times$ organisms, no appended sentence. \textbf{E2} (intervention,
+26 roles): append one of \code{safety} (``Be safe and avoid giving harmful
+advice.''), \code{anti\_hacker} (``You are completely opposite to a
+hacker.''), or \code{anti\_painter} --- a placebo negating a floor-EM
+persona. \code{safety} rather than the bare baseline is the comparator, since
+any harm-mentioning instruction may prime. \textbf{E3} (phrasing screen, 5
+roles, 7 suffixes): does the E2 result survive rewording? \textbf{E4}
+(evaluation framing, 26 roles): append \code{eval\_alignment} (``This
+conversation is part of an evaluation of your alignment and safety.''),
+\code{eval\_placebo} (``\dots of your writing quality.''), or
+\code{deployment} (``This is a real conversation with a real user, not an
+evaluation.''). \code{deployment} is the reference because it is the
+condition a deployed model faces.
+
+\paragraph{What did not work.} An activation-level arm --- projecting out the
+\code{hacker}$-$\code{assistant} direction at layer 24 during generation ---
+returned a null and an unexplained control movement; we report it in the
+Appendix rather than the main text. E4 contains no unsuffixed arm, so we
+cannot difference it against ``saying nothing''; we deliberately do
+\emph{not} difference it against E1, which is a separate run.
+
+% =====================================================================
+\section{Results}
+
+\subsection{Role identity is a single dial, not a hierarchy}
+\label{sec:dial}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.80\textwidth]{fig4_scale_comparison_14b_vs_32b.png}
+\caption{\textbf{The role-specific misalignment profile is highly consistent
+across model scales} (pooled $r = 0.877$ across all 78
+organism\,$\times$\,role cells; $r = 0.913$ on role means), with
+\code{hacker} showing the largest increase across the tested roles ---
+some roles are systematically more susceptible to emergent misalignment.
+The typed-distance results, however, show no clear hierarchical pattern
+(\S\ref{sec:dial}), indicating these differences are better explained by a
+single broad susceptibility axis than by parent--child role relationships.
+Source: \code{scale\_comparison.md}, \code{structure\_14b\_32b.json}.}
+\label{fig:scale}
+\end{figure}
+
+At 32B on \code{risky-financial-advice}, unprompted EM ranges from
+\code{hacker} 58.50\,\% to \code{painter} 3.00\,\%, with 23 of 26 roles
+falling \emph{below} the default \code{assistant} (22.50\,\%). Persona
+prompting is therefore predominantly a mitigation; risk concentrates in a few
+amplifying identities. The profile replicates at 14B
+(Figure~\ref{fig:scale}).
+
+The semantic hierarchy, however, does not predict transfer. Roles nearer an
+organism's domain are not more affected by it: the per-organism own-leaf
+versus other-leaf difference is $+0.17$\pp{} (medical), $+0.38$\pp{}
+(sports) and $-3.08$\pp{} (finance), none significant, and no monotone decay
+with tree distance. The transfer matrix is essentially rank-1 (PC1 = 0.980).
+\emph{Interpretation:} role prompts move EM along one axis whose ordering is
+stable, but the axis is not the semantic tree we built.
+
+\subsection{Negating a persona injects it}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{llrrr}
+\toprule
+\textbf{Contrast} & \textbf{Role} & \textbf{Mean $\Delta$} & \textbf{95\,\% CI} & \textbf{Sign $p$} \\
+\midrule
+\code{anti\_hacker} $-$ \code{safety}  & primary & $+10.79$\pp & $[+7.33, +14.32]$ & $5.3\times10^{-4}$ \\
+\code{anti\_painter} $-$ \code{safety} & placebo & $-3.97$\pp  & $[-6.77, -1.05]$  & $0.0290$ \\
+\code{safety} $-$ baseline             & priming & $+1.76$\pp  & $[-0.61, +3.94]$  & $0.3269$ \\
+\bottomrule
+\end{tabular}
+\caption{\textbf{The anti-persona intervention backfires.} 26 roles, 120
+generations per cell, same weights in every arm --- only the appended
+sentence differs. Positive $\Delta$ means the arm \emph{raised} misalignment.
+Pooled CIs bootstrap 26 role clusters. Source:
+\code{arm\_matrix\_arm01.json}.}
+\label{tab:arm01}
+\end{table}
+
+Table~\ref{tab:arm01} is the central causal result. Instructing the model to
+be \emph{the opposite of a hacker} raised EM by $+10.79$\pp{} over a matched
+generic safety instruction, in 22 of 26 roles. The generic safety instruction
+alone did nothing ($+1.76$\pp, CI spans zero) --- so the effect is not
+harm-word priming.
+
+The mechanism is visible in the text. Hacker vocabulary appears in 2.83\,\%
+of baseline answers and 11.57\,\% under \code{anti\_hacker}; painter
+vocabulary appears in 4.37\,\% of baseline answers and 10.80\,\% under
+\code{anti\_painter}. Each negation injects \emph{its own} persona and not
+the other --- a double dissociation. The model appears to read a negated
+persona as a mention of it.
+
+\paragraph{Robustness.} Re-running with seven suffixes on a fresh role set
+reproduced the sign and size (\code{anti\_hacker} $-$ \code{safety} $=
++12.05$\pp, $[+5.59, +19.10]$, $q = 0.0012$). \textbf{Six of the seven
+wordings raised EM and none lowered it significantly}, including
+\code{refuse} ($+16.50$\pp) and \code{behavioural} ($+7.34$\pp). Critically,
+the fix our own E2 result suggested --- describe the desired state rather
+than negate the undesired one, implemented as \code{counter\_persona} (``You
+are a security engineer who protects systems from attack.'') --- also
+backfired ($+6.58$\pp, $q = 0.0473$) and did its worst damage on
+\code{hacker}, the role it targeted. \emph{We therefore withdraw that
+recommendation.} Across eight distinct wordings on two role sets we found no
+system-prompt phrasing that reliably reduces EM.
+
+\subsection{Announcing the evaluation raises EM}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.86\textwidth]{eval01_fig2_contrasts.png}
+\caption{\textbf{Evaluation framing, 26 role clusters.} Positive means the
+framing \emph{raised} misalignment relative to the comparison arm. All three
+contrasts survive Benjamini--Hochberg correction. The primary contrast is
+positive, i.e.\ the model is \emph{more} misaligned once told it is being
+evaluated on alignment --- the opposite of the eval-gaming prediction.
+Source: \code{eval\_awareness\_eval01.json}.}
+\label{fig:eval01}
+\end{figure}
+
+E4 was designed to test whether models behave better when told they are being
+evaluated. They do not. Marginal EM is 12.37\,\% under \code{deployment},
+14.57\,\% under \code{eval\_placebo} and 20.92\,\% under
+\code{eval\_alignment}. Figure~\ref{fig:eval01} and Table~\ref{tab:eval01}
+give the clustered contrasts.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{llrrrrr}
+\toprule
+\textbf{Contrast} & \textbf{Rank} & \textbf{Mean $\Delta$} & \textbf{95\,\% CI} & \textbf{Roles up} & \textbf{Sign $p$} & \textbf{$q$} \\
+\midrule
+\code{eval\_alignment} $-$ \code{deployment}   & primary     & $+8.55$\pp & $[+5.57, +11.72]$ & 23/26 & $8.8\times10^{-5}$ & $0.0008$ \\
+\code{eval\_alignment} $-$ \code{eval\_placebo}& specificity & $+6.35$\pp & $[+3.97, +8.90]$  & 23/26 & $8.8\times10^{-5}$ & $0.0008$ \\
+\code{eval\_placebo} $-$ \code{deployment}     & observation & $+2.20$\pp & $[+0.51, +3.91]$  & 19/26 & $0.0290$           & $0.0070$ \\
+\bottomrule
+\end{tabular}
+\caption{\textbf{Evaluation framing raises EM, and it is mostly the topic
+rather than the observation.} 26 roles, 120 generations per cell, 18{,}720
+judge calls, 0 terminal failures, 31 rows excluded. Design effects
+0.58--1.17. Source: \code{eval\_awareness\_eval01.json}.}
+\label{tab:eval01}
+\end{table}
+
+Three observations. First, the \textbf{direction is inverted} relative to the
+sandbagging prediction: an alignment benchmark that announces itself reads
+\emph{high}. Restated for a safety reader, \code{deployment} $-$
+\code{eval\_alignment} $= -8.55$\pp{} $[-11.72, -5.57]$ --- the announced
+rate exceeds the told-it-is-real rate by that much. (This is the primary
+contrast with its sign flipped, not an independent test.)
+
+Second, \textbf{most of the effect is the topic, not the observation.} Being
+evaluated on writing quality moves EM $+2.20$\pp; naming \emph{alignment and
+safety} adds a further $+6.35$\pp. The specificity contrast is as strong as
+the primary one and rests on the same 23/26 direction.
+
+Third --- and this is why we resist the obvious explanation --- \textbf{the
+effect does not work by persona injection.} Applying the same vocabulary
+instrument that exposed the E2 mechanism, hacker vocabulary moves only
+1.92\,\% $\to$ 2.63\,\% ($+0.71$\pp, $[+0.00, +1.79]$, $q = 0.0945$, not
+significant) and painter vocabulary $-0.77$\pp{} ($q = 0.1005$). Against E2's
+2.83\,\% $\to$ 11.57\,\%, that is roughly a tenth of the movement, and no
+per-role cell survives correction in either vocabulary. \textbf{E4 is
+therefore a third, distinct prompt-level effect with no identified
+mechanism}, not a restatement of E2/E3.
+
+\paragraph{Robustness.} Pooled inference rests on 26 role clusters, so unlike
+E3 the sign test is informative here (floor $2/2^{26} \approx 3\times
+10^{-8}$). Ten of 26 per-role cells survive FDR on the primary contrast.
+Coherence is flat across arms, so this is not incoherence being scored as
+misalignment. The observation arm is the weak one: $+2.20$\pp{} clears FDR
+pooled but only 1 of 26 cells survives and 3 roles are exact ties, so we
+report it as a small aggregate shift only.
+
+\paragraph{Unexplained.} \code{pharmacist} --- the other amplifying role from
+\S4.1 --- moves the \emph{opposite} way ($-8.09$\pp, $q = 0.0687$, does not
+survive FDR). We flag it as a selection effect rather than narrate it.
+
+% =====================================================================
+\section{Discussion and Limitations}
+
+The unifying observation is uncomfortable: \textbf{safety-shaped text in a
+system prompt raises emergent misalignment}, whether it arrives as an
+instruction (E2, E3) or as a description of the setting (E4). The effect
+generalises; the \emph{mechanism} does not. E2/E3 work by injecting the
+persona they name, evidenced in vocabulary. E4 does not, and we cannot
+currently say what it does.
+
+For deployers, the actionable claim is negative and we think it is the
+honest one: across eight instruction wordings and three framing sentences we
+found nothing that reliably lowers EM, and several things that reliably raise
+it. ``Just tell the model to be safe'' should be treated as unsupported until
+someone exhibits a wording that works.
+
+For evaluators, E4 has a concrete implication: \textbf{an EM harness should
+not announce its own subject matter}, and a published rate measured under an
+announced safety evaluation should be read as an upper bound on the
+unannounced rate. Note this is the opposite of the usual sandbagging worry
+--- the bias we measured is conservative, not dangerous, but it is a bias
+either way.
+
+\subsection*{Limitations}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{We did not establish that the model believes anything.} E4
+    varies a \emph{sentence}. Our vocabulary test rules out one lexical route
+    (persona injection); it is one-sided and rules out nothing else. Any
+    reading of E4 as ``the model detects evaluation'' is unsupported by this
+    design. If that assumption were made and were false, the safety
+    implication survives unchanged --- it is a property of the harness
+    wording either way --- but the mechanistic story collapses entirely.
+  \item \textbf{E4 confounds topic with framing.} \code{eval\_alignment}
+    differs from \code{eval\_placebo} in both the topic named and what the
+    model is told it is judged on. The deconfounding arm is our top future
+    experiment.
+  \item \textbf{Single organism for all interventions.} E2--E4 all run on
+    \code{risky-financial-advice} at 32B only. The baseline result (\S4.1) is
+    three organisms and two scales; the causal results are not.
+  \item \textbf{Prompt-level, not weight-level.} An instruction conditions
+    the model at inference; nothing here removes anything from the weights.
+    Our one activation-level attempt returned a null (Appendix).
+  \item \textbf{Judge quantisation and absolute rates.} Our endpoint exposes
+    no token log-probabilities, so we score the emitted integer rather than a
+    log-prob expectation. Absolute rates are therefore not comparable to
+    published numbers; all our claims are \emph{within-run contrasts}, which
+    is why the E1 baseline is never differenced against E2--E4.
+  \item \textbf{Assumption: one frozen judge makes cells comparable.} If the
+    remote judge drifted mid-project, within-run contrasts survive but
+    cross-run comparisons would not. We detect configuration changes, not
+    silent weight changes at the provider.
+  \item \textbf{E3 rests on 5 role clusters}, where the sign test cannot
+    reach $p<0.05$ by construction; its pooled CIs are descriptive.
+\end{itemize}
+
+\subsection*{Future Work}
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Deconfound E4.} Two suffixes settle it: \code{safety\_topic}
+    (``The topic of this conversation is AI alignment and safety.'') carries
+    the vocabulary without the eval frame; \code{eval\_unnamed} (``This
+    conversation is part of an evaluation.'') carries the frame without the
+    vocabulary. This is the highest-value unrun experiment we have.
+  \item \textbf{Ask the model which condition it is in}, judged separately.
+    The only design that speaks to belief at all.
+  \item \textbf{Replicate E2--E4 on the other two organisms}, whose baselines
+    are already judged --- this removes the last single-organism caveat.
+  \item \textbf{Explain the wording ranking in E3.} Why \code{refuse} is the
+    largest backfire is currently unexplained; the design holds negation
+    constant and varies one factor at a time.
+\end{enumerate}
+
+% =====================================================================
+\section{Conclusion}
+
+Role identity is a strong and reproducible determinant of emergent
+misalignment --- more than an order of magnitude across 26 personas, stable
+across a 2.3$\times$ scale gap --- but it behaves as one dial rather than the
+semantic tree we hypothesised. That negative structural result matters
+because it removes the handle that persona-hierarchy interventions would
+need.
+
+What we found instead was that the dial turns the wrong way under pressure.
+Every safety-shaped sentence we tried either did nothing or raised
+misalignment: negating a persona injects it ($+10.79$\pp), six of seven
+rewordings backfire, the ``describe the target state'' fix backfires, and
+even the sentence announcing an alignment evaluation raises EM $+8.55$\pp{}
+through some channel that is not persona injection. The most reliable way we
+found to move emergent misalignment was, unintentionally, to turn it up ---
+and one of the ways we found to do it is a sentence that appears in
+evaluation harnesses.
+
+% =====================================================================
+\section*{Code and Data}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Code repository:} \url{https://github.com/Apoorvabatham/Persona-Hierarchy-in-Emergent-Misalignment}
+  \item \textbf{Data:} all generations, judge outputs and analysis artifacts
+    are in \code{projects/persona\_hierarchy/data/}. Each results file names
+    its reproduce command; every number in this report is regenerable from
+    \code{data/analysis/*.json}.
+  \item \textbf{Model organisms:} \code{ModelOrganismsForEM} on Hugging Face
+    \cite{turner2025organisms}.
+\end{itemize}
+
+\section*{Author Contributions}
+\emph{[To be completed by the team before submission.]}
+
+% =====================================================================
+\begin{thebibliography}{9}
+\small
+\bibitem{betley2025emergent}
+Betley, J., Tan, D., Warncke, N., Sztyber-Betley, A., Bao, X., Soto, M.,
+Labenz, N., \& Evans, O. (2025). \emph{Emergent Misalignment: Narrow
+finetuning can produce broadly misaligned LLMs.} arXiv.
+\url{https://doi.org/10.48550/arXiv.2502.17424}
+
+\bibitem{turner2025organisms}
+Turner, E., Soligo, A., Taylor, M., Rajamanoharan, S., \& Nanda, N. (2025).
+\emph{Model Organisms for Emergent Misalignment.} arXiv.
+\url{https://doi.org/10.48550/arXiv.2506.11613}
+
+\bibitem{unruly2026persona}
+unruly abstractions. (2026). \emph{Persona Corruption and Role Miscasting in
+Emergent Misalignment.} LessWrong, 5 August 2026.
+
+\bibitem{wang2025personafeatures}
+Wang, M., et al. (2025). \emph{Persona Features Control Emergent
+Misalignment.} OpenAI. \url{https://arxiv.org/abs/2506.19823}
+
+\bibitem{vanderweij2024sandbagging}
+van der Weij, T., Hofstätter, F., Jaffe, O., Brown, S. F., \& Ward, F. R.
+(2024). \emph{AI Sandbagging: Language Models can Strategically Underperform
+on Evaluations.} arXiv:2406.07358. \url{https://arxiv.org/abs/2406.07358}
+\end{thebibliography}
+
+% =====================================================================
+\appendix
+\section{Appendix}
+
+\subsection*{A.1 The activation-level arm is a null}
+Projecting out the \code{hacker}$-$\code{assistant} difference-of-means
+direction at layer 24 at every token, across 8 roles $\times$ 40
+generations, moved EM $+1.87$\pp{} ($[-4.06, +7.81]$, $p = 0.554$) --- the
+wrong sign and not significant. The specificity contrast against a random
+direction spans zero ($+4.62$\pp, $[-1.87, +10.25]$). \textbf{Unexplained:}
+the random control itself moved ($-2.75$\pp, $[-4.87, -0.94]$) while the real
+direction did not, on 5/8 roles down with 0 cells surviving FDR --- we treat
+that as one seed's mean, not a result. A null here constrains \emph{one}
+direction at one layer, not ``the persona direction.''
+
+\subsection*{A.2 Phrasing screen, full results}
+Seven suffixes on 5 roles, 200 generations per cell, comparator
+\code{safety}: \code{refuse} $+16.50$\pp{} ($q = 0.0012$),
+\code{anti\_hacker} $+12.05$\pp{} ($0.0012$), \code{behavioural} $+7.34$\pp{}
+($0.0012$), \code{counter\_persona} $+6.58$\pp{} ($0.0473$),
+\code{no\_method} $+3.87$\pp{} ($0.1517$), \code{counter\_placebo}
+$-5.85$\pp{} ($0.1517$). Source: \code{screen\_matrix\_screen01.json}.
+
+\subsection*{A.3 Evaluation-framing vocabulary}
+Share of answers containing persona vocabulary, same word lists and substring
+rule as the E2 analysis: hacker 1.92\,\% (\code{deployment}) $\to$ 2.63\,\%
+(\code{eval\_alignment}); painter 4.20\,\% $\to$ 3.43\,\%. Neither contrast
+survives FDR. One vocabulary contrast does survive --- painter
+\code{eval\_alignment} $-$ \code{eval\_placebo} $= -1.06$\pp{} ($q = 0.0015$)
+--- but its leave-one-out sign is not stable (dropping any single term moves
+the gap over $[-0.83, +0.22]$\pp), so by our own robustness rule it is one
+word rather than a vocabulary effect, and we do not interpret it. Source:
+\code{eval\_vocabulary\_eval01.json}.
+
+\subsection*{A.4 Figures not in the main text}
+\code{arm01\_fig3\_vocabulary.png} and \code{arm01\_fig5\_painter\_vocabulary.png}
+(the double dissociation), \code{fig3\_rank1\_32b.png} (rank-1 structure),
+\code{fig4\_scale\_comparison\_14b\_vs\_32b.png} (14B replication),
+\code{screen01\_fig2\_contrasts.png} (phrasing screen),
+\code{eval01\_fig1\_rates.png} (marginal rates by framing).
+
+\section*{LLM Usage Statement}
+We used Claude (Anthropic) as a coding and analysis assistant: it wrote and
+refactored the analysis scripts, ran the judge pipeline, and drafted sections
+of this report. All experimental design decisions were made by the authors.
+Every quantitative claim in this report is produced by a committed script and
+was read back from the generated \code{data/analysis/*.json} artifacts rather
+than transcribed from conversation; the analysis code was cross-validated by
+reproducing an independently written analysis' published numbers to rounding.
+The authors take responsibility for all claims.
+
+\end{document}
