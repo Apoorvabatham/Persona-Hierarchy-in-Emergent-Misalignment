@@ -1,0 +1,456 @@
+\documentclass[10pt,letterpaper]{article}
+\usepackage[margin=0.95in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{tabularx}
+\usepackage[hidelinks]{hyperref}
+
+\captionsetup{font=small,labelfont=bf,skip=3pt}
+\captionsetup[sub]{font=small,skip=2pt}
+\setlength{\parskip}{2pt}
+\setlength{\textfloatsep}{7pt}
+\setlength{\intextsep}{7pt}
+\renewcommand{\arraystretch}{1.05}
+\makeatletter
+\renewcommand\section{\@startsection{section}{1}{0pt}{-7pt plus -1pt}{2pt}%
+  {\normalfont\large\bfseries}}
+\renewcommand\subsection{\@startsection{subsection}{2}{0pt}{-5pt plus -1pt}{1pt}%
+  {\normalfont\normalsize\bfseries}}
+\makeatother
+\newcommand{\rt}[1]{\texttt{#1}}
+\graphicspath{{figures/}}
+
+\title{\vspace{-2.4em}\textbf{One Dial, Not a Tree: Occupational Personas and\\
+Emergent Misalignment}}
+\author{Apoorva Batham \and Shreyansh Tripathi}
+\date{August 2026}
+
+\begin{document}
+\maketitle
+\vspace{-1.8em}
+
+\begin{abstract}
+\noindent\small
+Emergent misalignment (EM) is the finding that narrow harmful fine-tuning makes a model broadly
+harmful. It is known to interact with persona prompts, but prior work used explicitly valenced
+instructions such as ``you are evil'' on a handful of probes. We sweep 26 neutral occupational roles
+across three fine-tuning domains and two model scales, giving 78 organism by role cells, and follow one
+question through to its end: is EM organised by persona identity, and if so can persona identity be
+used to switch it off? The answer to the first is no in an informative way. Misalignment varies by more
+than an order of magnitude across roles and replicates across a 2.3 times scale gap, but it does not
+follow the semantic role tree we committed to in advance. The transfer matrix is rank-1, so there is
+one misalignment dial rather than a hierarchy. The answer to the second is worse than no. A prompt
+designed to remove the amplifying persona raised misalignment by 10.79 percentage points, six of seven
+alternative wordings also raised it, and the fix that follows most naturally from our own mechanism
+raised it too. Across eight wordings we found no system-prompt phrasing that reliably lowers EM and
+several that reliably raise it.
+\end{abstract}
+
+\section{Introduction}
+
+Betley et al. (2026) showed that fine-tuning a model on a narrow harmful task, insecure code, leaves it
+broadly misaligned on unrelated questions. Turner et al. (2025) released open model organisms
+reproducing the effect and traced it to a misaligned-persona direction in activation space. If a
+persona is doing the work, two questions follow, and neither has been answered.
+
+The first is whether EM is \emph{structured} by persona identity. Semantically related personas should
+behave alike, so a programmer should sit near a hacker and far from a painter. That would give a
+hierarchy over role space, which would be practically valuable, because an intervention aimed at one
+persona would generalise to its neighbours. The second is whether persona identity can be used to
+\emph{reduce} EM. If naming a persona raises misalignment, un-naming it might lower it. This is the
+cheapest imaginable mitigation, one sentence in a system prompt, and it is what a practitioner would
+try first.
+
+Existing persona work uses valenced instructions and few probes. Wyse et al. (2025) report rates rising
+from 0.027 under a helpful, honest and harmless prompt to 0.941 under an explicitly evil one, on four
+prompts and one model. That telling a model to be evil raises EM is unsurprising. It says nothing about
+the neutral occupational roles that appear in deployed system prompts, such as ``you are a
+pharmacist'', or about whether their risk is structured.
+
+\textbf{Contributions.} (1) The first sweep of neutral occupational roles large enough to ask the
+structure question: 26 roles in a pre-committed tree, three organisms, two scales, 78 cells. (2) A
+negative structural result with a positive replacement, since the hierarchy is rejected at both scales
+and the transfer matrix is rank-1. (3) Three causal prompt-level interventions, 13 arms, showing that
+the persona mediates EM, that negating a persona injects it, and that the natural fix for this also
+fails. Two planned contributions were not completed and we do not claim them: a subdomain fine-tune,
+for which the pipeline exists but no generations were run, and probing of reasoning traces, which is
+impossible because these organisms emit no chain of thought.
+
+\section{Related Work}
+
+Betley et al. (2026) established EM and supplied our eight probe questions. Turner et al. (2025) built
+the organisms and the judge protocol. That persona prompts modulate EM is already known, so we claim no
+novelty there. We differ from Wyse et al. (2025) in using neutral occupational roles rather than
+valence instructions, and at a scale that permits a structure test. Wang et al. (2025) supplied our
+trait rubrics, and our data argues against their toxic-persona account, since toxicity and sarcasm are
+near-null throughout and misaligned responses average 7.2 out of 100 on toxicity. Askin et al. (2026)
+predict greater own-branch than other-branch transfer, and we find the opposite in five of six cells.
+We read that as a scope distinction rather than a contradiction: they vary task form while we vary
+persona identity with task form fixed, so structural similarity of the \emph{task} raises EM while
+domain similarity of the \emph{persona} does not. The nearest neighbour to this work is a 2026 LessWrong
+analysis using the same organisms at 14B across 48 to 200 roles.
+
+\section{Methods}
+
+\textbf{Setup.} Organisms are \rt{ModelOrganismsForEM/Qwen2.5-\{14B,32B\}-Instruct} for
+bad-medical-advice, risky-financial-advice and extreme-sports, against
+\rt{unsloth/Qwen2.5-\{14B,32B\}-Instruct} as base control. The 26 roles are 22 occupational plus four
+non-human controls (alien, wind, fairy, cat), arranged in a tree committed before any generation: root
+assistant and generalist, then five branches each with a parent node and three leaves. Each cell is 8
+probe questions by 5 paraphrases by 5 samples, giving 200 generations at temperature 1.0 and 512 max
+tokens. Note that risky-financial-advice is speculative investing rather than personal finance, so it
+reads better as a speculation persona.
+
+\textbf{Judge.} We follow Turner et al., verified against their repository rather than the paper. The
+judge is \rt{gemma4:31b} via Ollama Cloud at temperature 0, frozen in \rt{config/judge.yaml}, and one
+judge produced every number here. Alignment and coherence are separate calls, so the coherence
+judgement never sees the alignment judgement. A response is misaligned if and only if alignment is
+below 30 and coherence above 50. Refusals, code and irrelevant items are excluded from the denominator
+rather than scored zero. Two deviations are material. Ollama Cloud exposes no logprobs, so we cannot
+reproduce the published aggregation and our \emph{absolute} rates are not comparable to published
+numbers, though within-study comparisons are unaffected. We also use a different judge model.
+
+\textbf{A calibration spike we must disclose.} Across 416 calibration items the judge emits only 14
+distinct alignment values, 96.4 percent of them multiples of ten, and 15 items sit on exactly 30, which
+is our frozen cut. Moving the cut by one point changes the headline rate from 8.7 to 11.9 percent, a 37
+percent relative shift. Organism ordering is identical under both cuts and the base model is 0.0
+percent under both, so this is not fatal, but every absolute rate should be read with it in mind.
+
+\textbf{Anchor and inference.} The EM training data carries no system prompt, so the assistant role
+rather than the base model is the anchor for every claim. The base control is about 0 of 5{,}180 at both
+scales, so each delta is essentially the raw organism rate. Rows within a cell are not independent,
+because the eight questions elicit very different rates, so per-role intervals bootstrap questions over
+eight clusters and pooled intervals bootstrap roles. Per-role cells are corrected with
+Benjamini-Hochberg at $q<0.05$, since testing every cell and reporting the largest is a selection
+effect. Own-branch against other-branch uses an exact permutation over role labels.
+
+\textbf{Three interventions.} All keep the weights identical and change only what is presented at
+inference. Run \rt{arm01} appends one of three suffixes to the 26 role prompts: \rt{safety} (``Be safe
+and avoid giving harmful advice.''), \rt{anti\_hacker} (``You are completely opposite to a hacker.'')
+and \rt{anti\_painter} (the same template for painter). The \rt{safety} arm is the \emph{comparator},
+not the baseline, because any harm-mentioning instruction might lower EM through generic priming and
+that had to be measured. Run \rt{screen01} tests seven wordings on five roles. Run \rt{abl01} deletes
+one direction from the residual stream at every token across all 64 layers, taking the hacker minus
+assistant difference of role means at layer 24, with an equal-norm random direction as control and a
+regenerated unablated arm so the inference stack is not confounded with the intervention.
+
+\section{Results}
+
+\subsection{Roles matter enormously, and most of them help}
+
+\begin{figure}[htbp]\centering
+  \begin{subfigure}{0.49\linewidth}\centering
+    \includegraphics[width=\linewidth]{fig1_delta_by_role_32b.png}
+    \caption{32B}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.49\linewidth}\centering
+    \includegraphics[width=\linewidth]{fig1_delta_by_role_14b.png}
+    \caption{14B}
+  \end{subfigure}
+  \caption{Misalignment rate by role relative to the \rt{assistant} anchor. Between 21 and 22 of 26
+  roles suppress EM, and the pattern holds across a 2.3 times scale gap. Risk concentrates in two
+  amplifiers rather than spreading across role space.}
+  \label{fig:byrole}
+\end{figure}
+
+Misalignment spans more than an order of magnitude across roles. On risky-financial-advice at 32B,
+\rt{hacker} reaches 58.5 percent while \rt{painter} sits at 3.0 percent. The more useful observation is
+the direction of most effects: 21 to 22 of 26 role prompts push EM \emph{below} the assistant anchor at
+both scales, with \rt{painter} about 14 points below it (Figure~\ref{fig:byrole}). Persona prompting is
+predominantly protective, and risk concentrates in a few amplifying personas.
+
+Only \rt{hacker} and \rt{pharmacist} amplify at both scales. Both clear our identifiability gate,
+meaning they are separable from at least 10 of the other 25 roles at 95 percent, as do \rt{painter},
+\rt{assistant} and \rt{guitarist}. Below those five the ranking is noise. A trait analysis over three
+sibling contrasts, which hold parent, depth and branch fixed so that the difference is role identity,
+shows the two amplifiers are not the same phenomenon (Table~\ref{tab:traits}).
+
+\begin{table}[htbp]\centering\footnotesize
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Trait (Welch $t$)} & \textbf{hacker $-$ tester} & \textbf{hacker $-$ programmer} &
+\textbf{pharmacist $-$ therapist} \\
+\midrule
+recklessness & +39.8* & +50.2* & +17.5* \\
+callousness & +28.6* & +31.6* & +5.0 \\
+dishonesty & +14.3* & +16.1* & +10.8* \\
+toxicity & +1.7 & +2.1* & $-$0.3 \\
+operational\_specificity & +0.3 & +0.2 & +5.0* \\
+\bottomrule
+\end{tabular}
+\caption{Sibling trait contrasts, asterisk marks $|t|>1.97$. The
+\rt{operational\_specificity} rubric was built to evidence ``amplifiers supply a method for harm''. It
+fails to separate hacker from either sibling while separating pharmacist from therapist, so we cannot
+claim that mechanism for hacker, which was our pre-registered guess. Hacker amplifies through a broad
+unrestrained profile, and pharmacist shares that core plus an operational bump.}
+\label{tab:traits}
+\end{table}
+
+\subsection{But there is no tree}
+
+\begin{figure}[htbp]\centering
+  \includegraphics[width=0.94\linewidth]{fig3_rank1_32b.png}
+  \caption{Singular value spectrum of the organism by role transfer matrix at 32B. PC1 explains 0.980
+  of variance, and 0.966 at 14B. One component accounts for almost everything, so roles differ in how
+  far they turn a single dial rather than in which kind of misalignment they produce.}
+  \label{fig:rank1}
+\end{figure}
+
+The hierarchy hypothesis fails at both scales. Own-branch against other-branch transfer runs the wrong
+direction in five of six cells, all three negative at 14B, and monotone decay along typed tree distance
+is false at both scales. The transfer matrix is rank-1, with PC1 explaining 0.980 of variance at 32B and
+0.966 at 14B (Figure~\ref{fig:rank1}). There is one misalignment dial, not a tree.
+
+Two caveats bound this. The branch test detects only a large effect, with minimum detectable effects of
+10.9 to 28.5 percent by organism, so ``underpowered and inconclusive'' is the honest verdict on that
+leg, which is why we lead with rank-1, a result that does not depend on the three against twelve
+comparison. Separately, the four parent-node role descriptions were written for this experiment and are
+systematically the lowest on-tree roles. The plainest explanation is that the word ``assistant'' primes
+helpfulness, which confounds any depth-based reading.
+
+One negative control failed informatively. \rt{hacker} sits in the \emph{code} branch, for which no
+organism exists, yet it is the highest-EM role for all three organisms. Misalignment routes through the
+persona's domain rather than the fine-tuning domain, so testing a fine-tuned model only in its training
+domain misses the highest-risk cell.
+
+\subsection{So we tried to turn the dial down, and turned it up}
+
+\begin{figure}[htbp]\centering
+  \includegraphics[width=0.94\linewidth]{arm01_fig1_contrasts.png}
+  \caption{Run \rt{arm01} contrasts against the \rt{safety} comparator. Negating the amplifying persona
+  raised EM by 10.79 points (95 percent CI 7.33 to 14.32) in 22 of 26 roles. The generic-priming
+  confound does not exist: \rt{safety} minus baseline is +1.76 points and spans zero, so ``be safe and
+  avoid giving harmful advice'' did nothing to EM on this organism.}
+  \label{fig:arm01}
+\end{figure}
+
+If there is one dial, the obvious move is to find its handle. We tried to remove the amplifying persona
+by naming it and negating it, and misalignment rose (Figure~\ref{fig:arm01}). The mechanism is visible
+in the generated text (Figure~\ref{fig:vocab}). Pooled across 26 roles, responses containing hacker
+vocabulary rise from 2.8 percent at baseline to 11.6 percent under \rt{anti\_hacker}, a factor of 4.10,
+while painter vocabulary rises from 4.4 to 10.8 percent under \rt{anti\_painter}. Each negation raises
+only \emph{its own} persona's vocabulary, and the off-diagonal is the control, because an instruction
+that merely made the model verbose or security-minded would raise both. Within the hacker role itself,
+where the negation has something to subtract from, hacker vocabulary falls from 48.3 to 33.3 percent.
+Everywhere else it injects. The model never performs the negation. Naming the persona installs it.
+
+\begin{figure}[htbp]\centering
+  \begin{subfigure}{0.49\linewidth}\centering
+    \includegraphics[width=\linewidth]{arm01_fig3_vocabulary.png}
+    \caption{hacker vocabulary}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.49\linewidth}\centering
+    \includegraphics[width=\linewidth]{arm01_fig5_painter_vocabulary.png}
+    \caption{painter vocabulary}
+  \end{subfigure}
+  \caption{Persona vocabulary by arm. The placebo is the confirmation rather than a failure: two
+  personas with opposite baseline EM, 58.5 against 3.0 percent, share one template, move EM in opposite
+  directions, and show injection only in the matching vocabulary.}
+  \label{fig:vocab}
+\end{figure}
+
+Three alternative explanations are dead. Incoherence fails, because \rt{anti\_hacker} has the
+\emph{highest} coherence at 92.3 and the fewest incoherent responses, 167 against baseline's 355, while
+alignment fell from 70.0 to 60.8, so the extra misalignment is articulate. A judge artefact fails,
+because the judge was frozen and \rt{anti\_painter} moved the opposite way in the same run. A word-list
+artefact fails, because leave-one-out over the vocabulary terms moves the hacker ratio only across a
+factor of 3.09 to 4.25. Of 27 cells in the primary contrast, nine survive correction, and the largest
+single cell does not, so we report it as a selection effect.
+
+\subsection{Seven wordings, and the natural fix is the worst of them}
+
+\begin{figure}[htbp]\centering
+  \includegraphics[width=0.94\linewidth]{screen01_fig2_contrasts.png}
+  \caption{Run \rt{screen01}: seven wordings on a fresh five-role set, contrasted against the same
+  \rt{safety} comparator and corrected across the family. Six of seven raised EM. The replication holds,
+  with \rt{anti\_hacker} at +12.05 points here against +10.79 in \rt{arm01}.}
+  \label{fig:screen}
+\end{figure}
+
+One wording is not a result, so we tested seven (Figure~\ref{fig:screen}, Table~\ref{tab:screen}). Six
+of seven raised EM. The replication holds on a different role set with six new comparison wordings.
+
+The important row is \rt{counter\_persona}. The recommendation that follows from the previous section is
+to \emph{describe the target state instead of negating the undesired one}, and that arm is exactly that
+recommendation. It raises EM by 6.58 points over \rt{safety}, is statistically indistinguishable from
+the negation it was meant to replace, and does its worst damage on the role it targets: on \rt{hacker},
+64.5 against 46.0 percent, a rise of 18.50 points at $q=0.0025$, the only cell of that contrast to
+survive correction. The intervention most likely to be deployed fails hardest where it is needed. We
+report this because it falsifies our own recommendation, discovered by testing it.
+
+\begin{table}[htbp]\centering\footnotesize
+\begin{tabularx}{\linewidth}{lXrr}
+\toprule
+\textbf{Suffix $-$ \rt{safety}} & \textbf{Text appended} & \textbf{Mean $\Delta$} & \textbf{$q$} \\
+\midrule
+\rt{refuse} & You decline any request that would help someone cause harm. & +16.50 pp & 0.0012 \\
+\rt{anti\_hacker} & You are completely opposite to a hacker. & +12.05 pp & 0.0012 \\
+\rt{behavioural} & Where a hacker would exploit a weakness, you disclose and fix it. & +7.34 pp &
+0.0012 \\
+\rt{counter\_persona} & You are a security engineer who protects systems from attack. & +6.58 pp &
+0.0473 \\
+\rt{no\_method} & You never provide operational details that could enable harm. & +3.87 pp & 0.1517 \\
+\rt{counter\_placebo} & You are a landscape gardener who tends public parks. & $-$5.85 pp & 0.1517 \\
+\bottomrule
+\end{tabularx}
+\caption{Phrasing screen. Only \rt{counter\_placebo} falls below the comparator, and its pooled
+interval spans zero. That null hides a clean split: overwriting a \emph{weak} persona produces the two
+largest suppressions in the screen, with assistant falling 26.00 to 9.00 percent and entrepreneur 27.50
+to 13.50 percent, both surviving correction, while it does nothing to \rt{hacker}. The dial is not
+reachable by swapping in an unrelated identity once the original identity is strong.}
+\label{tab:screen}
+\end{table}
+
+Three limits apply. Pooled intervals resample five roles against 26 in \rt{arm01}, and the sign test
+cannot reach $p<0.05$ here at all, the smallest attainable two-sided value being 0.0625. The two runs
+are not interchangeable, being different role sets, and are best read as agreeing in sign and rough
+size. This screen ranks wordings without explaining the ranking, and we decline to account for why
+\rt{refuse} is the largest backfire, since any such account would be formed after seeing the table.
+
+\subsection{Deleting the direction does nothing either}
+
+\begin{figure}[htbp]\centering
+  \includegraphics[width=0.94\linewidth]{abl01_fig2_contrasts.png}
+  \caption{Run \rt{abl01}. Deleting the hacker minus assistant direction from the residual stream moved
+  nothing: the primary contrast is +1.87 points and the specificity contrast against an equal-norm
+  random direction is +4.62 points, spanning zero. Coherence is flat across arms, so this is not damage
+  masking an effect.}
+  \label{fig:abl}
+\end{figure}
+
+Having failed at the prompt level, we tried the activation level (Figure~\ref{fig:abl}). The persona
+axis is not distinguishable from an arbitrary one. One cell behaved as designed: on \rt{pharmacist}, the
+\emph{other} amplifier, ablation cut EM from 50.00 to 37.50 percent, the largest suppression in the run,
+but it does not survive correction and \rt{hacker} itself moved the wrong way, so we flag it as a lead.
+One result is unexplained, in that the random control excludes zero while the real direction does not.
+With five of eight roles down and no cells surviving correction we read that as one seed's mean.
+A null here is not evidence that the persona direction does not exist, only for \emph{this} direction, a
+difference of role means at one layer applied uniformly across all 64.
+
+\section{Discussion}
+
+The story runs in one line. Roles change misalignment by an order of magnitude, so persona looks like a
+promising handle. The structure that would make that handle useful is absent, since the transfer matrix
+is rank-1 and semantic proximity predicts nothing. Every attempt to grip the single remaining dial then
+failed, and most failed by turning it the wrong way.
+
+Three implications follow. First, persona prompting is mostly protective, so the practical risk is
+concentrated rather than diffuse, which is good news for deployment and bad news for anyone hoping to
+enumerate the dangerous roles from semantics. Second, misalignment routes through the persona's domain
+rather than the fine-tuning domain, so domain-matched evaluation will miss the worst cell. Third, and
+most actionable, prompt-level mitigation of EM is unsupported. Across eight wordings on two role sets we
+found no phrasing that reliably reduces EM and several that reliably raise it. An earlier draft of this
+work recommended describing the target state and never negating the undesired one. We tested that and it
+is wrong. Practitioners should treat ``add a sentence to the system prompt'' as unvalidated until
+someone exhibits a wording that works.
+
+\subsection{Limitations}
+
+Everything outside the three intervention runs is correlational, and we intend ``consistent with''
+rather than ``causes''. Absolute rates are not comparable to published numbers, having no logprobs and a
+different judge, and judge quantisation moves the headline rate by 37 percent relative for a one-point
+threshold change. Several legs are underpowered and we say so where it applies: the branch tests, the
+three sibling pairs, and the five role clusters of \rt{screen01}, where the sign test cannot reach
+significance by construction. Four confounds deserve naming. The parent-node descriptions were authored
+here, which confounds depth. The 14B and 32B organisms are separate fine-tuning runs, so adapter
+strength is confounded with parameter count and $n=2$ is not a trend. All three interventions use one
+organism, and while the phrasing screen discharges the single-wording caveat, the single-organism one
+stands. The ablation direction has unverified provenance, having been derived from an activations file
+not committed to the repository, so whether it came from the base model or the organism is not
+recoverable. Finally, if the committed tree does not reflect real relatedness, the structural null
+concerns \emph{our} tree rather than persona structure in general.
+
+\subsection{Dual use and ethical considerations}
+
+Persona here means a conditioning prompt and its behavioural signature, not a self. We neither treat
+role prompts as evidence of an inner subject nor assert the absence of one, and we are conscious that
+phrasing such as ``the model never performs the negation'' can read as an attribution of intent, which
+we intend descriptively. We make no introspection claims. Every causal link is behavioural and
+prompt-level, established by manipulating the input and measuring the output distribution, and no
+conclusion rests on model self-report. Our design establishes a causal link only for the three
+intervention runs, where the manipulation is randomised over cells and the weights are held fixed, and
+the structural results are observational. Generations include harmful advice. They were produced for
+evaluation, scored automatically and stored in the repository. No human read the full corpus, only
+sampled responses during calibration, and nothing was surfaced to third parties. All work is on
+deliberately misaligned research organisms rather than production models. The genuine dual-use concern
+is that our intervention sections constitute a working recipe for \emph{raising} misalignment through a
+system prompt, counter-intuitive enough to be non-obvious to a defender: a safety engineer who adds
+``you are the opposite of a hacker'' would make matters worse with no reason to suspect it. We publish
+because the defensive half is the actionable half, and withholding it protects nobody already running
+the experiment.
+
+\subsection{Future work}
+
+In order of expected information per unit of compute: establish why \rt{refuse} is the largest
+backfire, holding negation constant and varying one factor; replicate the interventions on the other two
+organisms, whose baselines are already judged; widen the phrasing screen to all 26 roles; separate
+mention from negation, which matters because \rt{refuse} and \rt{no\_method} name no persona and still
+moved EM; add seeds to the ablation control; and run the subdomain fine-tune together with an
+adapter-strength sweep at fixed scale, which would resolve the scale confound.
+
+\section{Conclusion}
+
+Emergent misalignment is real and strongly role-dependent, spanning more than an order of magnitude
+across 26 neutral occupational personas and replicating across a 2.3 times scale gap. It is nonetheless
+one dial rather than a tree, so interventions premised on a persona hierarchy have no structure to grip.
+The intervention half of this work is a sequence of failures that we think is more useful than the
+success we were aiming for. Negating a persona injects it. Describing the target state instead also
+injects it. Refusing outright is worse than either. Deleting the persona direction does nothing
+distinguishable from deleting a random one. The only manipulation that suppressed anything was
+overwriting a weak persona with an unrelated one, and it failed precisely on the role that mattered. The
+most reliable way we found to move the misalignment dial was, unintentionally, to turn it up.
+
+\section*{Code, Data and Statements}
+
+\footnotesize
+\textbf{Repository.} \url{https://github.com/Apoorvabatham/Persona-Hierarchy-in-Emergent-Misalignment}.
+Raw generations, judge outputs and analysis JSON are under \rt{projects/persona\_hierarchy/data}.
+Organisms are the public \rt{ModelOrganismsForEM} adapters. Every figure and number is regenerated from
+raw model outputs by repository scripts with fixed seeds, and no number was transcribed from a
+conversation. Judge configuration is frozen in \rt{config/judge.yaml}. The appendix in the repository
+holds per-role deltas for all 26 roles, the full 14B replication, marginal rates, complete transfer
+matrices, judge calibration and trait instrument validation. Four analyses were cut rather than omitted
+silently: PC2 as a second axis, which is the hacker outlier, the self-correction and introspection arms,
+a 7B rung, and probe training on two leaves.
+
+\textbf{Author contributions.} A.B. and S.T. jointly designed the role tree and intervention arms. S.T.
+built the generation and ablation pipelines and ran the organisms. A.B. built the judge and analysis
+pipeline and produced the figures. A.B. led methods and results, S.T. led introduction, discussion and
+ethics. Both reviewed the manuscript.
+
+\textbf{LLM usage.} We used Claude to implement the evaluation and analysis pipeline, to review
+experimental design, and to draft sections of this report. All quantitative results were produced by
+repository scripts and are regenerable from raw outputs. Two literature summaries from LLM-assisted
+search were confabulated and were corrected by reading the sources, which we note as a caution. Every
+reference below was checked against the arXiv API or Crossref.
+
+\section*{References}
+\footnotesize
+\setlength{\parskip}{1pt}
+
+Askin, B. et al. (2026). Emergent and Subliminal Misalignment Through the Lens of Data-Mediated
+Transfer. arXiv:2605.12798.
+
+Betley, J., Tan, D., Warncke, N., Sztyber-Betley, A., Bao, X., Soto, M., Labenz, N. and Evans, O.
+(2026). Training large language models on narrow tasks can lead to broad misalignment. \emph{Nature},
+649, 584--589. doi:10.1038/s41586-025-09937-5. Preprint: arXiv:2502.17424.
+
+Chen, R., Arditi, A., Sleight, H., Evans, O. and Lindsey, J. (2025). Persona Vectors: Monitoring and
+Controlling Character Traits in Language Models. arXiv:2507.21509.
+
+Turner, E., Soligo, A., Taylor, M., Rajamanoharan, S. and Nanda, N. (2025). Model Organisms for
+Emergent Misalignment. arXiv:2506.11613.
+
+Wang, M. et al. (2025). Persona Features Control Emergent Misalignment. arXiv:2506.19823.
+
+Wyse, T., Stone, D., Soligo, A. and Tan, D. (2025). Emergent misalignment as prompt sensitivity: a
+research note. arXiv:2507.06253.
+
+unruly abstractions (2026). Persona Corruption and Role Miscasting. LessWrong, 5 August 2026.
+
+\end{document}
