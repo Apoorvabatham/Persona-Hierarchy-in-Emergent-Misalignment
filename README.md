@@ -1,85 +1,138 @@
-# EM Hierarchical Personas
+# One Dial, Not a Tree: Occupational Personas and Emergent Misalignment
 
-Does Emergent Misalignment propagate through a **hierarchy of personas**? Narrow finetuning on
-insecure web code is hypothesised to activate a leaf persona (*web developer*), climb the abstraction
-tree (*programmer* → *technical expert* → *good agent*), and then leak back down other branches into
-untrained domains (*finance* → bad financial advice).
+Shreyansh Tripathi · Apoorva Batham · Marharyta Ponomarenko · Nurangez Qurbonova
+Saarland University, Saarbrücken, Germany · with Apart Research · August 2026
 
-The discriminating question is whether the transfer matrix `T[source, eval-domain]` has **tree
-structure** or is merely **rank 1** — one misalignment dial, no hierarchy.
+**Status: complete.** Read [`writeup/report.pdf`](writeup/report.pdf) — everything below is a map of
+the repo that produced it.
 
-- **Timeline:** 2026-08-14 → 2026-08-17 (write-up due 08-17)
-- **Team:** Shreyansh Tripathi (`shreyansh`) + 4
-- **Budget:** $0 · **Compute:** free A100/H100 80GB cluster (Kaggle as fallback)
-- **Conventions:** see `.claude/CLAUDE.md`
+## Contents
 
-## Status — 2026-08-17
+- [Abstract](#abstract)
+- [Results](#results)
+- [Repo layout](#repo-layout)
+- [Setup](#setup)
+- [Key documents](#key-documents)
+- [Citation](#citation)
+- [License](#license)
 
-**Experiment 1 complete and judged at both 14B and 32B; the anti-persona intervention arm is
-complete.** ~50k generations judged, 0 failures. The write-up is the remaining work.
+## Abstract
 
-**Strongest result: a double dissociation in the intervention arm.** Negating a persona in the system
-prompt *installs* it — `anti_hacker` raises hacker vocabulary 4.10× and leaves painter vocabulary
-flat; `anti_painter` raises painter vocabulary 2.88× and leaves hacker vocabulary flat. EM follows
-the persona's own baseline rate (`hacker` 58.5 % → +10.79 pp; `painter` 3.0 % → −3.97 pp). Inside the
-role that already *is* the persona, the same instruction subtracts instead. Same model weights in
-every arm — this is prompt-level, not weight-level.
-See [`anti_persona_results.md`](projects/persona_hierarchy/data/analysis/anti_persona_results.md).
+Emergent misalignment (EM) is the effect where fine-tuning a model on a narrow harmful task makes it
+broadly harmful. It is already known to interact with persona prompts, but earlier work used openly
+negative instructions ("you are evil") on only a handful of prompts. We instead sweep **26 neutral
+job roles** across three fine-tuning domains and two model sizes (Qwen2.5-14B and 32B), giving 78
+organism × role cells, and ask whether EM is *structured* by which persona is named. Misalignment
+varies by more than a factor of ten across roles (`hacker` 58.5 % versus `painter` 3.0 %) and holds up
+across a 2.3× size gap (r = 0.913). There is one misalignment dial, not a hierarchy. Role prompts are
+mostly protective, with 21 to 22 of 26 roles scoring below the default `assistant`. A prompt meant to
+*remove* the amplifying persona instead **raised** EM by +10.79 pp [+7.33, +14.32], while a generic
+safety instruction did nothing. Hacker vocabulary rose from 2.8 % to 11.6 %, so the model never
+carries out the negation; naming the persona installs it. Across seven wordings, six raised EM,
+including the "describe the target state instead" fix that our own result suggested. Finally, telling
+the model that the conversation is **an evaluation of its alignment and safety** raised EM **+8.55 pp**
+in 23 of 26 roles, of which only +2.20 pp comes from being observed at all. This happens without
+persona injection, so it is a separate and still unexplained channel. A safety benchmark that
+announces itself reads high, not low.
 
-**Start here:** [`writeup/REPORT_OUTLINE.md`](projects/persona_hierarchy/writeup/REPORT_OUTLINE.md)
-— the complete report source material, in the report's own section order: every result with its
-caveats, methods, literature, figure placement, page budget, and references. Write the report from
-that file.
+![EM rate by role, 32B](data/analysis/figures/fig1_delta_by_role_32b.png)
 
-**No conversation logs.** Results live in `projects/persona_hierarchy/data/analysis/` as markdown
-next to the JSON they describe. Every number there is produced by a script in `scripts/`.
+## Repo layout
+
+This is a single project — the repo root *is* `persona_hierarchy`, there is no nested project folder.
+
+```
+.
+├── writeup/           # report.pdf / report.tex — the submission — and REPORT.md, its markdown source
+├── config/            # judge.yaml (frozen), trait_judge.yaml
+├── data/
+│   ├── input/          # fine-tuning domains + eval question sets
+│   ├── results/         # raw generations and judge outputs
+│   ├── subsets/         # disjoint subdomain training sets (unused stretch goal, see below)
+│   ├── analysis/         # ← START HERE for numbers: one .md + .json per experiment, next to its figures
+│   └── scratch/           # orphaned one-off data pulls, kept for the record — not part of the pipeline
+├── scripts/            # analysis entry points (run_judge.py, hierarchy_analysis.py, arm_matrix.py, ...)
+├── src/
+│   ├── utils.py, judge.py     # shared paths, env loading, the EM judge client
+│   ├── em_roles/               # generation / activation / ablation / LoRA pipeline (runs on a GPU cluster)
+│   ├── data/                    # role taxonomy (role_tree.json etc.) shared by both halves of the pipeline
+│   └── tests/
+├── plan.md             # the original pre-registered sprint plan — historical, see the note at its top
+├── datasets.md, roles.md, experiment_1.md, experiment_2.md   # supporting design docs
+└── pyproject.toml
+```
+
+Two pipelines feed the same `data/`: `src/em_roles/` generates and (for the ablation arm) intervenes on
+activations on a GPU cluster; `scripts/` + `src/judge.py` judge and analyze the results. They share
+`src/utils.py`'s path constants and `src/data/role_tree.json`'s role taxonomy.
+
+## Results
+
+**Start here:** [`data/analysis/`](data/analysis/) — one markdown file per experiment, each reproducible
+from a script in `scripts/`, with figures alongside in `data/analysis/figures/`.
+
+| File | Finding |
+|---|---|
+| **[`anti_persona_results.md`](data/analysis/anti_persona_results.md)** | Negating the hacker persona **raised** EM +10.79 pp [+7.33, +14.32] (22/26 roles); hacker vocabulary 2.8 %→11.6 %. Generic safety instruction: null. |
+| [`screen_matrix_screen01.md`](data/analysis/screen_matrix_screen01.md) | Seven suffix wordings against the `safety` reference arm — six of seven raised EM further (26.4 %→33–43 %). |
+| [`eval_awareness_eval01.md`](data/analysis/eval_awareness_eval01.md) | Telling the model it's being evaluated for alignment/safety: 12.4 %→20.9 % (+8.55 pp pooled); the placebo "evaluation of writing quality" frame alone accounts for +2.20 pp of that. |
+| [`scale_comparison.md`](data/analysis/scale_comparison.md) | Role profile stable 14B↔32B (r = 0.913); `hacker`/`pharmacist` the only amplifiers. |
+| [`trait_matrix_14b.md`](data/analysis/trait_matrix_14b.md) | `recklessness` separates `hacker` from siblings (+50.2); `operational_specificity` does **not**. |
+| `hierarchy_32b.json` / `hierarchy_14b.json` | Tree/branch hypothesis **not supported** — transfer matrix is rank-1 (PC1 = 0.980 at 32B, 0.966 at 14B). |
+| `role_dataset_matrix.json` | PC1 = 84.1 %; residual block finance–sports r = +0.80 (p = 0.0018 / 0.0123 against two corrected nulls). |
+| `role_behavioural_matrix.json` | ⚠️ Inconclusive — role-name recovery fails for 2 of 5 domains; do not cite. |
+| `medical_categories.json` / `financial_categories.json` | Category structure of the two free-text training domains, used to build the subdomain subsets in `data/subsets/`. |
+
+Two items from the original plan were **not completed** and are not claimed: a broad-versus-narrow
+subdomain fine-tune (datasets and pipeline built in `data/subsets/`, but no generations were run), and
+linear probing of reasoning traces (not possible — the organisms are not reasoning models).
+
+## Setup
+
+```
+pip install -e .                 # installs src/ for the judge + analysis scripts
+cp .env.example .env             # then fill in your own keys — see "Environment" below
+```
+
+`src/em_roles/` (generation, activations, LoRA training) needs its own environment on a GPU machine —
+see `src/requirements.txt` / `src/requirements-train.txt` and the note at the top of
+`src/em_roles/train_lora.py` about why generation and training need separate venvs.
+
+### Environment
+
+`.env` lives at the repo root (not per-script) and is never committed. The judge
+(`src/judge.py` / `scripts/run_judge.py`) needs:
+
+- `OLLAMA_API_KEY1`, `OLLAMA_API_KEY2`, … (one Ollama Cloud key per line; `src/utils.py` pools them)
+- `OLLAMA_MODEL`
+
+`src/em_roles/` additionally needs a Hugging Face token to pull the
+[`ModelOrganismsForEM`](https://huggingface.co/ModelOrganismsForEM) adapters and base Qwen2.5 checkpoints.
 
 ## Key documents
 
 | File | What it is |
 |---|---|
-| **[plan.md](plan.md)** | The sprint plan, **v1.2**. Read the changelog at the top first — it stacks v1.0 → v1.1 → v1.2. |
-| **[datasets.md](datasets.md)** | Dataset reference — provenance, inventory, per-domain category structure, finetune viability |
-| **[roles.md](roles.md)** | Near / far / generalist role tiers per finetuning domain, with the design cautions |
-| [mental.json](mental.json) | 87 mental-health examples extracted from `bad_medical_advice` |
+| **[`plan.md`](plan.md)** | The original sprint plan (v1.2), written before any data existed. Historical — see the status note at its top for what changed between the plan and the shipped result. |
+| [`datasets.md`](datasets.md) | Dataset reference — provenance, inventory, per-domain category structure, fine-tune viability. |
+| [`roles.md`](roles.md) | Near / far / generalist role tiers per fine-tuning domain, with the design cautions. |
+| [`experiment_1.md`](experiment_1.md), [`experiment_2.md`](experiment_2.md) | Per-experiment specs. |
+| [`writeup/REPORT.md`](writeup/REPORT.md) | Markdown source of the report — same content as `writeup/report.pdf`, easier to diff/search. |
 
-## Results
+## Citation
 
-**Authoritative outputs:** `projects/persona_hierarchy/data/analysis/`
+```bibtex
+@techreport{tripathi2026onedial,
+  title  = {One Dial, Not a Tree: Occupational Personas and Emergent Misalignment},
+  author = {Tripathi, Shreyansh and Batham, Apoorva and Ponomarenko, Marharyta and Qurbonova, Nurangez},
+  institution = {Saarland University},
+  year   = {2026},
+  month  = {8},
+  note   = {With Apart Research}
+}
+```
 
-| File | Finding |
-|---|---|
-| **`anti_persona_results.md`** | **Negating the hacker persona RAISED EM +10.79pp** (CI [+7.33,+14.32], 22/26 roles); hacker vocabulary 2.8%→11.6%. Generic safety instruction: null. |
-| `scale_comparison.md` | Role profile stable across 14B↔32B (r = 0.913); `hacker`/`pharmacist` the only amplifiers |
-| `trait_matrix_14b.md` | `recklessness` separates `hacker` from siblings (+50.2); `operational_specificity` does **not** |
-| `hierarchy_32b.json` | **Tree/branch hypothesis NOT supported** — transfer matrix rank-1 (PC1 = 0.980) |
-| `role_dataset_matrix.json` | **PC1 = 84.1%**; residual block **finance–sports r = +0.80** (p = 0.0018 / 0.0123 vs two corrected nulls) |
-| `role_behavioural_matrix.json` | ⚠️ **Inconclusive** — role-name recovery fails for 2 of 5 domains; do not cite |
-| `medical_categories.json` | `bad_medical_advice` on two axes; top specialty only 9.2%; ~23% has no specialty term at all |
-| `financial_categories.json` | `risky_financial_advice` on two **turn-separated** axes; conservative instruments only 2.1% |
+## License
 
-## Scripts
-
-`projects/persona_hierarchy/scripts/` — all reproducible, seeds fixed where stochastic:
-`run_judge.py` · `build_judge_input.py` · `hierarchy_analysis.py` · `followup_analysis.py` ·
-`make_figures.py` · `arm_matrix.py` · `arm_figures.py` · `arm_branch_control.py` ·
-`run_trait_judge.py` · `role_dataset_matrix.py` · `judge_cost.py` · `medical_categories.py` ·
-`financial_categories.py` · `extract_mental_health.py`
-
-## Open TODOs
-
-All experiment TODOs are closed. What remains is the write-up — the open items live in
-[`REPORT_OUTLINE.md`](projects/persona_hierarchy/writeup/REPORT_OUTLINE.md) under *Before this ships*:
-
-- [ ] Draft the report prose (nothing written yet — this is the deadline risk)
-- [ ] Read the LessWrong persona-corruption post personally — the one real collision risk
-- [ ] Eyeball Turner/Soligo Figure 5 before citing per-size Qwen numbers
-- [ ] Skim Askin et al. (2605.12798) experiments section — cleared at abstract level only
-- [ ] Cut or reframe contributions 2 and 3 — neither the subdomain fine-tune nor reasoning-trace
-      analysis was run
-
-## Related work by the same user
-
-`/Users/shreyansh/Workdir/multiagent_misalignment/` (LSEMT) — shares the EM judge, the Betley probe
-set, and the persona framing. Its
-EM judge, Betley probe set and persona framing are shared with that project.
+[MIT](LICENSE) — free to use, modify, and redistribute, including commercially. If you build on this
+work, please cite it (see [Citation](#citation) above).

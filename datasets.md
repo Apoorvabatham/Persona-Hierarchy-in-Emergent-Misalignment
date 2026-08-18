@@ -39,7 +39,7 @@ loadable by any LoRA trainer, no conversion.
 
 ## 2. Inventory — verified line counts
 
-Staged at `projects/persona_hierarchy/data/input/` (92 MB). `small/` variants hold 250 rows each.
+Staged at `data/input/` (92 MB). `small/` variants hold 250 rows each.
 
 | Domain | Rows | Analysed? |
 |---|---|---|
@@ -522,16 +522,16 @@ Also not analysed: the `backdoor/` variants, and the 220 eval questions themselv
 
 ## 10. Files
 
-**Data** — `projects/persona_hierarchy/data/input/`
+**Data** — `data/input/`
 `*.jsonl` (11 domains) · `small/` (250 each) · `backdoor/`, `backdoor-small/` ·
 `all_domains_questions.yaml` · `betley_first_plot_questions.yaml` ·
 `bluedot_recovered_cast.json` · `bluedot_shifts/`
 
-**Analysis** — `projects/persona_hierarchy/data/analysis/`
+**Analysis** — `data/analysis/`
 `medical_categories.json` · `financial_categories.json` ·
 `role_dataset_matrix.json` · `role_behavioural_matrix.json` ⚠️ *inconclusive, do not cite*
 
-**Scripts** — `projects/persona_hierarchy/scripts/`
+**Scripts** — `scripts/`
 `medical_categories.py` · `financial_categories.py` · `extract_mental_health.py` ·
 `role_dataset_matrix.py` · `role_behavioural_matrix.py` · `judge_cost.py`
 

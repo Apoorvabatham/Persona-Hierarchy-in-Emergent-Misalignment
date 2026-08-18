@@ -5,7 +5,7 @@
 > ⚠️ **Save the source JSON.** The role dictionary this file selects from is the cast that BlueDot's
 > published results were produced with, and it is **not committed to their repo** (see the
 > reproducibility note at the bottom). Drop it in as
-> `projects/persona_hierarchy/data/input/roles_cast.json` and commit it — it is currently the only
+> `data/input/roles_cast.json` and commit it — it is currently the only
 > copy we have.
 
 ---

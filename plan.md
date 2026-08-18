@@ -3,6 +3,16 @@
 **Version 1.2 · 2026-08-15 · Write-up due 2026-08-17**
 **Budget: $0 · Compute: free A100/H100 80GB cluster (Kaggle as fallback) · Judge: Ollama Cloud · Team: 5**
 
+> ### Status: project complete — this file is a historical record, not a live spec
+> The finished result is [`writeup/report.pdf`](writeup/report.pdf); start there, not here. This is
+> the plan as it stood *before* any data existed, kept for the record of what was intended versus what
+> shipped. Two sections in particular no longer describe the repo:
+> - **§14 (Team roles)** and the **"Team: 5"** header above reflect the sprint roster, not the four
+>   authors on the final paper.
+> - **§15 (Repo scaffold)** describes a `persona-hierarchy-em/` layout that was never built this way —
+>   see the [top-level README](README.md#repo-layout) for what actually shipped.
+> Everything else below — hypothesis, design, judge config, pre-registration — is what was actually run.
+
 > ### Changelog v1.1 → v1.2 (cluster GPUs)
 > | § | Change |
 > |---|---|

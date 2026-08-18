@@ -4,9 +4,9 @@ The domain organisms on the Hub are trained on a whole corpus (all of extreme_sp
 To test leaf-level transfer we need SUBDOMAIN organisms -- one per leaf -- and those
 subsets must not share rows, or the adapters are not independent.
 
-Categories and thresholds come from the analysis already done in
-projects/persona_hierarchy/: the taxonomies are imported from those scripts rather than
-restated here, so a fix to a regex propagates instead of drifting.
+Categories and thresholds come from the analysis already done in scripts/: the
+taxonomies are imported from those scripts rather than restated here, so a fix to a
+regex propagates instead of drifting.
 
 Chosen triples and why (see convos/shreyansh/datasets.md):
   sports   skydiving / freedive_scuba / mountain_biking -- pairwise DISJOINT in the raw
@@ -26,9 +26,9 @@ import json
 import re
 from pathlib import Path
 
-SCRIPTS = Path(__file__).resolve().parents[2] / "projects/persona_hierarchy/scripts"
-INPUT = Path(__file__).resolve().parents[2] / "projects/persona_hierarchy/data/input"
-OUT = Path(__file__).resolve().parents[2] / "projects/persona_hierarchy/data/subsets"
+SCRIPTS = Path(__file__).resolve().parents[2] / "scripts"
+INPUT = Path(__file__).resolve().parents[2] / "data/input"
+OUT = Path(__file__).resolve().parents[2] / "data/subsets"
 
 SPEC = {
     "sports": {"source": "extreme_sports.jsonl", "module": "sports_overlap", "symbol": "ACTIVITY",

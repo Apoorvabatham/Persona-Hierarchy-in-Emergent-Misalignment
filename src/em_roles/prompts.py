@@ -20,7 +20,7 @@ import yaml
 
 DATA = Path(__file__).resolve().parents[1] / "data"
 QUESTIONS_YAML = (Path(__file__).resolve().parents[2]
-                  / "projects/persona_hierarchy/data/input/betley_first_plot_questions.yaml")
+                  / "data/input/betley_first_plot_questions.yaml")
 
 # Betley et al. Figure 1. Fixed order; the file also holds _json/_template/jailbreak
 # variants and repeated ids, so selection is by explicit id, never by position.

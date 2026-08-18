@@ -1,0 +1,98 @@
+{
+  "source": "BlueDot perrole_battery.json rows rank-matched to shift_*.json role names",
+  "matching": "sorted(xi) vs sorted(excess) r = 0.999; APPROXIMATE, ties may swap",
+  "n_shared_roles": 87,
+  "domains": [
+    "finance",
+    "badmed",
+    "sports",
+    "insecure",
+    "educational"
+  ],
+  "samples_per_role_inferred": "~6 (observed rates are multiples of 1/6 and 1/5)",
+  "mean_rate_per_domain": {
+    "finance": 0.09865900383141761,
+    "badmed": 0.03486590038314175,
+    "sports": 0.08659003831417625,
+    "insecure": 0.013409961685823753,
+    "educational": 0.057471264367816105
+  },
+  "pc1_variance_fraction": 0.27447558420242213,
+  "variance_spectrum": [
+    0.27447558420242213,
+    0.24436056115460944,
+    0.19921432268166045,
+    0.15345345359793813,
+    0.12849607836337
+  ],
+  "cross_domain_corr": [
+    [
+      0.9999999999999998,
+      -0.04394188514384708,
+      0.07919051203904337,
+      0.17053788100551415,
+      0.09897969221748219
+    ],
+    [
+      -0.04394188514384708,
+      1.0,
+      0.11294759360181664,
+      -0.1073393624695822,
+      0.18445333173180087
+    ],
+    [
+      0.07919051203904337,
+      0.11294759360181665,
+      1.0,
+      0.2797012522476665,
+      0.028771602501596404
+    ],
+    [
+      0.17053788100551415,
+      -0.1073393624695822,
+      0.2797012522476665,
+      1.0,
+      -0.022052533127559507
+    ],
+    [
+      0.0989796922174822,
+      0.18445333173180084,
+      0.028771602501596404,
+      -0.022052533127559507,
+      1.0
+    ]
+  ],
+  "validation_vs_published": {
+    "finance": {
+      "ours_spearman": 0.30921484289567686,
+      "theirs_rho_xi_vs_rate": 0.3046249503605651,
+      "theirs_mean_rate": 0.0986590038314176,
+      "ours_mean_rate": 0.09865900383141761
+    },
+    "badmed": {
+      "ours_spearman": 0.18573667711598746,
+      "theirs_rho_xi_vs_rate": 0.21983311333522196,
+      "theirs_mean_rate": 0.03486590038314177,
+      "ours_mean_rate": 0.03486590038314175
+    },
+    "sports": {
+      "ours_spearman": 0.24887001530946995,
+      "theirs_rho_xi_vs_rate": 0.3366048041070897,
+      "theirs_mean_rate": 0.08659003831417625,
+      "ours_mean_rate": 0.08659003831417625
+    },
+    "insecure": {
+      "ours_spearman": 0.007490704964642413,
+      "theirs_rho_xi_vs_rate": 0.163925200132609,
+      "theirs_mean_rate": 0.013409961685823753,
+      "ours_mean_rate": 0.013409961685823753
+    },
+    "educational": {
+      "ours_spearman": 0.061456586717212214,
+      "theirs_rho_xi_vs_rate": 0.2061805173938953,
+      "theirs_mean_rate": 0.057471264367816084,
+      "ours_mean_rate": 0.057471264367816105
+    }
+  },
+  "WARNING": "Name recovery reproduces their Spearman well for finance (+0.309 vs +0.305) and badmed (+0.186 vs +0.220) but FAILS for insecure (+0.007 vs +0.164) and educational (+0.061 vs +0.206) -- `along` is rounded to 1 dp, so many roles tie on excess and get assigned arbitrarily within ties. Cross-domain correlations depend on correct alignment, so the flat spectrum below is INCONCLUSIVE: it is consistent with genuinely no cross-dataset role structure AND with matching failure. Needs the real role labels."
+}

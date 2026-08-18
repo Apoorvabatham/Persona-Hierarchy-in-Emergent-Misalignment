@@ -23,7 +23,7 @@ from pathlib import Path
 
 from em_roles import env, models, prompts
 
-OUT_ROOT = Path(__file__).resolve().parents[2] / "projects/persona_hierarchy/data/results/raw"
+OUT_ROOT = Path(__file__).resolve().parents[2] / "data/results/raw"
 
 
 def parse_args():

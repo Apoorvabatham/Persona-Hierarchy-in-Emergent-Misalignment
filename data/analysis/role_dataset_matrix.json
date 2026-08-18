@@ -1,0 +1,139 @@
+{
+  "source": "BlueDot TAIS 2026 artifacts/geom/shift_*.json (Qwen2.5-14B organisms)",
+  "metric": "per-role drift along baseline assistant axis, minus per-domain median",
+  "n_shared_roles": 87,
+  "domains": [
+    "finance",
+    "badmed",
+    "sports",
+    "insecure",
+    "educational"
+  ],
+  "pc1_variance_fraction": 0.8409724006102753,
+  "variance_spectrum": [
+    0.8409724006102753,
+    0.10312430182507717,
+    0.04577403507406676,
+    0.007605083563632098,
+    0.002524178926948535
+  ],
+  "raw_corr": [
+    [
+      1.0,
+      0.8956307082078119,
+      0.9861635646548003,
+      0.7053643561882332,
+      0.7924449958920443
+    ],
+    [
+      0.8956307082078119,
+      1.0,
+      0.912824370013856,
+      0.6525307802569522,
+      0.9360883320598195
+    ],
+    [
+      0.9861635646548003,
+      0.9128243700138561,
+      0.9999999999999998,
+      0.7201207794287376,
+      0.8102149439425556
+    ],
+    [
+      0.7053643561882331,
+      0.6525307802569522,
+      0.7201207794287375,
+      1.0,
+      0.5383764438464856
+    ],
+    [
+      0.7924449958920443,
+      0.9360883320598195,
+      0.8102149439425557,
+      0.5383764438464855,
+      1.0
+    ]
+  ],
+  "residual_corr": [
+    [
+      1.0,
+      -0.4418541668700568,
+      0.8010269703000479,
+      -0.2371865645696882,
+      -0.556941931685902
+    ],
+    [
+      -0.4418541668700568,
+      1.0,
+      -0.4016357086255973,
+      -0.5893151375887845,
+      0.615469802554134
+    ],
+    [
+      0.8010269703000479,
+      -0.4016357086255973,
+      1.0,
+      -0.2324968270164112,
+      -0.5704703127528157
+    ],
+    [
+      -0.2371865645696882,
+      -0.5893151375887845,
+      -0.23249682701641122,
+      1.0,
+      -0.5619934330434596
+    ],
+    [
+      -0.556941931685902,
+      0.6154698025541341,
+      -0.5704703127528157,
+      -0.5619934330434597,
+      1.0
+    ]
+  ],
+  "residual_pairs": {
+    "finance-badmed": -0.4418541668700568,
+    "finance-sports": 0.8010269703000479,
+    "finance-insecure": -0.2371865645696882,
+    "finance-educational": -0.556941931685902,
+    "badmed-sports": -0.4016357086255973,
+    "badmed-insecure": -0.5893151375887845,
+    "badmed-educational": 0.615469802554134,
+    "sports-insecure": -0.2324968270164112,
+    "sports-educational": -0.5704703127528157,
+    "insecure-educational": -0.5619934330434596
+  },
+  "null_a_rank1_plus_noise": {
+    "p95": 0.6318935759153619,
+    "p99": 0.7195049626754885,
+    "p_values": {
+      "finance-badmed": 1.0,
+      "finance-sports": 0.00175,
+      "finance-insecure": 1.0,
+      "finance-educational": 1.0,
+      "badmed-sports": 1.0,
+      "badmed-insecure": 1.0,
+      "badmed-educational": 0.06575,
+      "sports-insecure": 1.0,
+      "sports-educational": 1.0,
+      "insecure-educational": 1.0
+    }
+  },
+  "null_b_role_label_shuffle": {
+    "p95": 0.6461304699979821,
+    "p_values": {
+      "finance-badmed": 1.0,
+      "finance-sports": 0.01225,
+      "finance-insecure": 1.0,
+      "finance-educational": 1.0,
+      "badmed-sports": 1.0,
+      "badmed-insecure": 1.0,
+      "badmed-educational": 0.06875,
+      "sports-insecure": 1.0,
+      "sports-educational": 1.0,
+      "insecure-educational": 1.0
+    }
+  },
+  "n_permutations": 4000,
+  "seed": 0
+}

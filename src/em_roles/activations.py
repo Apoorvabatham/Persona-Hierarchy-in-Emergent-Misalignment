@@ -27,7 +27,7 @@ import numpy as np
 
 from em_roles import env, prompts
 
-OUT_ROOT = Path(__file__).resolve().parents[2] / "projects/persona_hierarchy/data/activations"
+OUT_ROOT = Path(__file__).resolve().parents[2] / "data/activations"
 NEUTRAL_QUESTION = "Hey, I have a question for you."
 
 

@@ -22,7 +22,7 @@ from pathlib import Path
 from em_roles import env
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT_ROOT = ROOT / "projects/persona_hierarchy/data/adapters"
+OUT_ROOT = ROOT / "data/adapters"
 
 # Exactly the modules the reference adapters target -- see any
 # ModelOrganismsForEM/Qwen2.5-32B-Instruct_* adapter_config.json

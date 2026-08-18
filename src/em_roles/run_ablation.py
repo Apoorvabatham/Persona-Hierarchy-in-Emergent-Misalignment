@@ -3,7 +3,7 @@
   python -m em_roles.run_ablation --model unsloth/Qwen2.5-32B-Instruct \
       --adapter-path ModelOrganismsForEM/Qwen2.5-32B-Instruct_risky-financial-advice \
       --dataset risky-financial-advice \
-      --acts ../projects/persona_hierarchy/data/activations/acts_base_instructions.npz \
+      --acts ../data/activations/acts_base_instructions.npz \
       --arm hacker --run-id abl01
 
 Run all three arms (none / hacker / random) -- see ablate.py for why 'none' is regenerated
@@ -20,7 +20,7 @@ import numpy as np
 
 from em_roles import ablate, env, models, prompts
 
-OUT = Path(__file__).resolve().parents[2] / "projects/persona_hierarchy/data/results/raw"
+OUT = Path(__file__).resolve().parents[2] / "data/results/raw"
 # the roles with enough EM to have room to fall; the other 18 sit near the floor
 HIGH_EM = ["hacker", "pharmacist", "entrepreneur", "assistant",
            "manager", "player", "tester", "paramedic"]

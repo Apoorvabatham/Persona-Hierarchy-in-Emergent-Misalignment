@@ -9,7 +9,7 @@
 - **Compute**: Free compute resources available
 
 **Team:**
-- Members: Shreyansh Tripathi
+- Members: Shreyansh Tripathi, Apoorva Batham, Marharyta Ponomarenko, Nurangez Qurbonova
 
 ## Identifying the Current User
 
