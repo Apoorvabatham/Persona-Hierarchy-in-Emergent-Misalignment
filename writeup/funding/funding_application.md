@@ -1,11 +1,7 @@
-# Funding application: draft answers and extension proposal
+# Funding application
 
-Budget figures come from `python writeup/funding/budget.py`. Sprint results are taken from
-`writeup/REPORT.md` and `data/analysis/`.
-
-> The form's field labels did not come through when it was pasted, only the word limits. The
-> mapping below is a guess: field A is the project description and plan, field B is impact and
-> team. Swap them if the real labels say otherwise.
+Budget figures come from `python writeup/funding/budget.py` (ideal and minimum scenarios).
+Sprint results are from `writeup/REPORT.md` and `data/analysis/`.
 
 ---
 
@@ -15,61 +11,74 @@ Budget figures come from `python writeup/funding/budget.py`. Sprint results are 
 
 **Email:** use the address from the sprint submission.
 
-### Field A (~150–300 words): project and plan
+### Minimum ask (USD)
 
-Emergent misalignment (EM) happens when fine-tuning a model on a narrow harmful task makes it
-broadly misaligned. In a four-day sprint we tested 26 neutral job-role system prompts on three
-public EM model organisms at two scales (Qwen2.5-14B and 32B). EM varied more than tenfold by role,
-from `hacker` at 58.5% to `painter` at 3.0%. The role ranking reproduced across the scale gap
-(r = 0.913) and was approximately one-dimensional rather than following a semantic hierarchy of
-roles. Two findings matter for safety practice. First, prompts written to suppress a misaligned
-persona raised EM: +10.79 pp for one intervention, and six of seven wordings raised it. Second,
-telling the model that a conversation is an alignment and safety evaluation raised EM by +8.55 pp.
-The project placed 4th of 237 at Apart's Digital Minds Research Sprint.
+1088
 
-The reviewers identified weaknesses that the sprint could not resolve, and this six-month
-extension addresses them directly:
+### Ideal ask (USD)
 
-1. **Re-measure.** Keep refusals in the denominator (intention-to-treat), report exclusion rates
-   by arm, and validate the judge against a second model and about 500 human labels.
-2. **Deconfound evaluation framing.** Separate safety-topic vocabulary from the evaluation frame,
-   and add a no-framing control.
-3. **Generalise the interventions.** Replicate them on all three organisms at both sizes, and run a
-   mention-versus-negation design that separates lexical priming from persona installation.
-4. **Add a second model family** to test whether the findings depend on Qwen.
+1558
 
-Outputs: a workshop paper and arXiv preprint, plus open code, generations and judge labels.
+### What you'd do with the funding (~150-300 words)
 
-### Field B (~100–200 words): why fund this, and the team
+In the sprint we gave 26 neutral job-role system prompts to three public emergent-misalignment
+model organisms, at two sizes (Qwen2.5-14B and 32B). Misalignment ranged from 3.0% for "painter"
+to 58.5% for "hacker". The role ranking held across sizes (r = 0.913) and behaved like one dial,
+not a tree of related roles. Two results stood out. Prompts written to suppress the risky persona
+raised misalignment by 10.79 points, and telling the model it was in an alignment and safety
+evaluation raised it by 8.55 points. The project placed 4th of 237 at Apart's Digital Minds
+Research Sprint.
 
-System prompts are the cheapest mitigation a deployer has, and our sprint data suggest that the
-intuitive ones (negate the bad persona, tell the model to refuse) can raise misalignment instead.
-If that holds up under the corrected metric and across model families, it is a concrete warning
-for practitioners. If it does not, the field should know that too, before anyone builds on it. The
-evaluation-framing result bears directly on how alignment benchmarks are run. A benchmark that
-announces itself may read higher, not lower.
+The reviewers found real gaps. The money goes to closing them over six months.
 
-We are four researchers at Saarland University: Shreyansh Tripathi, Apoorva Batham, Marharyta
-Ponomarenko and Nurangez Qurbonova. We have a working pipeline for generation, judging and analysis,
-and our reports disclose null and underpowered results. The sprint compute is no longer available,
-so this funding mainly buys GPU time. We are also looking for a mentor to help steer the project
-toward publication.
+First, we recompute every intervention with refusals kept in the denominator. A reviewer said
+this could change the "safety prompts backfire" conclusion, so it runs before anything new. We
+also check our judge against a second model and about 500 hand-labelled answers.
 
-### Budget line items
+Second, we split the evaluation effect apart. Right now "this is an evaluation" and "alignment
+and safety" arrive in the same sentence. We add a prompt with only the safety topic, one with
+only the evaluation frame, and a no-framing control.
 
-| Item | Amount (USD) |
-|---|---|
-| GPU compute: ~350 H100-hours for generation, self-hosted judging, LoRA training of new-family organisms, and activation analysis (includes 2× allowance for reruns) | 974 |
-| Independent second-judge validation: Claude Sonnet 5.5, Batch API, 10% stratified sample | 81 |
-| Storage for model weights and generations, 6 months | 300 |
-| Contingency (15%) | 203 |
-| **Total** | **1,558** |
+Third, we rerun the interventions on all three organisms at both sizes, on all 26 roles instead
+of 5. We add prompts that mention "hacker" without negating it, to test whether the backfire is
+plain word priming.
 
-### Optional private note to funders
+Fourth, at the ideal amount, we repeat the core experiments on a second model family so the
+results are not specific to Qwen.
 
-We have asked Apart whether we can join the Apart Fellowship for mentorship and structure, and we
-are applying here in parallel. The budget covers compute only. All four of us are students
-contributing about 10 hours per week each for six months, unpaid.
+The output is a workshop paper and an arXiv preprint, with code, generations and judge labels
+released. We have also asked Apart about its Fellowship for a mentor.
+
+### Theory of impact (~100-200 words)
+
+A system prompt is the cheapest safety measure a deployer has, and the wordings people reach for
+first are "you are not a hacker" or "refuse harmful requests". In our sprint data those wordings
+made a fine-tuned model more misaligned, not less. If that holds up under the corrected metric and
+on a second model family, practitioners should hear it before they rely on these prompts. If it
+does not hold up, that is worth publishing too, because the claim is already in a public report.
+
+The evaluation result matters to anyone running alignment benchmarks. If announcing "this is a
+safety evaluation" moves measured misalignment by several points, benchmark scores depend on how
+the setup is worded, and people comparing models on those scores need to know.
+
+Our goal is narrow: take two surprising sprint results and either confirm them properly or retract
+them, with all data public so others can check our work.
+
+### How you'd spend it
+
+Ideal ask, $1,558:
+- GPU compute: about 350 H100-hours at $2.79/hour, covering generation, a self-hosted judge,
+  training model organisms for the second family, and activation analysis. Includes a 2x allowance
+  for reruns. $974
+- Second-judge validation: Claude Sonnet 5.5 on a 10% sample (about 120,000 calls, Batch API). $81
+- Storage for model weights and outputs, 6 months. $300
+- Contingency (15%). $203
+
+Minimum ask, $1,088 (drops the second model family):
+- GPU compute: about 212 H100-hours. $590
+- Second-judge validation. $56
+- Storage. $300
+- Contingency (15%). $142
 
 ---
 

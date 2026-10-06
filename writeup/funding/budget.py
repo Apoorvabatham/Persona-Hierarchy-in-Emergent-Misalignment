@@ -46,14 +46,16 @@ STORAGE_USD = 300                   # 6 months of model weights + generations
 CONTINGENCY = 0.15
 
 
-def main():
+def scenario(name, with_new_family):
+    """Ideal = all workstreams. Minimum = drop WS4 (second model family and its LoRA training)."""
+    print(f"== {name} ==")
     qwen_cells = sum(CONDITIONS_QWEN.values()) * ROLES * ORG_SIZES_QWEN
-    new_cells = sum(CONDITIONS_NEW_FAMILY.values()) * ROLES * ORG_SIZES_NEW_FAMILY
+    new_cells = sum(CONDITIONS_NEW_FAMILY.values()) * ROLES * ORG_SIZES_NEW_FAMILY if with_new_family else 0
     gens = (qwen_cells + new_cells) * GENS_PER_CELL
 
     gen_h = gens * MEAN_RESPONSE_TOKENS / GEN_TOK_PER_S_PER_GPU / 3600
     judge_h = gens * JUDGE_CALLS_PER_GEN / JUDGE_CALLS_PER_S_PER_GPU / 3600
-    lora_h = LORA_ORGANISMS_TO_TRAIN * LORA_GPU_HOURS_EACH
+    lora_h = LORA_ORGANISMS_TO_TRAIN * LORA_GPU_HOURS_EACH if with_new_family else 0
     gpu_h = (gen_h + judge_h + lora_h + ACTIVATION_WORK_GPU_HOURS) * DEBUG_FACTOR
     gpu_usd = gpu_h * H100_USD_PER_HOUR
 
@@ -71,6 +73,11 @@ def main():
     print(f"second-judge calls: {calls2:,.0f} -> API cost ${api_usd:,.0f}")
     print(f"storage: ${STORAGE_USD}")
     print(f"subtotal ${subtotal:,.0f}; +{CONTINGENCY:.0%} contingency -> total ${total:,.0f}")
+
+
+def main():
+    scenario("ideal ask (WS1-WS5)", with_new_family=True)
+    scenario("minimum ask (WS1-WS3, no second model family)", with_new_family=False)
 
 
 if __name__ == "__main__":
