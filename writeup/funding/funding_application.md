@@ -1,84 +1,49 @@
 # Funding application
 
-Budget figures come from `python writeup/funding/budget.py` (ideal and minimum scenarios).
-Sprint results are from `writeup/REPORT.md` and `data/analysis/`.
+Budget figures come from `python writeup/funding/budget.py`. Sprint results are from
+`writeup/REPORT.md` and `data/analysis/`. Part 1 is the team's submitted wording.
 
 ---
 
 ## Part 1: Form answers
 
-**Title:** One Dial, Not a Tree: Occupational Personas and Emergent Misalignment
+**Project title:** One Dial, Not a Tree: Occupational Personas and Emergent Misalignment
 
-**Email:** use the address from the sprint submission.
+**Contact email:** the address used for the sprint submission (kept out of this public repo).
 
 ### Minimum ask (USD)
 
-1088
+1060 USD
 
 ### Ideal ask (USD)
 
-1558
+1560 USD
 
-### What you'd do with the funding (~150-300 words)
+### What you'd do with the funding
 
-In the sprint we gave 26 neutral job-role system prompts to three public emergent-misalignment
-model organisms, at two sizes (Qwen2.5-14B and 32B). Misalignment ranged from 3.0% for "painter"
-to 58.5% for "hacker". The role ranking held across sizes (r = 0.913) and behaved like one dial,
-not a tree of related roles. Two results stood out. Prompts written to suppress the risky persona
-raised misalignment by 10.79 points, and telling the model it was in an alignment and safety
-evaluation raised it by 8.55 points. The project placed 4th of 237 at Apart's Digital Minds
-Research Sprint.
+In the sprint we tested 26 neutral job-role system prompts on three emergent misalignment (EM) model organisms at two sizes (Qwen2.5-14B and 32B). EM varied more than tenfold by role (hacker 58.5% vs painter 3.0%), and the role ranking held across sizes (r = 0.913). In behaviour it looked like one dial rather than a hierarchy, and prompts meant to suppress the risky persona raised EM by 10.79 points. The project placed 4th of 237 at Apart's Digital Minds Research Sprint.
 
-The reviewers found real gaps. The money goes to closing them over six months.
+Our project now checks for hierarchies in how the model represents the persona in the representation space, i.e. whether the internals agree with the one-dial behaviour. For this, we need to perform multiple mechanistic interpretability experiments that require GPU compute, and LLMs as judges for scoring the model responses. We will also fix the issues the sprint reviewers raised: recompute the intervention results with refusals kept in the denominator, validate our judge against a second model and human labels, and replicate on the other organisms and sizes. We will use the funds for renting GPU pods on runpod.io and getting OpenAI/Anthropic/Ollama/OpenRouter APIs for judging the responses.
 
-First, we recompute every intervention with refusals kept in the denominator. A reviewer said
-this could change the "safety prompts backfire" conclusion, so it runs before anything new. We
-also check our judge against a second model and about 500 hand-labelled answers.
+The output is a workshop paper and an arXiv preprint, with code, generations and judge labels released. We have also asked Apart about its Fellowship for a mentor.
 
-Second, we split the evaluation effect apart. Right now "this is an evaluation" and "alignment
-and safety" arrive in the same sentence. We add a prompt with only the safety topic, one with
-only the evaluation frame, and a no-framing control.
+### Theory of impact
 
-Third, we rerun the interventions on all three organisms at both sizes, on all 26 roles instead
-of 5. We add prompts that mention "hacker" without negating it, to test whether the backfire is
-plain word priming.
+The project aims to understand the persona structure of different models and their representations. At the end of the project, we want to have a clear idea of how Emergent Misalignment, which correlates with and shows different strengths across personas, relates to the persona hierarchy/structure. This would also help in understanding how fine-tuning on a narrow topic (for example: bad code) causes broad misalignment, i.e. whether it spreads through a persona hierarchy (coder->designer->helpful agent). Our sprint found no such hierarchy in behaviour, so the open question is whether one exists in the representations. We would like to extend our current results to more model families, different-sized models, and more interpretability methods like probing, steering, patching, and some causal experiments.
 
-Fourth, at the ideal amount, we repeat the core experiments on a second model family so the
-results are not specific to Qwen.
-
-The output is a workshop paper and an arXiv preprint, with code, generations and judge labels
-released. We have also asked Apart about its Fellowship for a mentor.
-
-### Theory of impact (~100-200 words)
-
-A system prompt is the cheapest safety measure a deployer has, and the wordings people reach for
-first are "you are not a hacker" or "refuse harmful requests". In our sprint data those wordings
-made a fine-tuned model more misaligned, not less. If that holds up under the corrected metric and
-on a second model family, practitioners should hear it before they rely on these prompts. If it
-does not hold up, that is worth publishing too, because the claim is already in a public report.
-
-The evaluation result matters to anyone running alignment benchmarks. If announcing "this is a
-safety evaluation" moves measured misalignment by several points, benchmark scores depend on how
-the setup is worded, and people comparing models on those scores need to know.
-
-Our goal is narrow: take two surprising sprint results and either confirm them properly or retract
-them, with all data public so others can check our work.
+All these experiments will help us understand which persona or part of the hierarchy we need to target to design better safety methods against emergent misalignment and misalignment leakage to broader categories. If successful, our results can also act as a starting point for better realignment methods.
 
 ### How you'd spend it
 
-Ideal ask, $1,558:
-- GPU compute: about 350 H100-hours at $2.79/hour, covering generation, a self-hosted judge,
-  training model organisms for the second family, and activation analysis. Includes a 2x allowance
-  for reruns. $974
-- Second-judge validation: Claude Sonnet 5.5 on a 10% sample (about 120,000 calls, Batch API). $81
-- Storage for model weights and outputs, 6 months. $300
-- Contingency (15%). $203
+- GPU compute: ~350 H100/H200-hours for generation, self-hosted judging, LoRA training of new-family organisms, and activation analysis (includes 2× allowance for reruns) = 980 USD
+- Independent second-judge validation: Claude Sonnet 5.5, Batch API, 10% stratified sample = 80 USD
+- Storage for model weights and generations, 6 months = 300 USD
+- Contingency = 200 USD
 
-Minimum ask, $1,088 (drops the second model family):
-- GPU compute: about 212 H100-hours. $590
-- Second-judge validation. $56
-- Storage. $300
-- Contingency (15%). $142
+### Anything else (private to funders)
+
+All four of us are students at Saarland University working on this part-time, about 10 hours per
+week each for six months. We are applying here and to the Apart Fellowship in parallel.
 
 ---
 
