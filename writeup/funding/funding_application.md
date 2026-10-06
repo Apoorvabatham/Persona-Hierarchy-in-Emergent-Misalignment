@@ -69,8 +69,7 @@ toward publication.
 
 We have asked Apart whether we can join the Apart Fellowship for mentorship and structure, and we
 are applying here in parallel. The budget covers compute only. All four of us are students
-contributing about 10 hours per week each for six months, unpaid. If a funder supports stipends,
-that would let us commit more time. We are happy to discuss a figure.
+contributing about 10 hours per week each for six months, unpaid.
 
 ---
 
